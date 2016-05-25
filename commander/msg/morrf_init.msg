@@ -1,0 +1,9 @@
+coordinate goal
+coordinate start
+image map
+image[] cost_maps
+int64 iterations
+int64 segment_length
+int64 number_of_trees
+int64 objective_number
+bool minimum_distance_enabled
