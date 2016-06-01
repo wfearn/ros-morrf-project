@@ -60,6 +60,12 @@ target_link_libraries(morrf_node ${catkin_LIBRARIES}
                                  ${MORRF_LIBRARY}
                      )
 
+install(TARGETS morrf_node
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
+install(DIRECTORY launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
 
 
