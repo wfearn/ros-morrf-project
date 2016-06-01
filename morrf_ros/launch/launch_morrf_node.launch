@@ -1,3 +1,3 @@
 <launch>
-   <node pkg="morrf_ros" type="morrf_node" name="morrf_node" />
+   <node pkg="morrf_ros" type="morrf_node" name="morrf_node" output="screen"/>
 </launch>
