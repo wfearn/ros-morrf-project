@@ -6,6 +6,7 @@ using namespace std;
 
 #define MORRF_SERVICE_NAME "/morrf/get_multi_obj_paths"
 
+
 static double calcDist(POS2D pos_a, POS2D pos_b, int** distribution, void* tree) {
   double dist = 0.0;
   if (pos_a == pos_b) {
@@ -85,12 +86,48 @@ MORRFService::MORRFService() {
 MORRFService::~MORRFService() {
 }
   
+
 bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_mopp::Request& req, 
                                         morrf_ros::morrf_mopp::Response& res) {
   std::cout << "---------------------------------" << std::endl;
   std::cout << "MORRFService::get_multi_obj_paths" << std::endl;
   std::cout << "SERVICE RECEIVED" << std::endl;
   std::cout << "---------------------------------" << std::endl;
+  /*
+  std::vector<COST_FUNC_PTR> funcs; 
+  std::vector<int**> fitnessDistributions; 
+  int** pp_obstacle;
+  MORRF morrf(req.init.width, req.init.height, req.init.objective_number, req.init.number_of_trees, 
+              req.init.segment_length, (MORRF::MORRF_TYPE)req.init.method_type);
+
+  morrf.add_funcs(funcs, fitnessDistributions);
+  POS2D start(req.init.start.x, req.init.start.y);
+  POS2D goal(req.init.goal.x, req.init.goal.y);
+  morrf.init(start, goal);
+  morrf.load_map(pp_obstacle);
+  while(morrf.get_current_iteration() <= req.init.number_of_iterations) {
+    morrf.extend();
+  }
+  
+  std::vector<Path*> paths = morrf.get_paths();
+  for(unsigned int i=0; i < paths.size(); i++) {
+    morrf_ros::multi_objective_path pp;
+    Path* p = paths[i];
+    for(unsigned int k=0; k < p->m_objective_num; k++ ) {
+      std_msgs::Float64 val;
+      val.data = p->m_cost[k];
+      pp.cost.push_back(val);
+    }
+    for(unsigned int j=0; j < p->m_waypoints.size(); j++) {
+      geometry_msgs::Pose2D point;
+      point.x = p->m_waypoints[j][0];
+      point.y = p->m_waypoints[j][1];
+      pp.waypoints.push_back(point);
+    }
+    res.paths.push_back(pp);
+  }
+  */
+
   return true;
 }
   
