@@ -94,20 +94,47 @@ bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_mopp::Request& req,
   std::cout << "SERVICE RECEIVED" << std::endl;
   std::cout << req.init << std::endl;
   std::cout << "---------------------------------" << std::endl;
-  /*
+ 
   std::vector<COST_FUNC_PTR> funcs; 
-  std::vector<int**> fitnessDistributions; 
-  int** pp_obstacle;
+  std::vector<int**> fitnessDistributions;
+  
+  int** pp_obstacle = new int*[req.init.map.width];
+  for(unsigned int w=0; w < req.init.map.width; w++) {
+    pp_obstacle[w] = new int[req.init.map.height];
+    for(unsigned int h=0; h < req.init.map.height; h++) {
+      pp_obstacle[w][h] = req.init.map.int_array[w*req.init.map.height+h];
+    }
+  }
   MORRF morrf(req.init.width, req.init.height, req.init.objective_number, req.init.number_of_trees, 
               req.init.segment_length, (MORRF::MORRF_TYPE)req.init.method_type);
+
+  if(req.init.minimum_distance_enabled == true) {
+    funcs.push_back(calcDist);
+    fitnessDistributions.push_back(NULL);
+  } 
+
+  for(unsigned int i=0; i < req.init.cost_maps.size(); i++) {
+    morrf_ros::int8_image img = req.init.cost_maps[i];
+    int** p_costmap = new int*[img.width];
+    for(unsigned int w=0; w < img.width; w++) {
+      p_costmap[w] = new int[img.height];
+      for(unsigned int h=0; h < img.height; h++) {
+        p_costmap[w][h] = img.int_array[w*img.height+h];
+      }
+    }
+    funcs.push_back(calcCost);
+    fitnessDistributions.push_back(p_costmap);
+  }
 
   morrf.add_funcs(funcs, fitnessDistributions);
   POS2D start(req.init.start.x, req.init.start.y);
   POS2D goal(req.init.goal.x, req.init.goal.y);
   morrf.init(start, goal);
   morrf.load_map(pp_obstacle);
+  std::cout << "start planning" << std::endl;
   while(morrf.get_current_iteration() <= req.init.number_of_iterations) {
     morrf.extend();
+    std::cout << "Iteration " << morrf.get_current_iteration() << std::endl;
   }
   
   std::vector<Path*> paths = morrf.get_paths();
@@ -127,7 +154,25 @@ bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_mopp::Request& req,
     }
     res.paths.push_back(pp);
   }
-  */
+  std::cout << "Path exported " << std::endl;
+
+  for(unsigned int w=0; w < req.init.map.width; w++) {
+    delete [] pp_obstacle[w];
+    pp_obstacle[w] = NULL;
+  }
+  delete [] pp_obstacle;
+
+  funcs.clear();
+  for(unsigned int i=0; i < fitnessDistributions.size(); i++) {
+    if(fitnessDistributions[i] != NULL) {
+      for(unsigned int w=0; w < req.init.width; w++) {
+        delete [] fitnessDistributions[i][w];
+      }
+      delete [] fitnessDistributions[i];
+      fitnessDistributions[i] = NULL;
+    }
+  }
+  fitnessDistributions.clear();
 
   return true;
 }
