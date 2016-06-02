@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <include file="$(find morrf_ros)/launch/launch_morrf_node.launch"/>
+    <node pkg="commander" type="morrf_commander.py" name="morrf_commander"/>
+</launch>
