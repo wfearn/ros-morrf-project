@@ -92,6 +92,7 @@ bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_mopp::Request& req,
   std::cout << "---------------------------------" << std::endl;
   std::cout << "MORRFService::get_multi_obj_paths" << std::endl;
   std::cout << "SERVICE RECEIVED" << std::endl;
+  std::cout << req.init << std::endl;
   std::cout << "---------------------------------" << std::endl;
   /*
   std::vector<COST_FUNC_PTR> funcs; 
