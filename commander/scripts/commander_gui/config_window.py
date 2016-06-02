@@ -8,6 +8,7 @@ from image_window import Image
 from morrf_ros.msg import *
 import cv2
 import numpy as np
+from commander_publisher import StartCommanderPublisher
 
 STARTX = 1000
 STARTY = 1000
@@ -50,6 +51,10 @@ class Config(QtGui.QMainWindow):
         self.objective_number.setFrame(True)
         self.objective_number.setMaxLength(4)
 
+        self.method_type = QtGui.QLineEdit()
+        self.method_type.setFrame(True)
+        self.method_type.setMaxLength(1)
+
         self.min_distance = QtGui.QCheckBox("", self)
 
         layout = QtGui.QFormLayout()
@@ -58,6 +63,7 @@ class Config(QtGui.QMainWindow):
         layout.addRow("Segment Length", self.segment_length)
         layout.addRow("# Of Objectives", self.objective_number)
         layout.addRow("Minimize Distance", self.min_distance)
+        layout.addRow("Method Type", self.method_type)
 
         main_layout = QtGui.QVBoxLayout()
         main_layout.addLayout(layout)
@@ -83,7 +89,7 @@ class Config(QtGui.QMainWindow):
             initializer.goal.y = goal[1]
             initializer.start.x = start[0]
             initializer.start.y = start[1]
-            initializer.iterations = int(self.iterations.text())
+            initializer.number_of_iterations = int(self.iterations.text())
             initializer.segment_length = int(self.segment_length.text())
             initializer.number_of_trees = int(self.tree_number.text())
             initializer.objective_number = int(self.objective_number.text())
@@ -92,7 +98,7 @@ class Config(QtGui.QMainWindow):
 
             print "Goal is: %s, %s" % (initializer.goal.x, initializer.goal.y)
             print "Start is: %s, %s" % (initializer.start.x, initializer.start.y)
-            print "Iterations are: %s" % (initializer.iterations)
+            print "Iterations are: %s" % (initializer.number_of_iterations)
             print "Segment Length is: %s" % (initializer.segment_length)
             print "Number of trees is: %s" % (initializer.number_of_trees)
             print "Objective Number is: %s" % (initializer.objective_number)
@@ -101,6 +107,8 @@ class Config(QtGui.QMainWindow):
             print "Map height is: %s" % initializer.map.height
             print "Map width is: %s" % initializer.map.width
             #print "Map pixel values are %s" % initializer.map.int_array
+
+            StartCommanderPublisher(initializer)
 
         else:
             print "Morrf parameters not completed, initialize config or image parameters"
@@ -129,11 +137,11 @@ class Config(QtGui.QMainWindow):
 
             image.width = img.shape[0]
             image.height = img.shape[1]
-            image.name = self.image_name
+            image.name = str(self.image_name)
 
             for i in range(image.width):
                 for j in range(image.height):
-                    image.int_array.append(img[i,j,0])
+                    image.int_array.append(int(img[i,j,0]))
 
             return image
         else:
