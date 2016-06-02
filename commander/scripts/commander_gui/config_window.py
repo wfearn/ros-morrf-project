@@ -38,22 +38,27 @@ class Config(QtGui.QMainWindow):
         self.iterations = QtGui.QLineEdit()
         self.iterations.setFrame(True)
         self.iterations.setMaxLength(4)
+        self.iterations.setText("2")
 
         self.tree_number = QtGui.QLineEdit()
         self.tree_number.setFrame(True)
         self.tree_number.setMaxLength(4)
+        self.tree_number.setText("2")
 
         self.segment_length = QtGui.QLineEdit()
         self.segment_length.setFrame(True)
         self.segment_length.setMaxLength(4)
+        self.segment_length.setText("2")
 
         self.objective_number = QtGui.QLineEdit()
         self.objective_number.setFrame(True)
         self.objective_number.setMaxLength(4)
+        self.objective_number.setText("2")
 
         self.method_type = QtGui.QLineEdit()
         self.method_type.setFrame(True)
         self.method_type.setMaxLength(1)
+        self.method_type.setText("2")
 
         self.min_distance = QtGui.QCheckBox("", self)
 
