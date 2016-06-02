@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from commander.msg import *
-from commander.srv import *
+#from commander.msg import *
+#from commander.srv import *
 import rospy
 #from controller import Controller
 import sys

@@ -25,7 +25,7 @@ find_library(MORRF_LIBRARY morrf
 
 add_message_files (
   FILES
-  int8_image.msg
+  int16_image.msg
   morrf_init.msg
   multi_objective_path.msg
 )

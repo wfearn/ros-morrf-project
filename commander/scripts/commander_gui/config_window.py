@@ -141,7 +141,7 @@ class Config(QtGui.QMainWindow):
 
             for i in range(image.width):
                 for j in range(image.height):
-                    image.int_array.append(int(img[i,j,0]))
+                    image.int_array.append(np.int16(img[i,j,0]))
 
             return image
         else:
