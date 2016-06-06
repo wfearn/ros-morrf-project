@@ -9,6 +9,7 @@ from morrf_ros.msg import *
 import cv2
 import numpy as np
 from commander_publisher import StartCommanderPublisher
+import json
 
 STARTX = 1000
 STARTY = 1000
@@ -24,11 +25,14 @@ class Config(QtGui.QMainWindow):
 
         self.image_load = QtGui.QAction("Load Image", self)
         self.image_load.triggered.connect(self.load_image)
+        self.appQuit = QtGui.QAction("Quit", self)
+        self.appQuit.triggered.connect(qApp.quit)
 
         main_menu = self.menuBar()
 
         load_menu = main_menu.addMenu('&File')
         load_menu.addAction(self.image_load)
+        load_menu.addAction(self.appQuit)
 
 
         launch_button = QtGui.QPushButton("Launch MORRF", self)
@@ -38,29 +42,30 @@ class Config(QtGui.QMainWindow):
         self.iterations = QtGui.QLineEdit()
         self.iterations.setFrame(True)
         self.iterations.setMaxLength(4)
-        self.iterations.setText("2")
+        self.iterations.setText("500")
 
         self.tree_number = QtGui.QLineEdit()
         self.tree_number.setFrame(True)
         self.tree_number.setMaxLength(4)
-        self.tree_number.setText("2")
+        self.tree_number.setText("5")
 
         self.segment_length = QtGui.QLineEdit()
         self.segment_length.setFrame(True)
         self.segment_length.setMaxLength(4)
-        self.segment_length.setText("2")
+        self.segment_length.setText("5")
 
         self.objective_number = QtGui.QLineEdit()
         self.objective_number.setFrame(True)
         self.objective_number.setMaxLength(4)
-        self.objective_number.setText("2")
+        self.objective_number.setText("1")
 
         self.method_type = QtGui.QLineEdit()
         self.method_type.setFrame(True)
         self.method_type.setMaxLength(1)
-        self.method_type.setText("2")
+        self.method_type.setText("0")
 
         self.min_distance = QtGui.QCheckBox("", self)
+        self.min_distance.setChecked(True)
 
         layout = QtGui.QFormLayout()
         layout.addRow("# Of Iterations", self.iterations)
@@ -100,6 +105,8 @@ class Config(QtGui.QMainWindow):
             initializer.objective_number = int(self.objective_number.text())
             initializer.minimum_distance_enabled = self.min_distance.isChecked()
             initializer.map = self.map_convert()
+            initializer.width = initializer.map.width
+            initializer.height = initializer.map.height
 
             print "Goal is: %s, %s" % (initializer.goal.x, initializer.goal.y)
             print "Start is: %s, %s" % (initializer.start.x, initializer.start.y)
@@ -113,7 +120,11 @@ class Config(QtGui.QMainWindow):
             print "Map width is: %s" % initializer.map.width
             #print "Map pixel values are %s" % initializer.map.int_array
 
-            StartCommanderPublisher(initializer)
+            response = StartCommanderPublisher(initializer)
+
+            self.image_window.printMorrfPaths(response)
+
+            self.outputToDropbox(response)
 
         else:
             print "Morrf parameters not completed, initialize config or image parameters"
@@ -152,3 +163,60 @@ class Config(QtGui.QMainWindow):
         else:
             return None
 
+
+    def contextMenuRequested(self, point):
+        pass
+
+    def outputToDropbox(self, morrf_output):
+
+        self.image_window.saveMapToDropbox()
+
+        morrf_output_path = "/home/wfearn/Dropbox/morrf_output/morrf_output.txt"
+        map_output_path = "/home/wfearn/Dropbox/map/%s" % self.image_window.getMapName()
+        start = self.image_window.getStartPoint()
+        goal = self.image_window.getGoalPoint()
+
+        json_output = {}
+
+        json_output["enemies"] = []
+        for pos in self.image_window.getEnemyLocations():
+            json_output["enemies"].append(str(pos[0]) + "," + str(pos[1]))
+
+        json_output["start"] = str(start[0]) + "," + str(start[1])
+        json_output["goal"] = str(goal[0]) + "," + str(goal[1])
+
+        #Making file path concise for retrieval from other computer
+        path_array = morrf_output_path.split("/")
+        json_output["morrf_output"] = path_array[4] + "/" + path_array[5]
+
+        waypoint_output = []
+        cost_output = []
+
+        for index in range(len(morrf_output.paths)):
+            waypoint_output.append([])
+            cost_output.append([])
+
+            for point in morrf_output.paths[index].waypoints:
+                waypoint_output[index].append(point)
+
+            for cost in morrf_output.paths[index].cost:
+                cost_output[index].append(cost)
+
+        print waypoint_output
+        print cost_output
+        print json.dumps(json_output)
+
+        f = open(morrf_output_path, "w")
+
+        for path in cost_output:
+            for cost in path:
+                f.write(str(cost.data) + " ")
+
+            f.write("\n")
+
+        for path in waypoint_output:
+            for point in path:
+                f.write(str(point.x) + " " + str(point.y) + " ")
+            f.write("\n")
+
+        f.close()

@@ -5,53 +5,97 @@ from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from enum import Enum
+import os
+from objective.objective import Objective
+from morrf_ros.msg import *
+from morrf_ros.srv import *
 
 IMAGE_FILE = "../../data/{}"
 SET_START = "Select Start Position"
 SET_GOAL = "Select Goal Position"
 SET_ENEMIES = "Select Enemy Positions"
 
+goal_file = "/home/wfearn/catkin_ws/src/ros-morrf-project/commander/data/objective_icons/goal.png"
+
 class State(Enum):
-    start = 0 
-    goal = 1 
-    enemies = 2 
+    start = 0
+    goal = 1
+    enemies = 2
 
 class Image(QtGui.QMainWindow):
     def __init__(self, image_name):
         super(Image, self).__init__()
 
-        #Setting up an enum to keep track of what point is 
+        #keeps track of what point is
         #being set ie. start point, goal point, the enemy locations, etc.
 
         self.state = State.start
+
+        self.image_name = image_name
 
         self.setWindowTitle("Image")
 
         self.image = QPixmap(image_name)
 
-
         self.setGeometry(50, 50, self.image.width(), self.image.height())
+
+        self.setContextMenuPolicy(Qt.ActionsContextMenu)
+
+        goalAction = QAction("Set Goal...", self)
+        startAction = QAction("Set Start...", self)
+        enemyAction = QAction("Set Enemy...", self)
+        resetAction = QAction("Reset", self)
+
+        startAction.triggered.connect(self.createStart)
+        goalAction.triggered.connect(self.createGoal)
+        enemyAction.triggered.connect(self.createEnemy)
+        resetAction.triggered.connect(self.reset)
+
+        self.addAction(goalAction)
+        self.addAction(startAction)
+        self.addAction(enemyAction)
+        self.addAction(resetAction)
+
+        self.objectives = []
 
         palette = QPalette()
         palette.setBrush(QPalette.Background, QBrush(self.image))
         self.setPalette(palette)
 
-        self.statusBar().showMessage(SET_START)
-
-        reset_btn = QtGui.QPushButton("Reset", self)
-        reset_btn.resize(100, 25)
-        reset_btn.move(self.image.width() - 100, self.image.height() - 25)
-        reset_btn.clicked.connect(self.reset)
-
-        set_btn = QtGui.QPushButton("Set", self)
-        set_btn.resize(75, 25)
-        set_btn.move(175, self.image.height() - 25)
-        set_btn.clicked.connect(self.setPoint)
 
         self.pen = QtGui.QPen(QtCore.Qt.black, 5, QtCore.Qt.SolidLine)
-        self.draw_points = []
 
         self.show()
+
+    def createStart(self):
+        if not self.contains("start"):
+            obj = Objective("start", self.mouseX, self.mouseY)
+            self.objectives.append(obj)
+
+        else:
+            for obj in self.objectives:
+                if obj.getObjectiveType() == "start":
+                    obj.setPosition(self.mouseX, self.mouseY)
+
+        self.update()
+
+    def createGoal(self):
+        if not self.contains("goal"):
+            obj = Objective("goal", self.mouseX, self.mouseY)
+            self.objectives.append(obj)
+
+        else:
+            for obj in self.objectives:
+                if obj.getObjectiveType() == "goal":
+                    obj.setPosition(self.mouseX, self.mouseY)
+
+        self.update()
+
+    def createEnemy(self):
+        obj = Objective("enemy", self.mouseX, self.mouseY)
+        self.objectives.append(obj)
+
+        self.update()
 
     def mousePressEvent(self, QMouseEvent):
         self.mouseX = QMouseEvent.x()
@@ -66,80 +110,64 @@ class Image(QtGui.QMainWindow):
 
         painter.setPen(self.pen)
 
-        #For when paint events happens before user clicks on the image
-        if self.mouseInitialized():
-            painter.drawPoint(self.mouseX, self.mouseY)
+        for obj in self.objectives:
+            img = obj.getImage()
+            painter.drawImage(obj.getDrawQPoint(), img)
 
-        for index in range(len(self.draw_points)):
-            point = self.draw_points[index]
+        if hasattr(self, 'morrf_paths'):
+            for path in self.morrf_paths.paths:
+                print "There are %s paths" % len(self.morrf_paths.paths)
+                for index in range(len(path.waypoints)):
+                    print "In this path there are %s waypoints" % len(path.waypoints)
+                    if index != 0:
+                        point1 = QPoint(path.waypoints[index - 1].x, path.waypoints[index - 1].y)
+                        point2 = QPoint(path.waypoints[index].x, path.waypoints[index].y)
 
-            #If we're drawing enemies, we want red dots instead of black ones
-            if index > 1:
-                redpen = QtGui.QPen(QtCore.Qt.red, 5, QtCore.Qt.SolidLine)
-                painter.setPen(redpen)
-                painter.drawPoint(point[0], point[1])
-            else:
-                painter.drawPoint(point[0], point[1])
+                        painter.drawLine(point1, point2)
 
         painter.end()
 
     def reset(self):
-        self.statusBar().showMessage(SET_START)
-
-        #self.pen = QtGui.QPen(QtCore.Qt.blue, 5, QtCore.Qt.SolidLine)
-
-        self.draw_points = []
-        self.update()
-
-    def setPoint(self):
-        if self.state == State.start:
-            if self.mouseInitialized():
-
-                self.statusBar().showMessage(SET_GOAL)
-                self.draw_points.append((self.mouseX, self.mouseY))
-
-                self.state = State.goal
-
-        elif self.state == State.goal:
-
-            self.statusBar().showMessage(SET_ENEMIES)
-
-            self.draw_points.append((self.mouseX, self.mouseY))
-
-
-            self.state = State.enemies
-        else:
-
-            self.draw_points.append((self.mouseX, self.mouseY))
-
+        self.objectives = []
         self.update()
 
     def mouseInitialized(self):
         return hasattr(self, 'mouseX') and hasattr(self, 'mouseY')
 
     def isCompleted(self):
-        return len(self.draw_points) > 2
+        return (self.contains("start") and self.contains("goal") and self.contains("enemy"))
 
     def getStartPoint(self):
-        if self.draw_points[0] != None:
-            return self.draw_points[0]
-        else:
-            return None
+        for obj in self.objectives:
+            if obj.getObjectiveType() == "start":
+                return obj.getPosition()
 
     def getGoalPoint(self):
-        if self.draw_points[1] != None:
-            return self.draw_points[1]
-        else:
-            return None
+        for obj in self.objectives:
+            if obj.getObjectiveType() == "goal":
+                return obj.getPosition()
 
     def getEnemyLocations(self):
-        if len(self.draw_points) > 2:
-            enemies = []
-            for i in range(len(self.draw_points)):
-                if i > 1:
-                    enemies.append(self.draw_points[i])
+        enemies = []
+        for obj in self.objectives:
+            if obj.getObjectiveType() == "enemy":
+                enemies.append(obj.getPosition())
 
-            return enemies
-        else:
-            return None
+        return enemies
 
+    def saveMapToDropbox(self):
+        pass
+
+    def getMapName(self):
+        return self.image_name
+
+    def contains(self, objective):
+        for obj in self.objectives:
+            if obj.getObjectiveType() == objective:
+                return True
+
+        return False
+
+    def printMorrfPaths(self, response):
+        self.morrf_paths = response
+        self.update()
