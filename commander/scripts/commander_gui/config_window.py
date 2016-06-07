@@ -161,8 +161,9 @@ class Config(QtGui.QMainWindow):
             print "Image height is %s" % image.height
             image.name = str(self.image_name)
 
-            for i in range(image.height):
-                for j in range(image.width):
+            
+            for j in range(image.width):
+                for i in range(image.height):
                     image.int_array.append(np.int16(img[i,j,0]))
 
             return image
