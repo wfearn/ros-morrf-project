@@ -90,6 +90,9 @@ class Config(QtGui.QMainWindow):
             print "Morrf parameters not completed, need to initialize image"
 
         elif self.is_completed() and self.image_window.isCompleted():
+            #Deinitializing variable to prevent errors
+            self.image_window.delMorrfPaths()
+
             initializer = morrf_init()
 
             goal = self.image_window.getGoalPoint()
@@ -152,12 +155,14 @@ class Config(QtGui.QMainWindow):
 
             img = cv2.imread(str(self.image_name))
 
-            image.width = img.shape[0]
-            image.height = img.shape[1]
+            image.width = img.shape[1]
+            print "Image width is %s" % image.width
+            image.height = img.shape[0]
+            print "Image height is %s" % image.height
             image.name = str(self.image_name)
 
-            for i in range(image.width):
-                for j in range(image.height):
+            for i in range(image.height):
+                for j in range(image.width):
                     image.int_array.append(np.int16(img[i,j,0]))
 
             return image

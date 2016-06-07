@@ -173,3 +173,7 @@ class Image(QtGui.QMainWindow):
         print "Initializing morrf_paths variable"
         self.morrf_paths = response
         self.update()
+
+    def delMorrfPaths(self):
+        if hasattr(self, 'morrf_paths'):
+            delattr(self, 'morrf_paths')
