@@ -98,9 +98,29 @@ class Image(QtGui.QMainWindow):
         self.update()
 
     def mousePressEvent(self, QMouseEvent):
+        mouse_state = QMouseEvent.button()
+
         self.mouseX = QMouseEvent.x()
         self.mouseY = QMouseEvent.y()
 
+        for obj in self.objectives:
+            if obj.isInsideBoundary((self.mouseX, self.mouseY)) and mouse_state == QtCore.Qt.LeftButton:
+                obj.setClicked(True)
+
+        self.update()
+
+    def mouseMoveEvent(self, event):
+        #Assumes mouse move event only occurs when LMB is held down
+        for obj in self.objectives:
+            if obj.isClicked():
+                obj.setPosition(event.x(), event.y())
+
+        self.update()
+
+    def mouseReleaseEvent(self, event):
+        for obj in self.objectives:
+            if obj.isClicked():
+                obj.setClicked(False)
         self.update()
 
     def paintEvent(self, event):
@@ -115,7 +135,6 @@ class Image(QtGui.QMainWindow):
             painter.drawImage(obj.getDrawQPoint(), img)
 
         if hasattr(self, 'morrf_paths'):
-            print "Self contains morrf_paths variable"
             for path in self.morrf_paths.paths:
                 print "There are %s paths" % len(self.morrf_paths.paths)
                 for index in range(len(path.waypoints)):
@@ -170,7 +189,6 @@ class Image(QtGui.QMainWindow):
         return False
 
     def printMorrfPaths(self, response):
-        print "Initializing morrf_paths variable"
         self.morrf_paths = response
         self.update()
 

@@ -59,10 +59,11 @@ class Config(QtGui.QMainWindow):
         self.objective_number.setMaxLength(4)
         self.objective_number.setText("1")
 
-        self.method_type = QtGui.QLineEdit()
-        self.method_type.setFrame(True)
-        self.method_type.setMaxLength(1)
-        self.method_type.setText("0")
+        self.method_box = QtGui.QComboBox()
+        self.method_box.addItem("Weighted Sum")
+        self.method_box.addItem("Tchebycheff")
+        self.method_box.addItem("Boundary Intersection")
+        self.method_box.activated[str].connect(self.setMethodType)
 
         self.min_distance = QtGui.QCheckBox("", self)
         self.min_distance.setChecked(True)
@@ -73,7 +74,7 @@ class Config(QtGui.QMainWindow):
         layout.addRow("Segment Length", self.segment_length)
         layout.addRow("# Of Objectives", self.objective_number)
         layout.addRow("Minimize Distance", self.min_distance)
-        layout.addRow("Method Type", self.method_type)
+        layout.addRow("Method Type", self.method_box)
 
         main_layout = QtGui.QVBoxLayout()
         main_layout.addLayout(layout)
@@ -107,6 +108,7 @@ class Config(QtGui.QMainWindow):
             initializer.number_of_trees = int(self.tree_number.text())
             initializer.objective_number = int(self.objective_number.text())
             initializer.minimum_distance_enabled = self.min_distance.isChecked()
+            initializer.method_type = self.method_type
             initializer.map = self.map_convert()
             initializer.width = initializer.map.width
             initializer.height = initializer.map.height
@@ -117,6 +119,7 @@ class Config(QtGui.QMainWindow):
             print "Segment Length is: %s" % (initializer.segment_length)
             print "Number of trees is: %s" % (initializer.number_of_trees)
             print "Objective Number is: %s" % (initializer.objective_number)
+            print "Method type is: %s" % (self.getMethodType())
             print "Minimum distance enabled is: %s" % (initializer.minimum_distance_enabled)
             print "Map image name is: %s" % initializer.map.name
             print "Map height is: %s" % initializer.map.height
@@ -132,6 +135,22 @@ class Config(QtGui.QMainWindow):
 
         else:
             print "Morrf parameters not completed, initialize config or image parameters"
+
+    def getMethodType(self):
+        if self.method_type == 0:
+            return "Weighted Sum"
+        elif self.method_type == 1:
+            return "Tchebycheff"
+        else:
+            return "Boundary Intersection"
+
+    def setMethodType(self, text):
+        if text == "Weighted Sum":
+            self.method_type = 0
+        elif text == "Tchebycheff":
+            self.method_type = 1
+        else:
+            self.method_type = 2
 
     def is_completed(self):
         if self.iterations.text() == "":
