@@ -122,9 +122,10 @@ class Config(QtGui.QMainWindow):
 
             response = StartCommanderPublisher(initializer)
 
+            print "Calling function to initialize morrf paths"
             self.image_window.printMorrfPaths(response)
 
-            self.outputToDropbox(response)
+            #self.outputToDropbox(response)
 
         else:
             print "Morrf parameters not completed, initialize config or image parameters"

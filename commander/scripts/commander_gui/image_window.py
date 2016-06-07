@@ -115,6 +115,7 @@ class Image(QtGui.QMainWindow):
             painter.drawImage(obj.getDrawQPoint(), img)
 
         if hasattr(self, 'morrf_paths'):
+            print "Self contains morrf_paths variable"
             for path in self.morrf_paths.paths:
                 print "There are %s paths" % len(self.morrf_paths.paths)
                 for index in range(len(path.waypoints)):
@@ -169,5 +170,6 @@ class Image(QtGui.QMainWindow):
         return False
 
     def printMorrfPaths(self, response):
+        print "Initializing morrf_paths variable"
         self.morrf_paths = response
         self.update()
