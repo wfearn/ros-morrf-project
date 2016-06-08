@@ -110,6 +110,7 @@ class Image(QtGui.QMainWindow):
         self.update()
 
     def mouseMoveEvent(self, event):
+
         #Assumes mouse move event only occurs when LMB is held down
         for obj in self.objectives:
             if obj.isClicked():
@@ -136,9 +137,9 @@ class Image(QtGui.QMainWindow):
 
         if hasattr(self, 'morrf_paths'):
             for path in self.morrf_paths.paths:
-                print "There are %s paths" % len(self.morrf_paths.paths)
+                #print "There are %s paths" % len(self.morrf_paths.paths)
                 for index in range(len(path.waypoints)):
-                    print "In this path there are %s waypoints" % len(path.waypoints)
+                    #print "In this path there are %s waypoints" % len(path.waypoints)
                     if index != 0:
                         point1 = QPoint(path.waypoints[index - 1].x, path.waypoints[index - 1].y)
                         point2 = QPoint(path.waypoints[index].x, path.waypoints[index].y)
@@ -189,8 +190,11 @@ class Image(QtGui.QMainWindow):
         return False
 
     def printMorrfPaths(self, response):
-        self.morrf_paths = response
-        self.update()
+        if hasattr(response, 'paths'):
+            self.morrf_paths = response
+            self.update()
+        else:
+            raise Exception("Path not found, try increasing iteration number")
 
     def delMorrfPaths(self):
         if hasattr(self, 'morrf_paths'):

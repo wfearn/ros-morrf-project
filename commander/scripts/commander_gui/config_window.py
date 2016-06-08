@@ -128,8 +128,11 @@ class Config(QtGui.QMainWindow):
 
             response = StartCommanderPublisher(initializer)
 
-            print "Calling function to initialize morrf paths"
-            self.image_window.printMorrfPaths(response)
+            try:
+                self.image_window.printMorrfPaths(response)
+
+            except Exception as e:
+                print str(e)
 
             #self.outputToDropbox(response)
 
