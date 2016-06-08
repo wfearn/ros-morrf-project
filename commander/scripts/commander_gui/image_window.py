@@ -9,6 +9,7 @@ import os
 from objective.objective import Objective
 from morrf_ros.msg import *
 from morrf_ros.srv import *
+from error_popup.no_path_error import NoPath
 
 IMAGE_FILE = "../../data/{}"
 SET_START = "Select Start Position"
@@ -27,8 +28,7 @@ class Image(QtGui.QMainWindow):
         super(Image, self).__init__()
 
         #keeps track of what point is
-        #being set ie. start point, goal point, the enemy locations, etc.
-
+        #being set ie. start point, goal point, the enemy locations, etc.  
         self.state = State.start
 
         self.image_name = image_name
@@ -190,11 +190,11 @@ class Image(QtGui.QMainWindow):
         return False
 
     def printMorrfPaths(self, response):
-        if hasattr(response, 'paths'):
+        if len(response.paths) > 0:
             self.morrf_paths = response
             self.update()
         else:
-            raise Exception("Path not found, try increasing iteration number")
+            self.error = NoPath()
 
     def delMorrfPaths(self):
         if hasattr(self, 'morrf_paths'):
