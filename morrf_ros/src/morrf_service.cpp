@@ -138,10 +138,9 @@ bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_mopp::Request& req,
   morrf.init(start, goal);
   morrf.load_map(pp_obstacle);
   
-  /*
   std::cout << "dump map info " << std::endl;
   morrf.dump_map_info("./test_obs.txt");
-  */
+  
   std::cout << "start planning" << std::endl;
   while(morrf.get_current_iteration() <= req.init.number_of_iterations) {
     morrf.extend();
