@@ -67,12 +67,20 @@ class Config(QtGui.QMainWindow):
         self.min_distance = QtGui.QCheckBox("", self)
         self.min_distance.setChecked(True)
 
+        self.stealth = QtGui.QCheckBox("", self)
+        self.stealth.setChecked(False)
+
+        self.safe = QtGui.QCheckBox("", self)
+        self.safe.setChecked(False)
+
         layout = QtGui.QFormLayout()
         layout.addRow("# Of Iterations", self.iterations)
         layout.addRow("# Of Trees", self.tree_number)
         layout.addRow("Segment Length", self.segment_length)
-        layout.addRow("# Of Objectives", self.objective_number)
-        layout.addRow("Minimize Distance", self.min_distance)
+        #layout.addRow("# Of Objectives", self.objective_number)
+        layout.addRow("Stealthy", self.stealth)
+        layout.addRow("Safely", self.safe)
+        layout.addRow("Quickly", self.min_distance)
         layout.addRow("Method Type", self.method_box)
 
         main_layout = QtGui.QVBoxLayout()
@@ -106,7 +114,7 @@ class Config(QtGui.QMainWindow):
             initializer.number_of_iterations = int(self.iterations.text())
             initializer.segment_length = int(self.segment_length.text())
             initializer.number_of_trees = int(self.tree_number.text())
-            initializer.objective_number = int(self.objective_number.text())
+            initializer.objective_number = int(self.getObjectiveNumbers())
             initializer.minimum_distance_enabled = self.min_distance.isChecked()
             initializer.method_type = int(self.getMethodType())
             initializer.map = self.map_convert()
@@ -128,16 +136,27 @@ class Config(QtGui.QMainWindow):
 
             response = StartCommanderPublisher(initializer)
 
-            try:
-                self.image_window.printMorrfPaths(response)
-
-            except Exception as e:
-                print str(e)
+            self.image_window.printMorrfPaths(response)
 
             #self.outputToDropbox(response)
 
         else:
             print "Morrf parameters not completed, initialize config or image parameters"
+
+    def getObjectiveNumbers(self):
+
+        counter = 0
+
+        if self.stealth.isChecked():
+            counter +=1
+
+        if self.safe.isChecked():
+            counter += 1
+
+        if self.min_distance.isChecked():
+            counter +=1
+
+        return counter
 
     def getMethodType(self):
         if self.method_box.currentText() == "Weighted Sum":
