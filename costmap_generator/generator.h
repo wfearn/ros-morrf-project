@@ -44,7 +44,7 @@ private:
     void getAllObsPts(QImage image);
     void getEnemyPtsToIgnore(list<Point> enemyPts);
     bool isOnLineSegment(Point a, Point b, Point c);
-    void writeImage(string file, string output, vector<vector<double>> imgProbVals);
+    void writeImage(string file, string output, vector<vector<double> > imgProbVals);
     void resize(vector<vector<double>> & array);
     vector<double> setEnemyProbArray(int i, bool blocked, double distance);
     bool isBlocked(Point imgPt, Point enemyPt);
