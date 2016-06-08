@@ -63,7 +63,6 @@ class Config(QtGui.QMainWindow):
         self.method_box.addItem("Weighted Sum")
         self.method_box.addItem("Tchebycheff")
         self.method_box.addItem("Boundary Intersection")
-        self.method_box.activated[str].connect(self.setMethodType)
 
         self.min_distance = QtGui.QCheckBox("", self)
         self.min_distance.setChecked(True)
@@ -91,6 +90,7 @@ class Config(QtGui.QMainWindow):
             print "Morrf parameters not completed, need to initialize image"
 
         elif self.is_completed() and self.image_window.isCompleted():
+
             #Deinitializing variable to prevent errors
             self.image_window.delMorrfPaths()
 
@@ -108,7 +108,7 @@ class Config(QtGui.QMainWindow):
             initializer.number_of_trees = int(self.tree_number.text())
             initializer.objective_number = int(self.objective_number.text())
             initializer.minimum_distance_enabled = self.min_distance.isChecked()
-            initializer.method_type = self.method_type
+            initializer.method_type = int(self.getMethodType())
             initializer.map = self.map_convert()
             initializer.width = initializer.map.width
             initializer.height = initializer.map.height
@@ -119,8 +119,8 @@ class Config(QtGui.QMainWindow):
             print "Segment Length is: %s" % (initializer.segment_length)
             print "Number of trees is: %s" % (initializer.number_of_trees)
             print "Objective Number is: %s" % (initializer.objective_number)
-            print "Method type is: %s" % (self.getMethodType())
             print "Minimum distance enabled is: %s" % (initializer.minimum_distance_enabled)
+            print "Method type is: %s" % self.method_box.currentText()
             print "Map image name is: %s" % initializer.map.name
             print "Map height is: %s" % initializer.map.height
             print "Map width is: %s" % initializer.map.width
@@ -137,20 +137,20 @@ class Config(QtGui.QMainWindow):
             print "Morrf parameters not completed, initialize config or image parameters"
 
     def getMethodType(self):
-        if self.method_type == 0:
-            return "Weighted Sum"
-        elif self.method_type == 1:
-            return "Tchebycheff"
+        if self.method_box.currentText() == "Weighted Sum":
+            return 0
+        elif self.method_box.currentText() == "Tchebycheff":
+            return 1
         else:
-            return "Boundary Intersection"
+            return 2
 
-    def setMethodType(self, text):
-        if text == "Weighted Sum":
-            self.method_type = 0
-        elif text == "Tchebycheff":
-            self.method_type = 1
-        else:
-            self.method_type = 2
+   # def setMethodType(self, text):
+   #     if text == "Weighted Sum":
+   #         self.method_type = 0
+   #     elif text == "Tchebycheff":
+   #         self.method_type = 1
+   #     else:
+   #         self.method_type = 2
 
     def is_completed(self):
         if self.iterations.text() == "":
@@ -180,9 +180,8 @@ class Config(QtGui.QMainWindow):
             print "Image height is %s" % image.height
             image.name = str(self.image_name)
 
-            
-            for j in range(image.width):
-                for i in range(image.height):
+            for i in range(image.height):
+                for j in range(image.width):
                     image.int_array.append(np.int16(img[i,j,0]))
 
             return image
