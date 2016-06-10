@@ -10,6 +10,7 @@ import cv2
 import numpy as np
 from commander_publisher import StartCommanderPublisher
 import json
+from error_popup.not_initialized import NotInitialized
 
 STARTX = 1000
 STARTY = 1000
@@ -141,7 +142,7 @@ class Config(QtGui.QMainWindow):
             #self.outputToDropbox(response)
 
         else:
-            print "Morrf parameters not completed, initialize config or image parameters"
+            self.error = NotInitialized()
 
     def getObjectiveNumbers(self):
 
