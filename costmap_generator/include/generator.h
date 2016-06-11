@@ -35,6 +35,8 @@ private:
     double delta;
     double maxProbOfSeenVal;
     double minProbOfSeenVal;
+    double minProbOfNearness;
+    double maxProbOfNearness;
     int width;
     int height;
 
@@ -45,9 +47,12 @@ private:
     void getEnemyPtsToIgnore(list<Point> enemyPts);
     bool isOnLineSegment(Point a, Point b, Point c);
     void writeImage(string file, string output, vector<vector<double> > imgProbVals);
+    void writeSafeImage(string file, string output, vector<vector<double> > imgProbVals);
     void resize(vector<vector<double>> & array);
     vector<double> setEnemyProbArray(int i, bool blocked, double distance);
     bool isBlocked(Point imgPt, Point enemyPt);
+    double getNearObsValue(Point pt);
+    void clear();
 
 public:
     Generator();

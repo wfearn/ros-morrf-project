@@ -2,7 +2,16 @@
 
 Generator::Generator()
 {
-
+    diag_distance = 0;
+    slope = 0;
+    y_intercept = 0;
+    delta = 0;
+    maxProbOfSeenVal = 0;
+    minProbOfSeenVal = 0;
+    minProbOfNearness = 0;
+    maxProbOfNearness = 0;
+    width = 0;
+    height = 0;
 }
 
 bool Generator::isOnLineSegment(Point a, Point b, Point c){
@@ -16,7 +25,7 @@ bool Generator::isOnLineSegment(Point a, Point b, Point c){
 
   double sumWithR = AC + CB;
 
-  if(abs( (sumWithR - AB)) < 0.01)
+  if(abs((sumWithR - AB)) < 0.01)
     return true;
   return false;
 }
@@ -31,11 +40,8 @@ void Generator::probOfSeenByEnemy(double d, list<Point> enemyPts, string world_b
 
     delta = d;
     diag_distance = sqrt(pow(width, 2) + pow(height, 2));
-    cout << diag_distance << endl;
     slope = 1/(delta - diag_distance);
-    cout << slope << endl;
     y_intercept = (-1) * (diag_distance * slope);
-    cout << y_intercept << endl;
 
     //getting all the points
     getImgBoundaryPts(worldBoundariesImage);
@@ -50,11 +56,9 @@ void Generator::probOfSeenByEnemy(double d, list<Point> enemyPts, string world_b
     maxProbOfSeenVal = 0.0;
 
     vector<vector<double> > imgProbVals;
-//    double imgProbVals[600][400];
     resize(imgProbVals);
     int numOfEnemies = enemyPts.size();
 
-//    qDebug() << "width: " << width << endl;
     for(int x = 0; x < width; x++) {
         for(int y = 0; y < height; y++) {
 
@@ -66,7 +70,6 @@ void Generator::probOfSeenByEnemy(double d, list<Point> enemyPts, string world_b
             int i = 0;
             for(Point enemyPt : enemyPts) {
 
-//                cout << "(" << x << ", " << y << ") at: " << i << endl;
                 bool blocked = isBlocked(Point(x, y), enemyPt);
                 double distanceToEnemy = sqrt((x - enemyPt.x) * (x - enemyPt.x) + (y - enemyPt.y) * (y - enemyPt.y));
 
@@ -81,7 +84,6 @@ void Generator::probOfSeenByEnemy(double d, list<Point> enemyPts, string world_b
                 allFalseProduct *= enemyProbArray[i][1];
             }
             imgProbVals[y][x] = 1 - allFalseProduct;
-//            cout << imgProbVals[x][y] << endl;
 
             if(imgProbVals[y][x] > maxProbOfSeenVal)
                 maxProbOfSeenVal = imgProbVals[y][x];
@@ -90,28 +92,19 @@ void Generator::probOfSeenByEnemy(double d, list<Point> enemyPts, string world_b
         }
     }
 
-//    qDebug() << imgProbVals.size() << endl;
-
     writeImage(outputFile, imageFile, imgProbVals);
 }
 
 
 void Generator::writeImage(string outputFile, string image, vector<vector<double> > imgProbVals) {
 
-    cout << "Writing Image!" << endl;
     double origRange = maxProbOfSeenVal - minProbOfSeenVal;
     double newRange = MAX_GRAYSCALE_VALUE - MIN_GRAYSCALE_VALUE;
-
-//    double ratio = newRange/origRange;
 
     QImage resultImage = QImage(width, height, QImage::Format_ARGB32);
     resultImage.fill(WHITE); //initialize the entire image with white
 
     ofstream out(outputFile);
-    if(out.is_open())
-        cout << "Opened output file!" << endl;
-    else
-        cout << "output file cannot be opened" << endl;
 
     for(int x = 0; x < width; x++) {
         for(int y = 0; y < height; y++) {
@@ -124,7 +117,6 @@ void Generator::writeImage(string outputFile, string image, vector<vector<double
             imgProbVals[y][x] = (((imgProbVals[y][x] - minProbOfSeenVal) * newRange)/origRange) + MIN_GRAYSCALE_VALUE;
 
             if(imgProbVals[y][x] < 255) {
-//                cout << imgProbVals[y][x] << endl;
                 QRgb value = qRgb((int)imgProbVals[y][x], (int)imgProbVals[y][x], (int)imgProbVals[y][x]);
                 resultImage.setPixel(x, y, value);
 
@@ -192,7 +184,6 @@ void Generator::getAllObsPts(QImage image) {
     for(int i = 0; i < width; i++) {
         for(int j = 0; j < height; j++) {
 
-//            cout << "i,j: " << i << ", " << j << endl;
             QColor pixel_color = image.pixel(i, j);
             if(pixel_color == BLACK) {
 
@@ -207,9 +198,6 @@ void Generator::getAllObsPts(QImage image) {
 
 void Generator::getImgBoundaryPts(QImage image) {
 
-//    int width = image.width();
-//    int height = image.height();
-
     for(int i = 0; i < width; i++) {
         for(int j = 0; j < height; j++) {
 
@@ -221,3 +209,119 @@ void Generator::getImgBoundaryPts(QImage image) {
     }
 }
 
+void Generator::clear() {
+
+    obsBoundaryPts.clear();
+    allObsPts.clear();
+    enemyPtsToIgnore.clear();
+
+    Generator();
+
+}
+
+void Generator::probOfBeingNearToObstacle(double d, string world_boundaries, string world_solids, list<Point> enemyPts, string imageFilename, string outputFilename) {
+
+    clear();
+
+    QImage worldBoundariesImage;
+    worldBoundariesImage.load(QString::fromStdString(world_boundaries));
+
+    QImage worldSolidsImage;
+    worldSolidsImage.load(QString::fromStdString(world_solids));
+
+    width = worldBoundariesImage.width();
+    height = worldBoundariesImage.height();
+    delta = d;
+
+    getImgBoundaryPts(worldBoundariesImage);
+    getAllObsPts(worldSolidsImage);
+    getEnemyPtsToIgnore(enemyPts);
+
+    diag_distance = sqrt(pow(width, 2) + pow(height, 2));
+    double inv_diag_distance = 1 / diag_distance;
+
+    minProbOfNearness = 1;
+    maxProbOfNearness = inv_diag_distance;
+
+    vector<vector<double> > imgProbVals;
+    resize(imgProbVals);
+
+    for(int x = 0; x < width; x++) {
+        for(int y = 0; y < height; y++) {
+
+            stringstream ss;
+            ss << x << " " << y;
+
+            if(allObsPts.count(ss.str()) || enemyPtsToIgnore.count(ss.str()))
+                continue;
+
+            imgProbVals[y][x] = getNearObsValue(Point(x, y));
+
+            if(imgProbVals[y][x] > maxProbOfNearness)
+                maxProbOfNearness = imgProbVals[y][x];
+
+            if(imgProbVals[y][x] < minProbOfNearness)
+                minProbOfNearness = imgProbVals[y][x];
+        }
+    }
+
+    writeSafeImage(imageFilename, outputFilename, imgProbVals);
+}
+
+double Generator::getNearObsValue(Point pt) {
+
+    double nearObsValue = 0;
+
+    for(Point obsPt : obsBoundaryPts) {
+
+        double distance = sqrt(pow(pt.x - obsPt.x, 2) + pow(pt.y - obsPt.y, 2));
+        double temp_inv_distance = 0;
+
+        if(distance <= delta)
+            temp_inv_distance = 1/delta;
+        else
+            temp_inv_distance = 1/distance;
+
+        if(temp_inv_distance > nearObsValue)
+            nearObsValue = temp_inv_distance;
+    }
+
+    return nearObsValue;
+}
+
+void Generator::writeSafeImage(string imageFilename, string outputFilename, vector<vector<double> > imgProbVals) {
+
+    double origRange = maxProbOfNearness - minProbOfNearness;
+    double newRange = MAX_GRAYSCALE_VALUE - MIN_GRAYSCALE_VALUE;
+
+    QImage resultImage = QImage(width, height, QImage::Format_ARGB32);
+    resultImage.fill(WHITE); //initialize the entire image with white
+
+    ofstream out(outputFilename);
+
+    for(int x = 0; x < width; x++) {
+        for(int y = 0; y < height; y++) {
+
+            stringstream ss;
+            ss << x << " " << y;
+
+            if(allObsPts.count(ss.str()) || enemyPtsToIgnore.count(ss.str())) {
+
+                //cout << "The new range here is: " << (int) newRange << endl;
+                QRgb value = qRgb((int)newRange, (int)newRange, (int)newRange);
+                resultImage.setPixel(x, y, value);
+                continue;
+            }
+
+            imgProbVals[y][x] = (((imgProbVals[y][x] - minProbOfNearness) * newRange)/origRange) + MIN_GRAYSCALE_VALUE;
+            QRgb value = qRgb((int)imgProbVals[y][x], (int)imgProbVals[y][x], (int)imgProbVals[y][x]);
+            resultImage.setPixel(x, y, value);
+
+            out << ss.str() << "\t" << ceil(imgProbVals[y][x]);
+            out << endl;
+        }
+    }
+
+    out.close();
+    resultImage.save(QString::fromStdString(imageFilename));
+}
