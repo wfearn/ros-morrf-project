@@ -11,6 +11,7 @@ import numpy as np
 from commander_publisher import StartCommanderPublisher
 import json
 from error_popup.not_initialized import NotInitialized
+from image_publisher import StartImagePublisher
 
 STARTX = 1000
 STARTY = 1000
@@ -193,7 +194,7 @@ class Config(QtGui.QMainWindow):
 
     def map_convert(self):
         if hasattr(self, "image_name"):
-            image = int8_image()
+            image = int16_image()
 
             img = cv2.imread(str(self.image_name))
 

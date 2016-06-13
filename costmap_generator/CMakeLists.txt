@@ -5,10 +5,12 @@ project(costmap_generator)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  rospy
+  roscpp
   std_msgs
+  commander
   message_generation
   geometry_msgs
+  morrf_ros
 )
 
 ## System dependencies are found with CMake's conventions
@@ -68,6 +70,7 @@ find_package(OpenCV REQUIRED)
 #   DEPENDENCIES
 #   std_msgs  # Or other packages containing msgs
 #   geometry_msgs
+#   commander
 # )
 
 ################################################
@@ -102,7 +105,7 @@ find_package(OpenCV REQUIRED)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES commander
-   CATKIN_DEPENDS message_runtime rospy std_msgs geometry_msgs
+   CATKIN_DEPENDS message_runtime roscpp std_msgs geometry_msgs
 #  DEPENDS system_lib
 )
 
@@ -119,10 +122,14 @@ include_directories(
 )
 
 
-add_executable(open_cv_test src/open_cv_test.cpp)
-target_link_libraries(open_cv_test ${catkin_LIBRARIES})
-target_link_libraries(open_cv_test ${OpenCV_LIBS})
-add_dependencies(open_cv_test costmap_generate_messages_cpp)
+#add_executable(open_cv_test src/open_cv_test.cpp)
+#target_link_libraries(open_cv_test ${catkin_LIBRARIES})
+#target_link_libraries(open_cv_test ${OpenCV_LIBS})
+#add_dependencies(open_cv_test costmap_generate_messages_cpp)
+
+add_executable(test_img_boundary src/boundary_image_subscriber)
+target_link_libraries(test_img_boundary ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+add_dependencies(test_img_boundary costmap_generator_generate_messages_cpp)
 
 ## Declare a C++ library
 # add_library(commander

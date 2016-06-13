@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   message_generation
   geometry_msgs
+  morrf_ros
 )
 
 ## System dependencies are found with CMake's conventions
@@ -50,12 +51,13 @@ find_package(catkin REQUIRED COMPONENTS
 #   commander.msg
 # )
 
-## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   commander.srv
-# )
-#
+# Generate services in the 'srv' folder
+ add_service_files(
+   FILES
+   test_boundary_img.srv
+   get_cost_map.srv
+ )
+
 ## Generate actions in the 'action' folder
 # add_action_files(
 #   FILES
@@ -63,12 +65,13 @@ find_package(catkin REQUIRED COMPONENTS
 #   Action2.action
 # )
 
-## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
-#   geometry_msgs
-# )
+# Generate added messages and services with any dependencies listed here
+ generate_messages(
+   DEPENDENCIES
+   morrf_ros
+   std_msgs  # Or other packages containing msgs
+   geometry_msgs
+ )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
