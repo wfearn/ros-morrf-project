@@ -59,16 +59,16 @@ endif()
 ##   * uncomment the generate_messages entry below
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
-## Generate messages in the 'msg' folder
+#Generate messages in the 'msg' folder
 # add_message_files(
-#   FILES
-#   commander.msg
+# FILES
+#  timnah'smsg!.msg
 # )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
 #   FILES
-#   commander.srv
+#  commander.srv
 # )
 #
 ## Generate actions in the 'action' folder
@@ -118,7 +118,7 @@ endif()
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES commander
-   CATKIN_DEPENDS message_runtime roscpp std_msgs geometry_msgs
+   CATKIN_DEPENDS message_runtime roscpp std_msgs geometry_msgs morrf_ros
 #  DEPENDS system_lib
 )
 
@@ -150,6 +150,10 @@ add_dependencies(test_img_boundary costmap_generator_generate_messages_cpp)
 
 add_executable(costmap src/main.cpp src/generator.cpp)
 target_link_libraries(costmap ${catkin_LIBRARIES} ${QT_LIBRARIES} ${OpenCV_LIBRARIES} )
+
+add_executable(costmap_subscriber src/costmap_subscriber.cpp)
+target_link_libraries(costmap_subscriber ${catkin_LIBRARIES} ${QT_LIBRARIES} ${OpenCV_LIBRARIES} )
+
 #add_dependencies(costmap costmap_generator_generate_messages_cpp)
 
 ## Declare a C++ library

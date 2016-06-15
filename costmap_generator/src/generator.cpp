@@ -96,7 +96,7 @@ void Generator::probOfSeenByEnemy(double d, list<Point> enemyPts, string world_b
 }
 
 
-void Generator::writeImage(string outputFile, string image, vector<vector<double> > imgProbVals) {
+int** Generator::writeImage(string outputFile, string image, vector<vector<double> > imgProbVals) {
 
     double origRange = maxProbOfSeenVal - minProbOfSeenVal;
     double newRange = MAX_GRAYSCALE_VALUE - MIN_GRAYSCALE_VALUE;
@@ -291,6 +291,12 @@ double Generator::getNearObsValue(Point pt) {
 
 void Generator::writeSafeImage(string imageFilename, string outputFilename, vector<vector<double> > imgProbVals) {
 
+    //morrf_ros::int16_image im;
+    //im.name = "safe cost map"
+    //im.width = width;
+    //im.height = height;
+    //im.int_array = std::vector<int16_t> (img.width * img.height, 255);
+
     double origRange = maxProbOfNearness - minProbOfNearness;
     double newRange = MAX_GRAYSCALE_VALUE - MIN_GRAYSCALE_VALUE;
 
@@ -315,6 +321,7 @@ void Generator::writeSafeImage(string imageFilename, string outputFilename, vect
 
             imgProbVals[y][x] = (((imgProbVals[y][x] - minProbOfNearness) * newRange)/origRange) + MIN_GRAYSCALE_VALUE;
             QRgb value = qRgb((int)imgProbVals[y][x], (int)imgProbVals[y][x], (int)imgProbVals[y][x]);
+	    //im.int_array =
             resultImage.setPixel(x, y, value);
 
             out << ss.str() << "\t" << ceil(imgProbVals[y][x]);
