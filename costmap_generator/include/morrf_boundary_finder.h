@@ -61,7 +61,10 @@ bool find_boundaries( morrf_ros::int16_image &img,  morrf_ros::int16_image &boun
     boundary_image.name = "Boundary Image";
     boundary_image.width = img.width;
     boundary_image.height = img.height;
-    boundary_image.int_array = std::vector<int16_t>(img.width*img.height, 255);
+    for(unsigned int i=0; i<img.width*img.height; i++) {
+      boundary_image.int_array.push_back(255);
+    }
+    //boundary_image.int_array = std::vector<int16_t>(img.width*img.height, 255);
 
     std::cout << "Changing boundary pixels black" << std::endl;
 
