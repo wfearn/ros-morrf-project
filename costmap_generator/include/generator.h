@@ -3,7 +3,7 @@
 #include <iostream>
 #include <list>
 #include <vector>
-#include <math.h>
+#include <cmath>
 #include <set>
 #include <string>
 #include <sstream>
@@ -48,7 +48,7 @@ private:
     bool isOnLineSegment(Point a, Point b, Point c);
     void writeImage(string file, string output, vector<vector<double> > imgProbVals);
     void writeSafeImage(string file, string output, vector<vector<double> > imgProbVals);
-    void resize(vector<vector<double>> & array);
+    void resize(vector<vector<double> > & array);
     vector<double> setEnemyProbArray(int i, bool blocked, double distance);
     bool isBlocked(Point imgPt, Point enemyPt);
     double getNearObsValue(Point pt);

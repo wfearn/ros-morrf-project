@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 
     string obsSolidImg = "/home/tkatuka/catkin_ws/src/ros-morrf-project/costmap_generator/data/world_solids.png";
 
-    string obsBoundaryImg = "/home/tkatuka/catkin_ws/src/ros-morrf-project/costmap_generator/data/world_boundaries";
+    string obsBoundaryImg = "/home/tkatuka/catkin_ws/src/ros-morrf-project/costmap_generator/data/world_boundaries.png";
 
     vector<vector<Point> > obstacles;
 
