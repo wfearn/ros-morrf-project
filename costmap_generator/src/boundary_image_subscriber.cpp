@@ -11,13 +11,13 @@ using namespace std;
 bool get_boundary(commander::test_boundary_img::Request &req,
                   commander::test_boundary_img::Response &res) {
 
-    vector< vector<Point> > obstacles;
+    //vector< vector<Point> > obstacles;
 
-    res.boundary_image = find_boundaries(req.map, obstacles);
-    cout << "Boundary image received " << res.boundary_image << endl;
+    find_boundaries(req.map, res.boundary_image);
+
+    cout << "Boundary image received: " << res.boundary_image.name << endl;
 
     return true;
-
 }
 
 int main(int argc, char **argv) {

@@ -11,8 +11,8 @@ def StartImagePublisher(map_image):
     rospy.wait_for_service("/morrf/get_boundary_image")
     try:
         boundary_img = rospy.ServiceProxy("/morrf/get_boundary_image", test_boundary_img)
-        response = morrf_ros(map_image)
-        print "Received boundary image, %s" % str(response)
+        response = boundary_img(map_image)
+        print "Received boundary image, %s" % str(response.name)
         #print image
 
     except rospy.ServiceException, e:

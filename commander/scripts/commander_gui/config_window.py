@@ -136,6 +136,8 @@ class Config(QtGui.QMainWindow):
             print "Map width is: %s" % initializer.map.width
             #print "Map pixel values are %s" % initializer.map.int_array
 
+            StartImagePublisher(initializer.map)
+
             response = StartCommanderPublisher(initializer)
 
             self.image_window.printMorrfPaths(response)
