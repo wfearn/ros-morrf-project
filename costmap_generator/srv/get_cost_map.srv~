@@ -1,7 +1,0 @@
-morrf_ros/int16_image map
-bool stealth
-bool safe
-float64 delta
-geometry_msgs/Pose2D[] enemyPts
----
-morrf_ros/int16_image[] cost_maps
