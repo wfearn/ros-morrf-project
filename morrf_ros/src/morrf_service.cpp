@@ -105,8 +105,8 @@ bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_mopp::Request& req,
   std::vector<int**> fitnessDistributions;
 
   int** pp_obstacle = new int*[req.init.map.width];
-  for(unsigned int w=0; w < req.init.map.height; w++) {
-    pp_obstacle[w] = new int[req.init.map.width];
+  for(unsigned int w=0; w < req.init.map.width; w++) {
+    pp_obstacle[w] = new int[req.init.map.height];
     for(unsigned int h=0; h < req.init.map.height; h++) {
       pp_obstacle[w][h] = req.init.map.int_array[w+req.init.map.width*h];
     }
@@ -125,7 +125,7 @@ bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_mopp::Request& req,
     for(unsigned int w=0; w < img.width; w++) {
       p_costmap[w] = new int[img.height];
       for(unsigned int h=0; h < img.height; h++) {
-        p_costmap[w][h] = img.int_array[w*img.height+h];
+        p_costmap[w][h] = img.int_array[w + img.width*h];
       }
     }
     funcs.push_back(calcCost);
@@ -138,9 +138,11 @@ bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_mopp::Request& req,
   morrf.init(start, goal);
   morrf.load_map(pp_obstacle);
   
+  /*
   std::cout << "dump map info " << std::endl;
   morrf.dump_map_info("./test_obs.txt");
-  
+  */
+
   std::cout << "start planning" << std::endl;
   while(morrf.get_current_iteration() <= req.init.number_of_iterations) {
     morrf.extend();
