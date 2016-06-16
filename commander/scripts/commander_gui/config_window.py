@@ -8,11 +8,13 @@ from image_window import Image
 from morrf_ros.msg import *
 import cv2
 import numpy as np
-from commander_publisher import StartCommanderPublisher
+from publishers.commander_publisher import StartCommanderPublisher
 import json
 from error_popup.not_initialized import NotInitialized
-from image_publisher import StartImagePublisher
+from publishers.image_publisher import StartImagePublisher
 
+STARTX = 1000
+STARTY = 1000
 WIDTH = 250
 HEIGHT = 700
 
