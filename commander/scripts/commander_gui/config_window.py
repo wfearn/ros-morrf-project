@@ -13,8 +13,6 @@ import json
 from error_popup.not_initialized import NotInitialized
 from image_publisher import StartImagePublisher
 
-STARTX = 1000
-STARTY = 1000
 WIDTH = 250
 HEIGHT = 700
 
@@ -79,7 +77,6 @@ class Config(QtGui.QMainWindow):
         layout.addRow("# Of Iterations", self.iterations)
         layout.addRow("# Of Trees", self.tree_number)
         layout.addRow("Segment Length", self.segment_length)
-        #layout.addRow("# Of Objectives", self.objective_number)
         layout.addRow("Stealthy", self.stealth)
         layout.addRow("Safely", self.safe)
         layout.addRow("Quickly", self.min_distance)
@@ -134,9 +131,10 @@ class Config(QtGui.QMainWindow):
             print "Map image name is: %s" % initializer.map.name
             print "Map height is: %s" % initializer.map.height
             print "Map width is: %s" % initializer.map.width
-            #print "Map pixel values are %s" % initializer.map.int_array
 
-            StartImagePublisher(initializer.map)
+            self.printImage(StartImagePublisher(initializer.map))
+
+            #Uncomment once MORRF has been fixed to allow row major 1d arrays
 
             response = StartCommanderPublisher(initializer)
 
@@ -146,6 +144,27 @@ class Config(QtGui.QMainWindow):
 
         else:
             self.error = NotInitialized()
+
+    def printImage(self, image):
+
+        test = QImage(image.width, image.height, QImage.Format_RGB16)
+
+        print "image width is %s" % image.width
+        print "image height is %s" % image.height
+        print "int array size is %s" % len(image.int_array)
+
+        for i in range(image.height):
+            for j in range(image.width):
+
+                index = i * image.width + j
+                color = image.int_array[index]
+
+                qrgb = QColor(color, color, color)
+
+                test.setPixel(j, i, qrgb.rgb())
+
+        test.save("/home/wfearn/Pictures/test.png")
+
 
     def getObjectiveNumbers(self):
 
@@ -169,14 +188,6 @@ class Config(QtGui.QMainWindow):
             return 1
         else:
             return 2
-
-   # def setMethodType(self, text):
-   #     if text == "Weighted Sum":
-   #         self.method_type = 0
-   #     elif text == "Tchebycheff":
-   #         self.method_type = 1
-   #     else:
-   #         self.method_type = 2
 
     def is_completed(self):
         if self.iterations.text() == "":
@@ -206,9 +217,9 @@ class Config(QtGui.QMainWindow):
             print "Image height is %s" % image.height
             image.name = str(self.image_name)
 
-            for j in range(image.width):
-                for i in range(image.height): 
-                    image.int_array.append(np.int16(img[i,j,0]))
+            for j in range(image.height):
+                for i in range(image.width):
+                    image.int_array.append(np.int16(img[j,i,0]))
 
             return image
         else:
