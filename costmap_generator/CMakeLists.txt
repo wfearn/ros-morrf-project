@@ -151,8 +151,8 @@ add_dependencies(test_img_boundary costmap_generator_generate_messages_cpp)
 add_executable(costmap src/main.cpp src/generator.cpp)
 target_link_libraries(costmap ${catkin_LIBRARIES} ${QT_LIBRARIES} ${OpenCV_LIBRARIES} )
 
-add_executable(costmap_subscriber src/costmap_subscriber.cpp)
-target_link_libraries(costmap_subscriber ${catkin_LIBRARIES} ${QT_LIBRARIES} ${OpenCV_LIBRARIES} )
+#add_executable(costmap_subscriber src/costmap_subscriber.cpp)
+#target_link_libraries(costmap_subscriber ${catkin_LIBRARIES} ${QT_LIBRARIES} ${OpenCV_LIBRARIES} )
 
 #add_dependencies(costmap costmap_generator_generate_messages_cpp)
 

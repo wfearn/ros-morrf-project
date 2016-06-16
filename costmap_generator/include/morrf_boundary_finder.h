@@ -60,7 +60,7 @@ bool find_boundaries( morrf_ros::int16_image &img,  morrf_ros::int16_image &boun
       boundary_image.int_array.push_back(255);
     }
 
-    //Changing boundary points from obstacles vector to black pixels
+  //Changing boundary points from obstacles vector to black pixels
     for(int i = 0; i < obstacles.size(); i++) {
         for(int j = 0; j < obstacles[i].size(); j++) {
 
