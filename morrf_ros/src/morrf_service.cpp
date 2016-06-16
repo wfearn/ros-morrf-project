@@ -105,10 +105,10 @@ bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_mopp::Request& req,
   std::vector<int**> fitnessDistributions;
 
   int** pp_obstacle = new int*[req.init.map.width];
-  for(unsigned int w=0; w < req.init.map.width; w++) {
-    pp_obstacle[w] = new int[req.init.map.height];
+  for(unsigned int w=0; w < req.init.map.height; w++) {
+    pp_obstacle[w] = new int[req.init.map.width];
     for(unsigned int h=0; h < req.init.map.height; h++) {
-      pp_obstacle[w][h] = req.init.map.int_array[w*req.init.map.height+h];
+      pp_obstacle[w][h] = req.init.map.int_array[w+req.init.map.width*h];
     }
   }
   MORRF morrf(req.init.width, req.init.height, req.init.objective_number, req.init.number_of_trees,
