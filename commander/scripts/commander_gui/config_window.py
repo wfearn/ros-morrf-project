@@ -12,6 +12,7 @@ from publishers.commander_publisher import StartCommanderPublisher
 import json
 from error_popup.not_initialized import NotInitialized
 from publishers.image_publisher import StartImagePublisher
+from publishers.costmap_publisher import StartCostmapPublisher
 
 STARTX = 1000
 STARTY = 1000

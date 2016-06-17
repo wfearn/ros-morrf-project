@@ -10,13 +10,13 @@ class NotInitialized(QWidget):
     def __init__(self):
         QWidget.__init__(self)
 
-        self.setGeometry(800, 2200, 200, 50)
+        self.setGeometry(800, 1200, 300, 50)
 
         self.setWindowTitle("Initialize Morrf Variables")
 
         self.ok_btn = QtGui.QPushButton("Ok", self)
         self.ok_btn.clicked.connect(self.ok_clicked)
-        self.ok_btn.move(60, 5)
+        self.ok_btn.move(100, 5)
 
         self.show()
 
