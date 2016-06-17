@@ -135,7 +135,7 @@ class Config(QtGui.QMainWindow):
             print "Map height is: %s" % initializer.map.height
             print "Map width is: %s" % initializer.map.width
 
-            self.printImage(StartImagePublisher(initializer.map))
+            #self.printImage(StartImagePublisher(initializer.map))
 
             #Uncomment once MORRF has been fixed to allow row major 1d arrays
 
