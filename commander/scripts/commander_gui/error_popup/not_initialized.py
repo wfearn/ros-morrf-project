@@ -10,7 +10,7 @@ class NotInitialized(QWidget):
     def __init__(self):
         QWidget.__init__(self)
 
-        self.setGeometry(800, 1200, 200, 50)
+        self.setGeometry(800, 2200, 200, 50)
 
         self.setWindowTitle("Initialize Morrf Variables")
 

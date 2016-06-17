@@ -7,35 +7,29 @@
 #include "point.h"
 #include "morrf_ros/int16_image.h"
 #include "commander/get_cost_map.h"
+#include "array_converter.h"
 
 bool find_boundaries( morrf_ros::int16_image &img,  morrf_ros::int16_image &boundary_image) {
 
     std::vector< std::vector<Point> > obstacles;
 
-    std::cout << "find boundaries activated!" << std::endl;
-    std::cout << "Image name is " << img.name << std::endl;
-
-    //Multiplying int16_image has a single value representing a pixel
     int size = img.width * img.height;
-
-    std::cout << "size is " << size << std::endl;
-
-    uchar *img_array = new uchar[size];
-
-    std::cout << "Converting image array into mat usable array" << std::endl;
-
-    for(int i = 0; i < img.int_array.size(); i+=3) {
-
-        img_array[i] = img.int_array[i];
-    }
 
     obstacles.clear();
 
-    std::cout << "Creating mat object" << std::endl;
+    cv::Mat src = get_cv_image(img);
 
-    cv::Mat src(img.width, img.height, CV_8UC1, img_array);
+   // cv::Mat src(img.height, img.width, CV_8UC1, cv::Scalar(255));
 
-    //src = cv::imread(filename,  CV_LOAD_IMAGE_GRAYSCALE);
+   // for(int i = 0; i < img.height; i++) {
+   //     for(int j = 0; j < img.width; j++) {
+
+   //         int index = i * img.width + j;
+   //         src.at<uchar>(i, j) = img.int_array[index];
+   //     }
+   // }
+
+    imwrite("/home/wfearn/Pictures/matfile.png", src);
 
     cv::threshold(src, src, 200, 255, cv::THRESH_BINARY_INV);
     std::vector< std::vector<cv::Point> > contours;
@@ -61,25 +55,20 @@ bool find_boundaries( morrf_ros::int16_image &img,  morrf_ros::int16_image &boun
     boundary_image.name = "Boundary Image";
     boundary_image.width = img.width;
     boundary_image.height = img.height;
+
     for(unsigned int i=0; i<img.width*img.height; i++) {
       boundary_image.int_array.push_back(255);
     }
-    //boundary_image.int_array = std::vector<int16_t>(img.width*img.height, 255);
 
-    std::cout << "Changing boundary pixels black" << std::endl;
-
+  //Changing boundary points from obstacles vector to black pixels
     for(int i = 0; i < obstacles.size(); i++) {
         for(int j = 0; j < obstacles[i].size(); j++) {
 
-            //Appears that obstacles is indexed column major, so indexing is done accordingly
             int index = (obstacles[i][j].y * img.width) + obstacles[i][j].x;
 
             boundary_image.int_array[index] = 0;
         }
     }
-
-    std::cout << "Successfully made it out" << std::endl;
-    std::cout << "image name is " << boundary_image.name << std::endl;
 
     return true;
 }
