@@ -28,8 +28,6 @@ add_message_files (
   int16_image.msg
   morrf_init.msg
   multi_objective_path.msg
-  outputVals.msg
-  point_cost.msg
 )
 
 add_service_files(
