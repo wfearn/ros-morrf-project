@@ -1,6 +1,8 @@
 ﻿#ifndef GENERATOR_H
 #define GENERATOR_H
 #include <iostream>
+#include "ros/ros.h"
+#include "morrf_ros/int16_image.h"
 #include <list>
 #include <vector>
 #include <cmath>
@@ -44,21 +46,22 @@ private:
     list<Point> obsBoundaryPts;
     set<string> allObsPts, enemyPtsToIgnore;
 
-    void getAllObsPts(QImage image);
+    void getAllObsPts(morrf_ros::int16_image img);
+    void getImgBoundaryPts(morrf_ros::int16_image img);
     void getEnemyPtsToIgnore(list<Point> enemyPts);
+
     bool isOnLineSegment(Point a, Point b, Point c);
     void writeImage(string file, string output, vector<vector<double> > imgProbVals);
     void writeSafeImage(string file, string output, vector<vector<double> > imgProbVals);
     void resize(vector<vector<double> > & array);
-    vector<double> setEnemyProbArray(int i, bool blocked, double distance);
+    vector<double> setEnemyProbValues(bool isBlocked, double distance);
     bool isBlocked(Point imgPt, Point enemyPt);
     double getNearObsValue(Point pt);
     void clear();
 
 public:
     Generator();
-    void probOfSeenByEnemy(double delta, list<Point> enemyPts, string world_boundaries, string world_solids, string imageFile, string outputFile);
-    void getImgBoundaryPts(QImage image);
+    void probOfSeenByEnemy(list<Point> enemyPts, morrf_ros::int16_image worldImg, morrf_ros::int16_image boundaryImg, string imageFile, string outputFile);
     void probOfBeingNearToObstacle(double delta, string world_boundaries, string world_solids, list<Point> enemyPts, string safeObjImgFilename, string result);
 
 };

@@ -27,13 +27,18 @@ void print_array_image(morrf_ros::int16_image img, std::string filename) {
 }
 
 morrf_ros::int16_image get_int_array(cv::Mat img) {
-    morrf_ros::int16_image image;
 
-    for(int i = 0; i < img.rows; i++) {
-        for(int j = 0; j < img.cols; j++) {
+    morrf_ros::int16_image image;
+    image.name = "OpenCVImage";
+    image.width = img.cols;
+    image.height = img.rows;
+
+    for(int i = 0; i < image.height; i++) {
+        for(int j = 0; j < image.width; j++) {
 
             image.int_array.push_back(img.at<uchar>(i, j));
         }
     }
 
+    return image;
 }
