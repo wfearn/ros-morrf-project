@@ -1,22 +1,19 @@
 #!/usr/bin/env python
 
+from enum import Enum
+import os
 import sys
+
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-from enum import Enum
-import os
+
 from objective.objective import Objective
-from morrf_ros.msg import *
-from morrf_ros.srv import *
 from error_popup.no_path_error import NoPath
 
-IMAGE_FILE = "../../data/{}"
-SET_START = "Select Start Position"
-SET_GOAL = "Select Goal Position"
-SET_ENEMIES = "Select Enemy Positions"
-
-goal_file = "/home/wfearn/catkin_ws/src/ros-morrf-project/commander/data/objective_icons/goal.png"
+from morrf_ros.msg import *
+from morrf_ros.srv import *
+from geometry_msgs.msg import *
 
 class State(Enum):
     start = 0
@@ -28,7 +25,7 @@ class Image(QtGui.QMainWindow):
         super(Image, self).__init__()
 
         #keeps track of what point is
-        #being set ie. start point, goal point, the enemy locations, etc.  
+        #being set ie. start point, goal point, the enemy locations, etc.
         self.state = State.start
 
         self.image_name = image_name
@@ -62,8 +59,8 @@ class Image(QtGui.QMainWindow):
         palette.setBrush(QPalette.Background, QBrush(self.image))
         self.setPalette(palette)
 
-
-        self.pen = QtGui.QPen(QtCore.Qt.black, 5, QtCore.Qt.SolidLine)
+        self.black_pen = QtGui.QPen(QtCore.Qt.black, 5, QtCore.Qt.SolidLine)
+        self.green_pen = QtGui.QPen(QtCore.Qt.green, 5, QtCore.Qt.SolidLine)
 
         self.show()
 
@@ -129,7 +126,7 @@ class Image(QtGui.QMainWindow):
         painter.begin(self)
 
 
-        painter.setPen(self.pen)
+        painter.setPen(self.green_pen)
 
         for obj in self.objectives:
             img = obj.getImage()
@@ -137,9 +134,9 @@ class Image(QtGui.QMainWindow):
 
         if hasattr(self, 'morrf_paths'):
             for path in self.morrf_paths.paths:
-                #print "There are %s paths" % len(self.morrf_paths.paths)
                 for index in range(len(path.waypoints)):
-                    #print "In this path there are %s waypoints" % len(path.waypoints)
+
+                    #Inefficient to draw line between first point and itself
                     if index != 0:
                         point1 = QPoint(path.waypoints[index - 1].x, path.waypoints[index - 1].y)
                         point2 = QPoint(path.waypoints[index].x, path.waypoints[index].y)
@@ -172,7 +169,12 @@ class Image(QtGui.QMainWindow):
         enemies = []
         for obj in self.objectives:
             if obj.getObjectiveType() == "enemy":
-                enemies.append(obj.getPosition())
+
+                p = Pose2D()
+                p.x = obj.getPosition()[0]
+                p.y = obj.getPosition()[1]
+
+                enemies.append(p)
 
         return enemies
 
@@ -199,3 +201,4 @@ class Image(QtGui.QMainWindow):
     def delMorrfPaths(self):
         if hasattr(self, 'morrf_paths'):
             delattr(self, 'morrf_paths')
+            self.update()

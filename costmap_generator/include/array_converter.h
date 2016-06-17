@@ -25,3 +25,15 @@ void print_array_image(morrf_ros::int16_image img, std::string filename) {
 
     imwrite(filename, get_cv_image(img));
 }
+
+morrf_ros::int16_image get_int_array(cv::Mat img) {
+    morrf_ros::int16_image image;
+
+    for(int i = 0; i < img.rows; i++) {
+        for(int j = 0; j < img.cols; j++) {
+
+            image.int_array.push_back(img.at<uchar>(i, j));
+        }
+    }
+
+}

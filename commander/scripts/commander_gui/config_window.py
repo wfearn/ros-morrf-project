@@ -1,17 +1,23 @@
 import sys
 import rospy
+
 from PyQt4 import QtGui, QtCore
-from image_window import Image
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
+
 from image_window import Image
+from image_window import Image
+
 from morrf_ros.msg import *
 import cv2
 import numpy as np
-from publishers.commander_publisher import StartCommanderPublisher
 import json
+
 from error_popup.not_initialized import NotInitialized
+from error_popup.no_image_selected import NoImage
+
 from publishers.image_publisher import StartImagePublisher
+from publishers.commander_publisher import StartCommanderPublisher
 from publishers.costmap_publisher import StartCostmapPublisher
 
 STARTX = 1000
@@ -41,6 +47,11 @@ class Config(QtGui.QMainWindow):
         launch_button = QtGui.QPushButton("Launch MORRF", self)
         launch_button.resize(250, 50)
         launch_button.clicked.connect(self.launch_morrf)
+
+        self.pick_paths = QtGui.QPushButton("Pick path", self)
+        self.pick_paths.resize(250, 50)
+        self.pick_paths.clicked.connect(self.sendToPathPicker)
+        self.pick_paths.setEnabled(False)
 
         self.iterations = QtGui.QLineEdit()
         self.iterations.setFrame(True)
@@ -88,6 +99,7 @@ class Config(QtGui.QMainWindow):
         main_layout = QtGui.QVBoxLayout()
         main_layout.addLayout(layout)
         main_layout.addWidget(launch_button)
+        main_layout.addWidget(self.pick_paths)
 
         self.win = QtGui.QWidget(self)
         self.win.setLayout(main_layout)
@@ -97,12 +109,13 @@ class Config(QtGui.QMainWindow):
 
     def launch_morrf(self):
         if not hasattr(self, "image_window"):
-            print "Morrf parameters not completed, need to initialize image"
+            self.error = NoImage()
 
         elif self.is_completed() and self.image_window.isCompleted():
 
             #Deinitializing variable to prevent errors
             self.image_window.delMorrfPaths()
+            self.pick_paths.setEnabled(True)
 
             initializer = morrf_init()
 
@@ -123,21 +136,20 @@ class Config(QtGui.QMainWindow):
             initializer.width = initializer.map.width
             initializer.height = initializer.map.height
 
-            print "Goal is: %s, %s" % (initializer.goal.x, initializer.goal.y)
-            print "Start is: %s, %s" % (initializer.start.x, initializer.start.y)
-            print "Iterations are: %s" % (initializer.number_of_iterations)
-            print "Segment Length is: %s" % (initializer.segment_length)
-            print "Number of trees is: %s" % (initializer.number_of_trees)
-            print "Objective Number is: %s" % (initializer.objective_number)
-            print "Minimum distance enabled is: %s" % (initializer.minimum_distance_enabled)
-            print "Method type is: %s" % self.method_box.currentText()
-            print "Map image name is: %s" % initializer.map.name
-            print "Map height is: %s" % initializer.map.height
-            print "Map width is: %s" % initializer.map.width
-
+#            print "Goal is: %s, %s" % (initializer.goal.x, initializer.goal.y)
+#            print "Start is: %s, %s" % (initializer.start.x, initializer.start.y)
+#            print "Iterations are: %s" % (initializer.number_of_iterations)
+#            print "Segment Length is: %s" % (initializer.segment_length)
+#            print "Number of trees is: %s" % (initializer.number_of_trees)
+#            print "Objective Number is: %s" % (initializer.objective_number)
+#            print "Minimum distance enabled is: %s" % (initializer.minimum_distance_enabled)
+#            print "Method type is: %s" % self.method_box.currentText()
+#            print "Map image name is: %s" % initializer.map.name
+#            print "Map height is: %s" % initializer.map.height
+#            print "Map width is: %s" % initializer.map.width
+#
             #self.printImage(StartImagePublisher(initializer.map))
-
-            #Uncomment once MORRF has been fixed to allow row major 1d arrays
+            initializer.cost_maps = StartCostmapPublisher(initializer.map, self.stealth.isChecked(),                               self.safe.isChecked(), self.image_window.getEnemyLocations())
 
             response = StartCommanderPublisher(initializer)
 
@@ -148,13 +160,12 @@ class Config(QtGui.QMainWindow):
         else:
             self.error = NotInitialized()
 
+    def sendToPathPicker(self):
+        pass
+
     def printImage(self, image):
 
         test = QImage(image.width, image.height, QImage.Format_RGB16)
-
-        print "image width is %s" % image.width
-        print "image height is %s" % image.height
-        print "int array size is %s" % len(image.int_array)
 
         for i in range(image.height):
             for j in range(image.width):
@@ -215,9 +226,7 @@ class Config(QtGui.QMainWindow):
             img = cv2.imread(str(self.image_name))
 
             image.width = img.shape[1]
-            print "Image width is %s" % image.width
             image.height = img.shape[0]
-            print "Image height is %s" % image.height
             image.name = str(self.image_name)
 
             for j in range(image.height):
@@ -245,7 +254,7 @@ class Config(QtGui.QMainWindow):
 
         json_output["enemies"] = []
         for pos in self.image_window.getEnemyLocations():
-            json_output["enemies"].append(str(pos[0]) + "," + str(pos[1]))
+            json_output["enemies"].append(str(pos.x) + "," + str(pos.y))
 
         json_output["start"] = str(start[0]) + "," + str(start[1])
         json_output["goal"] = str(goal[0]) + "," + str(goal[1])

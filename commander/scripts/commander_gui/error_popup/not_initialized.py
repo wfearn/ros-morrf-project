@@ -16,7 +16,7 @@ class NotInitialized(QWidget):
 
         self.ok_btn = QtGui.QPushButton("Ok", self)
         self.ok_btn.clicked.connect(self.ok_clicked)
-        self.ok_btn.move(100, 5)
+        self.ok_btn.move(110, 5)
 
         self.show()
 
