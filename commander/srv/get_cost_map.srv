@@ -4,7 +4,7 @@ bool safe
 geometry_msgs/Pose2D[] enemyPts
 ---
 morrf_ros/int16_image[] cost_maps
-morrf_ros/outputVals[] cost_values
+outputVals[] cost_values
 
 
 
