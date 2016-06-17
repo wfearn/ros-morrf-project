@@ -24,6 +24,7 @@ const double MIN_GRAYSCALE_VALUE = 10;
 const double MAX_GRAYSCALE_VALUE = 255;
 const QColor WHITE = QColor(Qt::white);
 const QColor BLACK = QColor(Qt::black);
+// const double delta = 5.0;
 
 class Generator
 {

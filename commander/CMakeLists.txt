@@ -71,7 +71,7 @@ find_package(catkin REQUIRED COMPONENTS
    morrf_ros
    std_msgs  # Or other packages containing msgs
    geometry_msgs
- )
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
