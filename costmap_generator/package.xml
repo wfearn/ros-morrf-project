@@ -45,8 +45,8 @@
   <build_depend>message_generation</build_depend>
   <build_depend>morrf_ros</build_depend>
   <build_depend>geometry_msgs</build_depend>
-  <build_depend>commander</build_depend>
-  <run_depend>commander</run_depend>
+  <!-- <build_depend>commander</build_depend>
+  <run_depend>commander</run_depend> -->
   <run_depend>geometry_msgs</run_depend>
   <run_depend>message_runtime</run_depend>
   <run_depend>roscpp</run_depend>

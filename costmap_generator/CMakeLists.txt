@@ -18,7 +18,7 @@ endif()
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
-  commander
+# commander
   message_generation
   geometry_msgs
   morrf_ros
@@ -27,7 +27,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## System dependencies are found with CMake's conventions
 find_package(OpenCV REQUIRED)
 find_package(Qt4 REQUIRED COMPONENTS QTCORE QTGUI)
-if(NOT Qt4_FOUND) 
+if(NOT Qt4_FOUND)
   message("Qt4 not found")
 endif()
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -61,15 +61,17 @@ endif()
 
 #Generate messages in the 'msg' folder
 # add_message_files(
-# FILES
-#  timnah'smsg!.msg
-# )
+#   FILES
+#   outputVals.msg
+#   point_cost.msg
+#
+#)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
 #   FILES
-#  commander.srv
-# )
+#  get_cost_map.srv
+#)
 #
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -79,12 +81,12 @@ endif()
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
-#   geometry_msgs
+ generate_messages(
+   DEPENDENCIES
+   std_msgs  # Or other packages containing msgs
+   geometry_msgs
 #   commander
-# )
+ )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##

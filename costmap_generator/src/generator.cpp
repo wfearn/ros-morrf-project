@@ -96,7 +96,7 @@ void Generator::probOfSeenByEnemy(double d, list<Point> enemyPts, string world_b
 }
 
 
-int** Generator::writeImage(string outputFile, string image, vector<vector<double> > imgProbVals) {
+void Generator::writeImage(string outputFile, string image, vector<vector<double> > imgProbVals) {
 
     double origRange = maxProbOfSeenVal - minProbOfSeenVal;
     double newRange = MAX_GRAYSCALE_VALUE - MIN_GRAYSCALE_VALUE;
