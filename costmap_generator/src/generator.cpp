@@ -30,15 +30,11 @@ bool Generator::isOnLineSegment(Point a, Point b, Point c){
   return false;
 }
 
-void Generator::probOfSeenByEnemy(list<Point> enemyPts, morrf_ros::int16_image worldImg, morrf_ros::int16_image boundaryImg, string imageFile, string outputFile){
-
-    // QImage worldBoundariesImage;
-    // worldBoundariesImage.load(QString::fromStdString(world_boundaries));
+void Generator::probOfSeenByEnemy(list<Point> enemyPts, morrf_ros::int16_image worldImg, morrf_ros::int16_image boundaryImg, morrf_ros::int16_image &cost_map, commander::outputVals &ov){
 
     width = worldImg.width; //width of the world_boundaries image
     height = worldImg.height; //height of the world_boundaries image
 
-    // delta = d;
     diag_distance = sqrt(pow(width, 2) + pow(height, 2));
     slope = 1/(delta - diag_distance);
     y_intercept = (-1) * (diag_distance * slope);
@@ -46,7 +42,6 @@ void Generator::probOfSeenByEnemy(list<Point> enemyPts, morrf_ros::int16_image w
     //getting all the points
     getAllObsPts(worldImg);
     getImgBoundaryPts(boundaryImg);
-
     getEnemyPtsToIgnore(enemyPts);
 
     minProbOfSeenVal = 2.0; // some reason for that
@@ -89,46 +84,44 @@ void Generator::probOfSeenByEnemy(list<Point> enemyPts, morrf_ros::int16_image w
                 minProbOfSeenVal = imgProbVals[y][x];
         }
     }
-
-    writeImage(outputFile, imageFile, imgProbVals);
+    writeImage(cost_map, ov, imgProbVals);
 }
 
 
-void Generator::writeImage(string outputFile, string image, vector<vector<double> > imgProbVals) {
+void Generator::writeImage(morrf_ros::int16_image &cost_map, commander::outputVals &ov, vector<vector<double> > imgProbVals) {
 
     double origRange = maxProbOfSeenVal - minProbOfSeenVal;
     double newRange = MAX_GRAYSCALE_VALUE - MIN_GRAYSCALE_VALUE;
 
-    QImage resultImage = QImage(width, height, QImage::Format_ARGB32);
-    resultImage.fill(WHITE); //initialize the entire image with white
-
-    // morrf_ros::int16_image resultImage;
-
-
-    ofstream out(outputFile);
-
+    // QImage resultImage = QImage(width, height, QImage::Format_ARGB32);
+    // resultImage.fill(WHITE); //initialize the entire image with white
+    //
+    // ofstream out(outputFile);
+//now you have to fix the output vals file
     for(int x = 0; x < width; x++) {
         for(int y = 0; y < height; y++) {
 
             stringstream ss;
             ss << x << " " << y;
 
-            if(allObsPts.count(ss.str()) || enemyPtsToIgnore.count(ss.str()))
+            if(allObsPts.count(ss.str()) || enemyPtsToIgnore.count(ss.str())) {
+                cost_map.int_array.push_back(BLACK.rgb());
                 continue;
+            }
             imgProbVals[y][x] = (((imgProbVals[y][x] - minProbOfSeenVal) * newRange)/origRange) + MIN_GRAYSCALE_VALUE;
 
             if(imgProbVals[y][x] < 255) {
                 QRgb value = qRgb((int)imgProbVals[y][x], (int)imgProbVals[y][x], (int)imgProbVals[y][x]);
-                resultImage.setPixel(x, y, value);
-
-                out << ss.str() << "\t" << (ceil(imgProbVals[y][x]));
-                out << endl;
+                // resultImage.setPixel(x, y, value);
+                cost_map.int_array.push_back(value);
+                // out << ss.str() << "\t" << (ceil(imgProbVals[y][x]));
+                // out << endl;
             }
         }
     }
 
-    out.close();
-    resultImage.save(QString::fromStdString(image));
+    // out.close();
+    // resultImage.save(QString::fromStdString(image));
 }
 
 void Generator::resize(vector<vector<double>> & array) {

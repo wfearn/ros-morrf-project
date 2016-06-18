@@ -3,6 +3,8 @@
 #include <iostream>
 #include "ros/ros.h"
 #include "morrf_ros/int16_image.h"
+#include "commander/outputVals.h"
+#include "commander/point_cost.h"
 #include <list>
 #include <vector>
 #include <cmath>
@@ -51,7 +53,7 @@ private:
     void getEnemyPtsToIgnore(list<Point> enemyPts);
 
     bool isOnLineSegment(Point a, Point b, Point c);
-    void writeImage(string file, string output, vector<vector<double> > imgProbVals);
+    void writeImage(morrf_ros::int16_image &cost_map, commander::outputVals &ov, vector<vector<double> > imgProbVals);
     void writeSafeImage(string file, string output, vector<vector<double> > imgProbVals);
     void resize(vector<vector<double> > & array);
     vector<double> setEnemyProbValues(bool isBlocked, double distance);
@@ -61,7 +63,7 @@ private:
 
 public:
     Generator();
-    void probOfSeenByEnemy(list<Point> enemyPts, morrf_ros::int16_image worldImg, morrf_ros::int16_image boundaryImg, string imageFile, string outputFile);
+    void probOfSeenByEnemy(list<Point> enemyPts, morrf_ros::int16_image worldImg, morrf_ros::int16_image boundaryImg, morrf_ros::int16_image &cost_map, commander::outputVals &ov);
     void probOfBeingNearToObstacle(double delta, string world_boundaries, string world_solids, list<Point> enemyPts, string safeObjImgFilename, string result);
 
 };

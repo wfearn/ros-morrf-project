@@ -21,7 +21,11 @@ bool generate_costmap(commander::get_cost_map::Request &req,
 
             if(req.safe == 1)
                 std::cout << "Safety active " << std::endl;
+                // morrf_ros::int16_image resultImage;
+                // commander::outputVals resultValsl;
+                // generator.probOfSeenByEnemy(world_solids, boun, resultImage, resultVals);
                 //res.cost_maps.push_back(probOfBeingNearToObstacle());
+                //res.cost_values.push_back
 
             //list<Point> enemies;
 
