@@ -184,15 +184,21 @@ void Generator::getEnemyPtsToIgnore(list<Point> enemyPts) {
 
 void Generator::getAllObsPts(morrf_ros::int16_image img) {
 
-    for(int i = 0; i < width; i++) {
-        for(int j = 0; j < height; j++) {
+    for(int i = 0; i < height; i++) {
+        for(int j = 0; j < width; j++) {
 
-          int index = i * height + j;
+          int index = i * width + j;
+
           int pixel_color  = img.int_array[index];
-          if(pixel_color == BLACK.rgb()) {
+
+          if(pixel_color == 0) {
+
+             std::cout << "pixel is black: " << pixel_color << std::endl;
+
              stringstream ss;
-             ss << i << " " << j;
+             ss << j << " " << i;
              allObsPts.insert(ss.str());
+
           }
         }
     }
@@ -200,13 +206,13 @@ void Generator::getAllObsPts(morrf_ros::int16_image img) {
 
 void Generator::getImgBoundaryPts(morrf_ros::int16_image img) {
 
-    for(int i = 0; i < width; i++) {
-        for(int j = 0; j < height; j++) {
+    for(int i = 0; i < height; i++) {
+        for(int j = 0; j < width; j++) {
 
-            int index = i * height + j;
+            int index = i * width + j;
             int pixel_color  = img.int_array[index];
-            if(pixel_color == BLACK.rgb()) {
-                obsBoundaryPts.push_back(Point(i,j));
+            if(pixel_color == 0) {
+                obsBoundaryPts.push_back(Point(j,i));
             }
         }
     }

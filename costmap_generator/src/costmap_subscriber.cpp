@@ -36,7 +36,7 @@ bool generate_costmap(commander::get_cost_map::Request &req,
 
             //req.map // is of type int16_image, needs to be converted to QImage
             //
-            if(req.stealth == 1)
+            if(req.stealth == 1) {
                 std::cout << "Stealth active " << std::endl;
 
                 morrf_ros::int16_image cost;
@@ -46,14 +46,16 @@ bool generate_costmap(commander::get_cost_map::Request &req,
 
                 print_array_image(cost, "/home/wfearn/Pictures/stealth_cost.png");
                 //res.cost_maps.push_back(probOfSeenByEnemy());
+            }
 
-            if(req.safe == 1)
+            if(req.safe == 1) {
                 std::cout << "Safety active " << std::endl;
                 // morrf_ros::int16_image resultImage;
                 // commander::outputVals resultValsl;
                 // generator.probOfSeenByEnemy(world_solids, boun, resultImage, resultVals);
                 //res.cost_maps.push_back(probOfBeingNearToObstacle());
                 //res.cost_values.push_back
+            }
 
             //list<Point> enemies;
 
