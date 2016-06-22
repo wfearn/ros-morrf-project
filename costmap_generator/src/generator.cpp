@@ -52,8 +52,10 @@ void Generator::probOfSeenByEnemy(list<Point> enemyPts, morrf_ros::int16_image w
 
     int numOfEnemies = enemyPts.size();
 
-    for(int x = 0; x < width; x++) {
-        for(int y = 0; y < height; y++) {
+    std::cout << "Entering first nested for loops" << std::endl;
+
+    for(int y = 0; y < height; y++) {
+        for(int x = 0; x < width; x++) {
 
             string s = to_string(x) + " " + to_string(y);
             if(allObsPts.count(s) || enemyPtsToIgnore.count(s))
@@ -78,12 +80,15 @@ void Generator::probOfSeenByEnemy(list<Point> enemyPts, morrf_ros::int16_image w
             }
             imgProbVals[y][x] = 1 - allFalseProduct;
 
+
             if(imgProbVals[y][x] > maxProbOfSeenVal)
                 maxProbOfSeenVal = imgProbVals[y][x];
             if(imgProbVals[y][x] < minProbOfSeenVal)
                 minProbOfSeenVal = imgProbVals[y][x];
         }
     }
+
+    std::cout << "Leaving nested for loops" << std::endl;
     writeImage(cost_map, ov, imgProbVals);
 }
 
@@ -93,13 +98,17 @@ void Generator::writeImage(morrf_ros::int16_image &cost_map, commander::outputVa
     double origRange = maxProbOfSeenVal - minProbOfSeenVal;
     double newRange = MAX_GRAYSCALE_VALUE - MIN_GRAYSCALE_VALUE;
 
+    cost_map.name = "Stealthy Costmap Image";
+    cost_map.width = width;
+    cost_map.height = height;
+
     // QImage resultImage = QImage(width, height, QImage::Format_ARGB32);
     // resultImage.fill(WHITE); //initialize the entire image with white
     //
     // ofstream out(outputFile);
 //now you have to fix the output vals file
-    for(int x = 0; x < width; x++) {
-        for(int y = 0; y < height; y++) {
+    for(int y = 0; y < height; y++) {
+        for(int x = 0; x < width; x++) {
 
             stringstream ss;
             ss << x << " " << y;
