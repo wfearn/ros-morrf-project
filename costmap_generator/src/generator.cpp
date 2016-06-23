@@ -51,8 +51,8 @@ void Generator::probOfSeenByEnemy(list<Point> enemyPts, morrf_ros::int16_image w
     resize(imgProbVals);
 
     int numOfEnemies = enemyPts.size();
-    cout << "Enmies: " << numOfEnemies << endl;	
-    std::cout << "Entering first nested for loops" << std::endl;
+    //cout << "Enmies: " << numOfEnemies << endl;	
+    //std::cout << "Entering first nested for loops" << std::endl;
 
     for(int y = 0; y < height; y++) {
         for(int x = 0; x < width; x++) {
@@ -91,7 +91,7 @@ void Generator::probOfSeenByEnemy(list<Point> enemyPts, morrf_ros::int16_image w
         }
     }
 
-    std::cout << "Leaving nested for loops" << std::endl;
+    //std::cout << "Leaving nested for loops" << std::endl;
     writeImage(cost_map, ov, imgProbVals);
 }
 
@@ -105,12 +105,9 @@ void Generator::writeImage(morrf_ros::int16_image &cost_map, commander::outputVa
     cost_map.width = width;
     cost_map.height = height;
 
-    // QImage resultImage = QImage(width, height, QImage::Format_ARGB32);
-    // resultImage.fill(WHITE); //initialize the entire image with white
-    //
-    // ofstream out(outputFile);
-    commander::point_cost val;
-//now you have to fix the output vals file
+    ov.name = "Stealth Text file";
+   
+	//now you have to fix the output vals file
     for(int y = 0; y < height; y++) {
         for(int x = 0; x < width; x++) {
 
@@ -124,19 +121,15 @@ void Generator::writeImage(morrf_ros::int16_image &cost_map, commander::outputVa
             imgProbVals[y][x] = (((imgProbVals[y][x] - minProbOfSeenVal) * newRange)/origRange) + MIN_GRAYSCALE_VALUE;
 
             cost_map.int_array.push_back(ceil(imgProbVals[y][x]));
-            
-	    //if(imgProbVals[y][x] < 255) {
-                //QRgb value = qRgb((int)imgProbVals[y][x], (int)imgProbVals[y][x], (int)imgProbVals[y][x]);
-                // resultImage.setPixel(x, y, value);
-                //cost_map.int_array.push_back(ceil(imgProbVals[y][x]));
-                // out << ss.str() << "\t" << (ceil(imgProbVals[y][x]));
-                // out << endl;
-            //}
-        }
+           
+	    commander::point_cost val;
+ 	    val.position.x = x;
+	    val.position.y = y;
+	    val.cost = ceil(imgProbVals[y][x]);
+	    
+	    ov.vals.push_back(val);		
+	}
     }
-
-    // out.close();
-    // resultImage.save(QString::fromStdString(image));
 }
 
 void Generator::resize(vector<vector<double>> & array) {
@@ -235,52 +228,51 @@ void Generator::clear() {
 }
 
 void Generator::probOfBeingNearToObstacle(list<Point> enemyPts, morrf_ros::int16_image worldImg, morrf_ros::int16_image boundaryImg, morrf_ros::int16_image &cost_map, commander::outputVals &ov){
-//
-//     clear();
-//
-//     QImage worldBoundariesImage;
-//     worldBoundariesImage.load(QString::fromStdString(world_boundaries));
-//
-//     QImage worldSolidsImage;
-//     worldSolidsImage.load(QString::fromStdString(world_solids));
-//
-//     width = worldBoundariesImage.width();
-//     height = worldBoundariesImage.height();
-//     delta = d;
-//
-//     getImgBoundaryPts(worldBoundariesImage);
-//     getAllObsPts(worldSolidsImage);
-//     getEnemyPtsToIgnore(enemyPts);
-//
-//     diag_distance = sqrt(pow(width, 2) + pow(height, 2));
-//     double inv_diag_distance = 1 / diag_distance;
-//
-//     minProbOfNearness = 1;
-//     maxProbOfNearness = inv_diag_distance;
-//
-//     vector<vector<double> > imgProbVals;
-//     resize(imgProbVals);
-//
-//     for(int x = 0; x < width; x++) {
-//         for(int y = 0; y < height; y++) {
-//
-//             stringstream ss;
-//             ss << x << " " << y;
-//
-//             if(allObsPts.count(ss.str()) || enemyPtsToIgnore.count(ss.str()))
-//                 continue;
-//
-//             imgProbVals[y][x] = getNearObsValue(Point(x, y));
-//
-//             if(imgProbVals[y][x] > maxProbOfNearness)
-//                 maxProbOfNearness = imgProbVals[y][x];
-//
-//             if(imgProbVals[y][x] < minProbOfNearness)
-//                 minProbOfNearness = imgProbVals[y][x];
-//         }
-//     }
-//
-//     writeSafeImage(imageFilename, outputFilename, imgProbVals);
+
+    // clear();
+
+    // QImage worldBoundariesImage;
+    // worldBoundariesImage.load(QString::fromStdString(world_boundaries));
+
+    // QImage worldSolidsImage;
+    // worldSolidsImage.load(QString::fromStdString(world_solids));
+
+    // width = worldImg.width;
+    // height = worldImg.height;
+
+    // getImgBoundaryPts(worldImg);
+    // getAllObsPts(worldSolidsImage);
+    // getEnemyPtsToIgnore(enemyPts);
+
+    // diag_distance = sqrt(pow(width, 2) + pow(height, 2));
+    // double inv_diag_distance = 1 / diag_distance;
+
+    // minProbOfNearness = 1;
+    // maxProbOfNearness = inv_diag_distance;
+
+    // vector<vector<double> > imgProbVals;
+    // resize(imgProbVals);
+
+    // for(int x = 0; x < width; x++) {
+    //     for(int y = 0; y < height; y++) {
+
+    //         stringstream ss;
+    //         ss << x << " " << y;
+
+    //         if(allObsPts.count(ss.str()) || enemyPtsToIgnore.count(ss.str()))
+    //             continue;
+
+    //         imgProbVals[y][x] = getNearObsValue(Point(x, y));
+
+    //         if(imgProbVals[y][x] > maxProbOfNearness)
+    //             maxProbOfNearness = imgProbVals[y][x];
+
+    //         if(imgProbVals[y][x] < minProbOfNearness)
+    //             minProbOfNearness = imgProbVals[y][x];
+    //     }
+    // }
+
+    // writeSafeImage(imageFilename, outputFilename, imgProbVals);
 }
 //
 double Generator::getNearObsValue(Point pt) {
