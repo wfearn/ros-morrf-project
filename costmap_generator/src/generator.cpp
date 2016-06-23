@@ -59,13 +59,13 @@ void Generator::probOfSeenByEnemy(list<Point> enemyPts, morrf_ros::int16_image w
 
             string s = to_string(x) + " " + to_string(y);
             if(allObsPts.count(s) || enemyPtsToIgnore.count(s))
-             {
-		   if(enemyPtsToIgnore.count(s))
-			std::cout << s << endl;
-		   continue;
-	     }
+            {
+               continue;
+            }
+
             double enemyProbArray[numOfEnemies][2];
             int i = 0;
+
             for(Point enemyPt : enemyPts) {
 
                 bool blocked = isBlocked(Point(x, y), enemyPt);
