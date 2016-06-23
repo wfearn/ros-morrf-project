@@ -54,7 +54,7 @@ class Generator
 
         bool isOnLineSegment(Point a, Point b, Point c);
         void writeImage(morrf_ros::int16_image &cost_map, commander::outputVals &ov, vector<vector<double> > imgProbVals);
-        void writeSafeImage(string file, string output, vector<vector<double> > imgProbVals);
+        void writeSafeImage(morrf_ros::int16_image &cost_map, commander::outputVals &ov, vector<vector<double> > imgProbVals);
         void resize(vector<vector<double> > & array);
         vector<double> setEnemyProbValues(bool isBlocked, double distance);
         bool isBlocked(Point imgPt, Point enemyPt);

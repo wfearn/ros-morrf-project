@@ -226,7 +226,8 @@ void Generator::clear() {
 
 void Generator::probOfBeingNearToObstacle(list<Point> enemyPts, morrf_ros::int16_image worldImg, morrf_ros::int16_image boundaryImg, morrf_ros::int16_image &cost_map, commander::outputVals &ov){
 
-    // clear();
+    //cout << "function" << endl;
+	//clear();
 
     // QImage worldBoundariesImage;
     // worldBoundariesImage.load(QString::fromStdString(world_boundaries));
@@ -234,105 +235,112 @@ void Generator::probOfBeingNearToObstacle(list<Point> enemyPts, morrf_ros::int16
     // QImage worldSolidsImage;
     // worldSolidsImage.load(QString::fromStdString(world_solids));
 
-    // width = worldImg.width;
-    // height = worldImg.height;
+     width = worldImg.width;
+     height = worldImg.height;
 
-    // getImgBoundaryPts(worldImg);
-    // getAllObsPts(worldSolidsImage);
-    // getEnemyPtsToIgnore(enemyPts);
+     getImgBoundaryPts(worldImg);
+     getAllObsPts(boundaryImg);
+     getEnemyPtsToIgnore(enemyPts);
 
-    // diag_distance = sqrt(pow(width, 2) + pow(height, 2));
-    // double inv_diag_distance = 1 / diag_distance;
+     diag_distance = sqrt(pow(width, 2) + pow(height, 2));
+     double inv_diag_distance = 1 / diag_distance;
 
-    // minProbOfNearness = 1;
-    // maxProbOfNearness = inv_diag_distance;
+     minProbOfNearness = 1;
+     maxProbOfNearness = inv_diag_distance;
 
-    // vector<vector<double> > imgProbVals;
-    // resize(imgProbVals);
+     vector<vector<double> > imgProbVals;
+     resize(imgProbVals);
 
-    // for(int x = 0; x < width; x++) {
-    //     for(int y = 0; y < height; y++) {
+     for(int y = 0; y < height; y++) {
+         for(int x = 0; x < width; x++) {
 
-    //         stringstream ss;
-    //         ss << x << " " << y;
+             stringstream ss;
+             ss << x << " " << y;
 
-    //         if(allObsPts.count(ss.str()) || enemyPtsToIgnore.count(ss.str()))
-    //             continue;
+             if(allObsPts.count(ss.str()) || enemyPtsToIgnore.count(ss.str()))
+                 continue;
 
-    //         imgProbVals[y][x] = getNearObsValue(Point(x, y));
+             imgProbVals[y][x] = getNearObsValue(Point(x, y));
 
-    //         if(imgProbVals[y][x] > maxProbOfNearness)
-    //             maxProbOfNearness = imgProbVals[y][x];
+             if(imgProbVals[y][x] > maxProbOfNearness)
+                 maxProbOfNearness = imgProbVals[y][x];
 
-    //         if(imgProbVals[y][x] < minProbOfNearness)
-    //             minProbOfNearness = imgProbVals[y][x];
-    //     }
-    // }
+             if(imgProbVals[y][x] < minProbOfNearness)
+                 minProbOfNearness = imgProbVals[y][x];
+         }
+     }
 
-    // writeSafeImage(imageFilename, outputFilename, imgProbVals);
+     writeSafeImage(cost_map, ov, imgProbVals);
 }
-//
+
 double Generator::getNearObsValue(Point pt) {
-//
-//     double nearObsValue = 0;
-//
-//     for(Point obsPt : obsBoundaryPts) {
-//
-//         double distance = sqrt(pow(pt.x - obsPt.x, 2) + pow(pt.y - obsPt.y, 2));
-//         double temp_inv_distance = 0;
-//
-//         if(distance <= delta)
-//             temp_inv_distance = 1/delta;
-//         else
-//             temp_inv_distance = 1/distance;
-//
-//         if(temp_inv_distance > nearObsValue)
-//             nearObsValue = temp_inv_distance;
-//     }
-//
-//     return nearObsValue;
+
+     double nearObsValue = 0;
+
+     for(Point obsPt : obsBoundaryPts) {
+
+
+         double distance = sqrt(pow(pt.x - obsPt.x, 2) + pow(pt.y - obsPt.y, 2));
+         double temp_inv_distance = 0;
+
+         if(distance <= delta)
+             temp_inv_distance = 1/delta;
+         else
+             temp_inv_distance = 1/distance;
+
+         if(temp_inv_distance > nearObsValue)
+             nearObsValue = temp_inv_distance;
+     }
+
+     return nearObsValue;
  }
 
-void Generator::writeSafeImage(string imageFilename, string outputFilename, vector<vector<double> > imgProbVals) {
+void Generator::writeSafeImage(morrf_ros::int16_image &cost_map, commander::outputVals &ov, vector<vector<double> > imgProbVals) {
 
     //morrf_ros::int16_image im;
-    //im.name = "safe cost map"
-    //im.width = width;
-    //im.height = height;
-    //im.int_array = std::vector<int16_t> (img.width * img.height, 255);
+    cost_map.name = "safe cost map";
+    cost_map.width = width;
+    cost_map.height = height;
+    //cost_map.int_array = std::vector<int16_t> (img.width * img.height, 255);
+
+    ov.name = "safe output vals";    
 
     double origRange = maxProbOfNearness - minProbOfNearness;
     double newRange = MAX_GRAYSCALE_VALUE - MIN_GRAYSCALE_VALUE;
 
-    QImage resultImage = QImage(width, height, QImage::Format_ARGB32);
-    resultImage.fill(WHITE); //initialize the entire image with white
+    //QImage resultImage = QImage(width, height, QImage::Format_ARGB32);
+    //resultImage.fill(WHITE); //initialize the entire image with white
 
-    ofstream out(outputFilename);
+    //ofstream out(outputFilename);
 
-    for(int x = 0; x < width; x++) {
-        for(int y = 0; y < height; y++) {
+    for(int y = 0; y < height; y++) {
+        for(int x = 0; x < width; x++) {
 
             stringstream ss;
             ss << x << " " << y;
-
             if(allObsPts.count(ss.str()) || enemyPtsToIgnore.count(ss.str())) {
 
                 //cout << "The new range here is: " << (int) newRange << endl;
-                QRgb value = qRgb((int)newRange, (int)newRange, (int)newRange);
-                resultImage.setPixel(x, y, value);
+                //QRgb value = qRgb((int)newRange, (int)newRange, (int)newRange);
+		cost_map.int_array.push_back((int)newRange);
+		//resultImage.setPixel(x, y, value);
                 continue;
             }
 
             imgProbVals[y][x] = (((imgProbVals[y][x] - minProbOfNearness) * newRange)/origRange) + MIN_GRAYSCALE_VALUE;
-            QRgb value = qRgb((int)imgProbVals[y][x], (int)imgProbVals[y][x], (int)imgProbVals[y][x]);
+            //QRgb value = qRgb((int)imgProbVals[y][x], (int)imgProbVals[y][x], (int)imgProbVals[y][x]);
 	    //im.int_array =
-            resultImage.setPixel(x, y, value);
+            //resultImage.setPixel(x, y, value);
+	    cost_map.int_array.push_back(ceil(imgProbVals[y][x]));
+           
+ 	    commander::point_cost val;
+	    val.position.x = x;
+	    val.position.y = y;
+	    val.cost = ceil(imgProbVals[y][x]);
 
-            out << ss.str() << "\t" << ceil(imgProbVals[y][x]);
-            out << endl;
+	    ov.vals.push_back(val);
+	   // out << ss.str() << "\t" << ceil(imgProbVals[y][x]);
+           // out << endl;
         }
     }
-
-    out.close();
-    resultImage.save(QString::fromStdString(imageFilename));
 }
