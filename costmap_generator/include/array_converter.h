@@ -51,7 +51,7 @@ morrf_ros::int16_image get_int_array(cv::Mat img) {
     return image;
 }
 
-void write_output_vals(commander::outputVals ov, string filename) {
+void write_output_vals(commander::outputVals ov, std::string filename) {
 
     std::ofstream f;
 
