@@ -64,7 +64,7 @@ class Generator
     public:
         Generator();
         void probOfSeenByEnemy(list<Point> enemyPts, morrf_ros::int16_image worldImg, morrf_ros::int16_image boundaryImg, morrf_ros::int16_image &cost_map, commander::outputVals &ov);
-        void probOfBeingNearToObstacle(double delta, string world_boundaries, string world_solids, list<Point> enemyPts, string safeObjImgFilename, string result);
+        void probOfBeingNearToObstacle(list<Point> enemyPts, morrf_ros::int16_image worldImg, morrf_ros::int16_image boundaryImg, morrf_ros::int16_image &cost_map, commander::outputVals &ov);
 
 };
 

@@ -51,7 +51,7 @@ void Generator::probOfSeenByEnemy(list<Point> enemyPts, morrf_ros::int16_image w
     resize(imgProbVals);
 
     int numOfEnemies = enemyPts.size();
-
+    cout << "Enmies: " << numOfEnemies << endl;	
     std::cout << "Entering first nested for loops" << std::endl;
 
     for(int y = 0; y < height; y++) {
@@ -59,8 +59,11 @@ void Generator::probOfSeenByEnemy(list<Point> enemyPts, morrf_ros::int16_image w
 
             string s = to_string(x) + " " + to_string(y);
             if(allObsPts.count(s) || enemyPtsToIgnore.count(s))
-                continue;
-
+             {
+		   if(enemyPtsToIgnore.count(s))
+			std::cout << s << endl;
+		   continue;
+	     }
             double enemyProbArray[numOfEnemies][2];
             int i = 0;
             for(Point enemyPt : enemyPts) {
@@ -106,26 +109,29 @@ void Generator::writeImage(morrf_ros::int16_image &cost_map, commander::outputVa
     // resultImage.fill(WHITE); //initialize the entire image with white
     //
     // ofstream out(outputFile);
+    commander::point_cost val;
 //now you have to fix the output vals file
     for(int y = 0; y < height; y++) {
         for(int x = 0; x < width; x++) {
 
             stringstream ss;
-            ss << x << " " << y;
+            ss << x << " " << y ;
 
             if(allObsPts.count(ss.str()) || enemyPtsToIgnore.count(ss.str())) {
-                cost_map.int_array.push_back(BLACK.rgb());
+                cost_map.int_array.push_back(255);
                 continue;
             }
             imgProbVals[y][x] = (((imgProbVals[y][x] - minProbOfSeenVal) * newRange)/origRange) + MIN_GRAYSCALE_VALUE;
 
-            if(imgProbVals[y][x] < 255) {
-                QRgb value = qRgb((int)imgProbVals[y][x], (int)imgProbVals[y][x], (int)imgProbVals[y][x]);
+            cost_map.int_array.push_back(ceil(imgProbVals[y][x]));
+            
+	    //if(imgProbVals[y][x] < 255) {
+                //QRgb value = qRgb((int)imgProbVals[y][x], (int)imgProbVals[y][x], (int)imgProbVals[y][x]);
                 // resultImage.setPixel(x, y, value);
-                cost_map.int_array.push_back(value);
+                //cost_map.int_array.push_back(ceil(imgProbVals[y][x]));
                 // out << ss.str() << "\t" << (ceil(imgProbVals[y][x]));
                 // out << endl;
-            }
+            //}
         }
     }
 
@@ -193,7 +199,7 @@ void Generator::getAllObsPts(morrf_ros::int16_image img) {
 
           if(pixel_color == 0) {
 
-             std::cout << "pixel is black: " << pixel_color << std::endl;
+             //std::cout << "pixel is black: " << pixel_color << std::endl;
 
              stringstream ss;
              ss << j << " " << i;
@@ -228,7 +234,7 @@ void Generator::clear() {
 
 }
 
-void Generator::probOfBeingNearToObstacle(double d, string world_boundaries, string world_solids, list<Point> enemyPts, string imageFilename, string outputFilename) {
+void Generator::probOfBeingNearToObstacle(list<Point> enemyPts, morrf_ros::int16_image worldImg, morrf_ros::int16_image boundaryImg, morrf_ros::int16_image &cost_map, commander::outputVals &ov){
 //
 //     clear();
 //
