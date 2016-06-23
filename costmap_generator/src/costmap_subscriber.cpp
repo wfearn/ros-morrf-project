@@ -22,23 +22,22 @@ bool generate_costmap(commander::get_cost_map::Request &req,
 
             find_boundaries(req.map, bound);
 
-            print_array_image(bound, "/home/tkatuka/Pictures/test_boundary.png");
+            print_array_image(bound, "/home/wfearn/Pictures/test_boundary.png");
 
             list<Point> enemy_points;
-	
-	    cout << "enemy points" << endl;
+
+            cout << "enemy points" << endl;
 
             for(int i = 0; i < req.enemyPts.size(); i++) {
+
                 Point pos(req.enemyPts[i].x, req.enemyPts[i].y);
                 cout << pos.x << ", " << pos.y << endl;
-		//pos.x = (int) req.enemyPts[i].x;
-                //pos.y = (int) req.enemyPts[i].y;
+
                 enemy_points.push_back(pos);
             }
 
 
             //req.map // is of type int16_image, needs to be converted to QImage
-            //
             if(req.stealth == 1) {
                 std::cout << "Stealth active " << std::endl;
 
@@ -47,8 +46,7 @@ bool generate_costmap(commander::get_cost_map::Request &req,
 
                 generator.probOfSeenByEnemy(enemy_points, req.map, bound, cost, ov);
 
-                print_array_image(cost, "/home/tkatuka/Pictures/stealth_cost.png");
-		//cout << ov.vals[0].position.x << " " << ov.vals[0].position.y << endl;
+                print_array_image(cost, "/home/wfearn/Pictures/stealth_cost.png");
                 //res.cost_maps.push_back(probOfSeenByEnemy());
             }
 

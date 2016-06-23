@@ -1,12 +1,18 @@
 #pragma once
 
 #include "ros/ros.h"
+#include "morrf_ros/int16_image.h"
+#include "commander/outputVals.h"
+#include "commander/point_cost.h"
+
 #include "opencv2/core/core.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include <opencv2/highgui/highgui.hpp>
+
 #include "point.h"
-#include "morrf_ros/int16_image.h"
 #include <string>
+#include <iostream>
+#include <fstream>
 
 cv::Mat get_cv_image(morrf_ros::int16_image img) {
 
@@ -43,4 +49,19 @@ morrf_ros::int16_image get_int_array(cv::Mat img) {
     }
 
     return image;
+}
+
+void write_output_vals(commander::outputVals ov, string filename) {
+
+    std::ofstream f;
+
+    std::cout << "Printing output vals " << ov.name << std::endl;
+
+    f.open(filename);
+
+    for(int i = 0; i < ov.vals.size(); i++) {
+        f << ov.vals[i].position.x << " " << ov.vals[i].position.y << "\t" << ov.vals[i].cost << std::endl;
+    }
+
+    f.close();
 }
