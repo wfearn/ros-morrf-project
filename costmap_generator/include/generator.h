@@ -60,6 +60,8 @@ class Generator
         bool isBlocked(Point imgPt, Point enemyPt);
         double getNearObsValue(Point pt);
         void clear();
+	void populateStealthProbVals(vector<vector<double > > &imgProbVals, list<Point> enemyPts);
+	void populateSafeProbVals(vector<vector<double> > &imgProbVals);
 
     public:
         Generator();

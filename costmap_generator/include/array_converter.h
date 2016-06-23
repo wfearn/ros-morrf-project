@@ -55,7 +55,7 @@ void write_output_vals(commander::outputVals ov, std::string filename) {
 
     std::ofstream f;
 
-    std::cout << "Printing output vals " << ov.name << std::endl;
+    //std::cout << "Printing output vals " << ov.name << std::endl;
 
     f.open(filename);
 

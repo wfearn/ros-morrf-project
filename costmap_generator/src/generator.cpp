@@ -14,6 +14,15 @@ Generator::Generator()
     height = 0;
 }
 
+void Generator::clear() {
+
+    obsBoundaryPts.clear();
+    allObsPts.clear();
+    enemyPtsToIgnore.clear();
+
+    Generator();
+}
+
 bool Generator::isOnLineSegment(Point a, Point b, Point c){
 
   double AB, AC, CB;
@@ -30,130 +39,12 @@ bool Generator::isOnLineSegment(Point a, Point b, Point c){
   return false;
 }
 
-void Generator::probOfSeenByEnemy(list<Point> enemyPts, morrf_ros::int16_image worldImg, morrf_ros::int16_image boundaryImg, morrf_ros::int16_image &cost_map, commander::outputVals &ov){
-
-    width = worldImg.width; //width of the world_boundaries image
-    height = worldImg.height; //height of the world_boundaries image
-
-    diag_distance = sqrt(pow(width, 2) + pow(height, 2));
-    slope = 1/(delta - diag_distance);
-    y_intercept = (-1) * (diag_distance * slope);
-
-    //getting all the points
-    getAllObsPts(worldImg);
-    getImgBoundaryPts(boundaryImg);
-    getEnemyPtsToIgnore(enemyPts);
-
-    minProbOfSeenVal = 2.0; // some reason for that
-    maxProbOfSeenVal = 0.0;
-
-    vector<vector<double> > imgProbVals;
-    resize(imgProbVals);
-
-    int numOfEnemies = enemyPts.size();
-    //cout << "Enmies: " << numOfEnemies << endl;	
-    //std::cout << "Entering first nested for loops" << std::endl;
-
-    for(int y = 0; y < height; y++) {
-        for(int x = 0; x < width; x++) {
-
-            string s = to_string(x) + " " + to_string(y);
-            if(allObsPts.count(s) || enemyPtsToIgnore.count(s))
-                continue;
-	     
-            double enemyProbArray[numOfEnemies][2];
-            int i = 0;
-            for(Point enemyPt : enemyPts) {
-
-                bool blocked = isBlocked(Point(x, y), enemyPt);
-                double distanceToEnemy = sqrt((x - enemyPt.x) * (x - enemyPt.x) + (y - enemyPt.y) * (y - enemyPt.y));
-
-                vector<double> probability = setEnemyProbValues(blocked, distanceToEnemy);
-                enemyProbArray[i][0] = probability.at(0);
-                enemyProbArray[i][1] = probability.at(1);
-                i++;
-            }
-
-            double allFalseProduct = 1;
-            for(int i = 0; i < numOfEnemies; i++) {
-                allFalseProduct *= enemyProbArray[i][1];
-            }
-            imgProbVals[y][x] = 1 - allFalseProduct;
-
-
-            if(imgProbVals[y][x] > maxProbOfSeenVal)
-                maxProbOfSeenVal = imgProbVals[y][x];
-            if(imgProbVals[y][x] < minProbOfSeenVal)
-                minProbOfSeenVal = imgProbVals[y][x];
-        }
-    }
-
-    //std::cout << "Leaving nested for loops" << std::endl;
-    writeImage(cost_map, ov, imgProbVals);
-}
-
-
-void Generator::writeImage(morrf_ros::int16_image &cost_map, commander::outputVals &ov, vector<vector<double> > imgProbVals) {
-
-    double origRange = maxProbOfSeenVal - minProbOfSeenVal;
-    double newRange = MAX_GRAYSCALE_VALUE - MIN_GRAYSCALE_VALUE;
-
-    cost_map.name = "Stealthy Costmap Image";
-    cost_map.width = width;
-    cost_map.height = height;
-
-    ov.name = "Stealth Text file";
-   
-	//now you have to fix the output vals file
-    for(int y = 0; y < height; y++) {
-        for(int x = 0; x < width; x++) {
-
-            stringstream ss;
-            ss << x << " " << y ;
-
-            if(allObsPts.count(ss.str()) || enemyPtsToIgnore.count(ss.str())) {
-                cost_map.int_array.push_back(255);
-                continue;
-            }
-            imgProbVals[y][x] = (((imgProbVals[y][x] - minProbOfSeenVal) * newRange)/origRange) + MIN_GRAYSCALE_VALUE;
-
-            cost_map.int_array.push_back(ceil(imgProbVals[y][x]));
-           
-	    commander::point_cost val;
- 	    val.position.x = x;
-	    val.position.y = y;
-	    val.cost = ceil(imgProbVals[y][x]);
-	    
-	    ov.vals.push_back(val);		
-	}
-    }
-}
-
 void Generator::resize(vector<vector<double>> & array) {
 
     array.resize(height);
     for(int i = 0; i < height; i++) {
         array[i].resize(width);
     }
-}
-
-vector<double> Generator::setEnemyProbValues(bool blocked, double distance) {
-
-    vector<double> arr;
-    if(blocked) {
-        arr.push_back(0);   //Probability of Seen
-        arr.push_back(1);   //Prob of Unseen
-    }
-    else if(distance <= delta) {
-        arr.push_back(1);
-        arr.push_back(0);
-    }
-    else {
-        double probability = (slope * distance) + y_intercept;
-        arr.push_back(probability);
-        arr.push_back(1 - probability);
-    }
-    return arr;
 }
 
 bool Generator::isBlocked(Point imgPt, Point enemyPt) {
@@ -184,20 +75,14 @@ void Generator::getAllObsPts(morrf_ros::int16_image img) {
         for(int j = 0; j < width; j++) {
 
           int index = i * width + j;
-
           int pixel_color  = img.int_array[index];
-
           if(pixel_color == 0) {
-
-             //std::cout << "pixel is black: " << pixel_color << std::endl;
-
              stringstream ss;
              ss << j << " " << i;
              allObsPts.insert(ss.str());
-
           }
-        }
-    }
+      }
+   }
 }
 
 void Generator::getImgBoundaryPts(morrf_ros::int16_image img) {
@@ -214,27 +99,127 @@ void Generator::getImgBoundaryPts(morrf_ros::int16_image img) {
     }
 }
 
-void Generator::clear() {
 
-    obsBoundaryPts.clear();
-    allObsPts.clear();
-    enemyPtsToIgnore.clear();
+void Generator::probOfSeenByEnemy(list<Point> enemyPts, morrf_ros::int16_image worldImg, morrf_ros::int16_image boundaryImg, morrf_ros::int16_image &cost_map, commander::outputVals &ov){
 
-    Generator();
+    clear();
+    width = worldImg.width; //width of the world_boundaries image
+    height = worldImg.height; //height of the world_boundaries image
 
+    diag_distance = sqrt(pow(width, 2) + pow(height, 2));
+    slope = 1/(delta - diag_distance);
+    y_intercept = (-1) * (diag_distance * slope);
+
+    //getting all the points
+    getAllObsPts(worldImg);
+    getImgBoundaryPts(boundaryImg);
+    getEnemyPtsToIgnore(enemyPts);
+
+    minProbOfSeenVal = 2.0;
+    maxProbOfSeenVal = 0.0;
+
+    vector<vector<double> > imgProbVals;
+    resize(imgProbVals);
+
+    populateStealthProbVals(imgProbVals, enemyPts);
+    writeImage(cost_map, ov, imgProbVals);
+}
+
+void Generator::populateStealthProbVals(vector<vector<double > > &imgProbVals, list<Point> enemyPts) {
+
+  int numOfEnemies = enemyPts.size();
+
+  for(int y = 0; y < height; y++) {
+      for(int x = 0; x < width; x++) {
+
+          string s = to_string(x) + " " + to_string(y);
+          if(allObsPts.count(s) || enemyPtsToIgnore.count(s))
+              continue;
+
+          double enemyProbArray[numOfEnemies][2];
+          int i = 0;
+          for(Point enemyPt : enemyPts) {
+
+              bool blocked = isBlocked(Point(x, y), enemyPt);
+              double distanceToEnemy = sqrt((x - enemyPt.x) * (x - enemyPt.x) + (y - enemyPt.y) * (y - enemyPt.y));
+
+              vector<double> probability = setEnemyProbValues(blocked, distanceToEnemy);
+              enemyProbArray[i][0] = probability.at(0);
+              enemyProbArray[i][1] = probability.at(1);
+              i++;
+          }
+
+          double allFalseProduct = 1;
+          for(int i = 0; i < numOfEnemies; i++) {
+              allFalseProduct *= enemyProbArray[i][1];
+          }
+          imgProbVals[y][x] = 1 - allFalseProduct;
+
+
+          if(imgProbVals[y][x] > maxProbOfSeenVal)
+              maxProbOfSeenVal = imgProbVals[y][x];
+          if(imgProbVals[y][x] < minProbOfSeenVal)
+              minProbOfSeenVal = imgProbVals[y][x];
+      }
+  }
+}
+
+void Generator::writeImage(morrf_ros::int16_image &cost_map, commander::outputVals &ov, vector<vector<double> > imgProbVals) {
+
+    double origRange = maxProbOfSeenVal - minProbOfSeenVal;
+    double newRange = MAX_GRAYSCALE_VALUE - MIN_GRAYSCALE_VALUE;
+
+    cost_map.name = "Stealthy Costmap Image";
+    cost_map.width = width;
+    cost_map.height = height;
+
+    ov.name = "Stealth Text file";
+
+    for(int y = 0; y < height; y++) {
+        for(int x = 0; x < width; x++) {
+
+            stringstream ss;
+            ss << x << " " << y ;
+
+            if(allObsPts.count(ss.str()) || enemyPtsToIgnore.count(ss.str())) {
+                cost_map.int_array.push_back(255);
+                continue;
+            }
+            imgProbVals[y][x] = (((imgProbVals[y][x] - minProbOfSeenVal) * newRange)/origRange) + MIN_GRAYSCALE_VALUE;
+
+      	    commander::point_cost val;
+       	    val.position.x = x;
+      	    val.position.y = y;
+      	    val.cost = ceil(imgProbVals[y][x]);
+
+      	    ov.vals.push_back(val);
+            cost_map.int_array.push_back(ceil(imgProbVals[y][x]));
+        }
+    }
+}
+
+vector<double> Generator::setEnemyProbValues(bool blocked, double distance) {
+
+    vector<double> arr;
+    if(blocked) {
+        arr.push_back(0);   //Probability of Seen
+        arr.push_back(1);   //Prob of Unseen
+    }
+    else if(distance <= delta) {
+        arr.push_back(1);
+        arr.push_back(0);
+    }
+    else {
+        double probability = (slope * distance) + y_intercept;
+        arr.push_back(probability);
+        arr.push_back(1 - probability);
+    }
+    return arr;
 }
 
 void Generator::probOfBeingNearToObstacle(list<Point> enemyPts, morrf_ros::int16_image worldImg, morrf_ros::int16_image boundaryImg, morrf_ros::int16_image &cost_map, commander::outputVals &ov){
 
-    //cout << "function" << endl;
-	//clear();
-
-    // QImage worldBoundariesImage;
-    // worldBoundariesImage.load(QString::fromStdString(world_boundaries));
-
-    // QImage worldSolidsImage;
-    // worldSolidsImage.load(QString::fromStdString(world_solids));
-
+     clear();
      width = worldImg.width;
      height = worldImg.height;
 
@@ -251,26 +236,30 @@ void Generator::probOfBeingNearToObstacle(list<Point> enemyPts, morrf_ros::int16
      vector<vector<double> > imgProbVals;
      resize(imgProbVals);
 
-     for(int y = 0; y < height; y++) {
-         for(int x = 0; x < width; x++) {
-
-             stringstream ss;
-             ss << x << " " << y;
-
-             if(allObsPts.count(ss.str()) || enemyPtsToIgnore.count(ss.str()))
-                 continue;
-
-             imgProbVals[y][x] = getNearObsValue(Point(x, y));
-
-             if(imgProbVals[y][x] > maxProbOfNearness)
-                 maxProbOfNearness = imgProbVals[y][x];
-
-             if(imgProbVals[y][x] < minProbOfNearness)
-                 minProbOfNearness = imgProbVals[y][x];
-         }
-     }
-
+     populateSafeProbVals(imgProbVals);
      writeSafeImage(cost_map, ov, imgProbVals);
+}
+
+void Generator::populateSafeProbVals(vector<vector<double> > &imgProbVals) {
+
+  for(int y = 0; y < height; y++) {
+      for(int x = 0; x < width; x++) {
+
+          stringstream ss;
+          ss << x << " " << y;
+
+          if(allObsPts.count(ss.str()) || enemyPtsToIgnore.count(ss.str()))
+              continue;
+
+          imgProbVals[y][x] = getNearObsValue(Point(x, y));
+
+          if(imgProbVals[y][x] > maxProbOfNearness)
+              maxProbOfNearness = imgProbVals[y][x];
+
+          if(imgProbVals[y][x] < minProbOfNearness)
+              minProbOfNearness = imgProbVals[y][x];
+      }
+  }
 }
 
 double Generator::getNearObsValue(Point pt) {
@@ -291,27 +280,19 @@ double Generator::getNearObsValue(Point pt) {
          if(temp_inv_distance > nearObsValue)
              nearObsValue = temp_inv_distance;
      }
-
      return nearObsValue;
- }
+}
 
 void Generator::writeSafeImage(morrf_ros::int16_image &cost_map, commander::outputVals &ov, vector<vector<double> > imgProbVals) {
 
-    //morrf_ros::int16_image im;
     cost_map.name = "safe cost map";
     cost_map.width = width;
     cost_map.height = height;
-    //cost_map.int_array = std::vector<int16_t> (img.width * img.height, 255);
 
-    ov.name = "safe output vals";    
+    ov.name = "safe output vals";
 
     double origRange = maxProbOfNearness - minProbOfNearness;
     double newRange = MAX_GRAYSCALE_VALUE - MIN_GRAYSCALE_VALUE;
-
-    //QImage resultImage = QImage(width, height, QImage::Format_ARGB32);
-    //resultImage.fill(WHITE); //initialize the entire image with white
-
-    //ofstream out(outputFilename);
 
     for(int y = 0; y < height; y++) {
         for(int x = 0; x < width; x++) {
@@ -319,28 +300,19 @@ void Generator::writeSafeImage(morrf_ros::int16_image &cost_map, commander::outp
             stringstream ss;
             ss << x << " " << y;
             if(allObsPts.count(ss.str()) || enemyPtsToIgnore.count(ss.str())) {
-
-                //cout << "The new range here is: " << (int) newRange << endl;
-                //QRgb value = qRgb((int)newRange, (int)newRange, (int)newRange);
-		cost_map.int_array.push_back((int)newRange);
-		//resultImage.setPixel(x, y, value);
+		            cost_map.int_array.push_back((int)newRange);
                 continue;
             }
 
             imgProbVals[y][x] = (((imgProbVals[y][x] - minProbOfNearness) * newRange)/origRange) + MIN_GRAYSCALE_VALUE;
-            //QRgb value = qRgb((int)imgProbVals[y][x], (int)imgProbVals[y][x], (int)imgProbVals[y][x]);
-	    //im.int_array =
-            //resultImage.setPixel(x, y, value);
-	    cost_map.int_array.push_back(ceil(imgProbVals[y][x]));
-           
- 	    commander::point_cost val;
-	    val.position.x = x;
-	    val.position.y = y;
-	    val.cost = ceil(imgProbVals[y][x]);
 
-	    ov.vals.push_back(val);
-	   // out << ss.str() << "\t" << ceil(imgProbVals[y][x]);
-           // out << endl;
+       	    commander::point_cost val;
+      	    val.position.x = x;
+      	    val.position.y = y;
+      	    val.cost = ceil(imgProbVals[y][x]);
+
+      	    ov.vals.push_back(val);
+            cost_map.int_array.push_back(ceil(imgProbVals[y][x]));
         }
     }
 }
