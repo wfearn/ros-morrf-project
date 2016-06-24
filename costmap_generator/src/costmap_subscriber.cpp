@@ -20,7 +20,7 @@ bool generate_costmap(commander::get_cost_map::Request &req,
             morrf_ros::int16_image bound;
             find_boundaries(req.map, bound);
 
-            print_array_image(bound, "/home/tkatuka/Pictures/test_boundary.png");
+            // print_array_image(bound, "/home/tkatuka/Pictures/test_boundary.png");
 
             list<Point> enemy_points;
 
@@ -29,7 +29,6 @@ bool generate_costmap(commander::get_cost_map::Request &req,
                 Point pos(req.enemyPts[i].x, req.enemyPts[i].y);
                 enemy_points.push_back(pos);
             }
-
 
             if(req.stealth == 1) {
 
@@ -42,18 +41,38 @@ bool generate_costmap(commander::get_cost_map::Request &req,
 
                 print_array_image(cost, "/home/tkatuka/Pictures/stealth_cost.png");
 		            write_output_vals(ov, "/home/tkatuka/Pictures/stealth.txt");
+
+                res.cost_maps.push_back(cost);
+                res.cost_values.push_back(ov);
             }
 
             if(req.safe == 1) {
                 std::cout << "Safety active " << std::endl;
 
-		            morrf_ros::int16_image cost;
+		morrf_ros::int16_image cost;
                 commander::outputVals ov;
 
+		cout << "Starting function" << endl;
                 generator.probOfBeingNearToObstacle(enemy_points, req.map, bound, cost, ov);
+		cout << "Finished" << endl;
                 print_array_image(cost, "/home/tkatuka/Pictures/safe_cost.png");
                 write_output_vals(ov, "/home/tkatuka/Pictures/safe.txt");
+
+                res.cost_maps.push_back(cost);
+                res.cost_values.push_back(ov);
             }
+
+            /*Meher's Parameters
+            1. Map Scores FileName
+            2. Map PathPts FileName
+            3. obs Img - req.map
+            4. obs boundary Img - bound
+            5. Stealth Values - cost_values
+            6. Safe values - cost_values
+            7. Start Pt - morrf_ros::morrf_init.start
+            8. Goal - morrf_ros::morrf_init.goal
+            9. enemyPts - req.enemyPts
+            */
             return true;
 }
 

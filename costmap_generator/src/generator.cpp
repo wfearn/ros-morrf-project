@@ -106,7 +106,7 @@ void Generator::probOfSeenByEnemy(list<Point> enemyPts, morrf_ros::int16_image w
     width = worldImg.width; //width of the world_boundaries image
     height = worldImg.height; //height of the world_boundaries image
 
-    diag_distance = sqrt(pow(width, 2) + pow(height, 2));
+    diag_distance = sqrt(width * width + height * height);
     slope = 1/(delta - diag_distance);
     y_intercept = (-1) * (diag_distance * slope);
 
@@ -227,7 +227,7 @@ void Generator::probOfBeingNearToObstacle(list<Point> enemyPts, morrf_ros::int16
      getAllObsPts(boundaryImg);
      getEnemyPtsToIgnore(enemyPts);
 
-     diag_distance = sqrt(pow(width, 2) + pow(height, 2));
+     diag_distance = sqrt(width * width + height * height);
      double inv_diag_distance = 1 / diag_distance;
 
      minProbOfNearness = 1;
@@ -242,6 +242,7 @@ void Generator::probOfBeingNearToObstacle(list<Point> enemyPts, morrf_ros::int16
 
 void Generator::populateSafeProbVals(vector<vector<double> > &imgProbVals) {
 
+	//cout << "Entering first for loop" << endl;
   for(int y = 0; y < height; y++) {
       for(int x = 0; x < width; x++) {
 
@@ -269,7 +270,7 @@ double Generator::getNearObsValue(Point pt) {
      for(Point obsPt : obsBoundaryPts) {
 
 
-         double distance = sqrt(pow(pt.x - obsPt.x, 2) + pow(pt.y - obsPt.y, 2));
+         double distance = sqrt((pt.x - obsPt.x) * (pt.x - obsPt.x) + (pt.y - obsPt.y, 2) * (pt.y - obsPt.y, 2));
          double temp_inv_distance = 0;
 
          if(distance <= delta)
@@ -285,6 +286,7 @@ double Generator::getNearObsValue(Point pt) {
 
 void Generator::writeSafeImage(morrf_ros::int16_image &cost_map, commander::outputVals &ov, vector<vector<double> > imgProbVals) {
 
+    //cout << "Writing safe Image" << endl;
     cost_map.name = "safe cost map";
     cost_map.width = width;
     cost_map.height = height;
