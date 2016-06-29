@@ -1,5 +1,7 @@
 #include "generator.h"
 
+using namespace std;
+
 Generator::Generator()
 {
     diag_distance = 0;
@@ -12,6 +14,7 @@ Generator::Generator()
     maxProbOfNearness = 0;
     width = 0;
     height = 0;
+    kd_obs = new KDTree2D( std::ptr_fun(tac) );
 }
 
 void Generator::clear() {
@@ -223,9 +226,11 @@ void Generator::probOfBeingNearToObstacle(list<Point> enemyPts, morrf_ros::int16
      width = worldImg.width;
      height = worldImg.height;
 
-     getImgBoundaryPts(worldImg);
-     getAllObsPts(boundaryImg);
+     //getImgBoundaryPts(boundaryImg);
+     getAllObsPts(worldImg);
      getEnemyPtsToIgnore(enemyPts);
+
+     getObsBoundaryPts_(boundaryImg);
 
      diag_distance = sqrt(width * width + height * height);
      double inv_diag_distance = 1 / diag_distance;
@@ -238,6 +243,22 @@ void Generator::probOfBeingNearToObstacle(list<Point> enemyPts, morrf_ros::int16
 
      populateSafeProbVals(imgProbVals);
      writeSafeImage(cost_map, ov, imgProbVals);
+}
+
+void Generator::getObsBoundaryPts_(morrf_ros::int16_image img) {
+
+    for(int i = 0; i < height; i++) {
+        for(int j = 0; j < width; j++) {
+
+          int index = i * width + j;
+          int pixel_color  = img.int_array[index];
+          if(pixel_color == 0) {
+	     POS2D p(j, i);
+             kd_obs->insert(p);
+          }
+      }
+   }
+
 }
 
 void Generator::populateSafeProbVals(vector<vector<double> > &imgProbVals) {
@@ -267,20 +288,37 @@ double Generator::getNearObsValue(Point pt) {
 
      double nearObsValue = 0;
 
-     for(Point obsPt : obsBoundaryPts) {
+    // for(Point obsPt : obsBoundaryPts) {
 
 
-         double distance = sqrt((pt.x - obsPt.x) * (pt.x - obsPt.x) + (pt.y - obsPt.y, 2) * (pt.y - obsPt.y, 2));
-         double temp_inv_distance = 0;
+    //     double distance = sqrt((pt.x - obsPt.x) * (pt.x - obsPt.x) + (pt.y - obsPt.y) * (pt.y - obsPt.y));
+    //     double temp_inv_distance = 0;
 
-         if(distance <= delta)
-             temp_inv_distance = 1/delta;
-         else
-             temp_inv_distance = 1/distance;
+    //     if(distance <= delta)
+    //         temp_inv_distance = 1/delta;
+    //     else
+    //         temp_inv_distance = 1/distance;
 
-         if(temp_inv_distance > nearObsValue)
-             nearObsValue = temp_inv_distance;
-     }
+    //     if(temp_inv_distance > nearObsValue)
+    //         nearObsValue = temp_inv_distance;
+    // }
+
+     POS2D point(pt.x, pt.y);
+     std::pair<KDTree2D::const_iterator, double> found = kd_obs->find_nearest(point);
+     POS2D obsPt = *found.first;
+
+     //cout << "Nearest found: "  << endl;
+     double distance = sqrt((pt.x - (int) obsPt.d[0]) * (pt.x - (int) obsPt.d[0]) + (pt.y - (int) obsPt.d[1]) * (pt.y - (int) obsPt.d[1]));
+     double temp_inv_distance = 0;
+
+     if(distance <= delta)
+        temp_inv_distance = 1/delta;
+     else
+        temp_inv_distance = 1/distance;
+
+     if(temp_inv_distance > nearObsValue)
+        nearObsValue = temp_inv_distance;
+
      return nearObsValue;
 }
 
@@ -302,7 +340,7 @@ void Generator::writeSafeImage(morrf_ros::int16_image &cost_map, commander::outp
             stringstream ss;
             ss << x << " " << y;
             if(allObsPts.count(ss.str()) || enemyPtsToIgnore.count(ss.str())) {
-		            cost_map.int_array.push_back((int)newRange);
+		cost_map.int_array.push_back((int) newRange);
                 continue;
             }
 

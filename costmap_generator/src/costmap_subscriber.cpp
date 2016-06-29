@@ -10,6 +10,8 @@
 #include "morrf_boundary_finder.h"
 #include "array_converter.h"
 
+using namespace std;
+
 bool generate_costmap(commander::get_cost_map::Request &req,
                          commander::get_cost_map::Response &res) {
 
