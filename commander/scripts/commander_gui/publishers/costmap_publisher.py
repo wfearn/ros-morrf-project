@@ -16,7 +16,7 @@ def StartCostmapPublisher(map_image, stealth, safe, enemy_points):
 
         print "Received costmap array, %s" % str(response.cost_maps)
 
-        return response.cost_maps
+        return response
 
     except rospy.ServiceException, e:
         print "Service call failed: %s"%e

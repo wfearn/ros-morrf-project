@@ -22,6 +22,8 @@ bool generate_costmap(commander::get_cost_map::Request &req,
             morrf_ros::int16_image bound;
             find_boundaries(req.map, bound);
 
+            res.boundary_image = bound;
+
             // print_array_image(bound, "/home/tkatuka/Pictures/test_boundary.png");
 
             list<Point> enemy_points;
@@ -42,7 +44,7 @@ bool generate_costmap(commander::get_cost_map::Request &req,
                 generator.probOfSeenByEnemy(enemy_points, req.map, bound, cost, ov);
 
                 print_array_image(cost, "/home/tkatuka/Pictures/stealth_cost.png");
-		            write_output_vals(ov, "/home/tkatuka/Pictures/stealth.txt");
+                write_output_vals(ov, "/home/tkatuka/Pictures/stealth.txt");
 
                 res.cost_maps.push_back(cost);
                 res.cost_values.push_back(ov);
@@ -51,12 +53,14 @@ bool generate_costmap(commander::get_cost_map::Request &req,
             if(req.safe == 1) {
                 std::cout << "Safety active " << std::endl;
 
-		morrf_ros::int16_image cost;
+                morrf_ros::int16_image cost;
                 commander::outputVals ov;
 
-		cout << "Starting function" << endl;
+                cout << "Starting function" << endl;
                 generator.probOfBeingNearToObstacle(enemy_points, req.map, bound, cost, ov);
-		cout << "Finished" << endl;
+
+                cout << "Finished" << endl;
+
                 print_array_image(cost, "/home/tkatuka/Pictures/safe_cost.png");
                 write_output_vals(ov, "/home/tkatuka/Pictures/safe.txt");
 

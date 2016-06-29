@@ -179,7 +179,9 @@ class Image(QtGui.QMainWindow):
         return enemies
 
     def saveMapToDropbox(self):
-        pass
+        i = QImage(self.image_name)
+
+        i.save("/home/wfearn/Dropbox/MORRF_OUTPUT/maps/map.png")
 
     def getMapName(self):
         return self.image_name

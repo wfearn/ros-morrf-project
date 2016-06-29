@@ -115,7 +115,6 @@ class Config(QtGui.QMainWindow):
 
             #Deinitializing variable to prevent errors
             self.image_window.delMorrfPaths()
-            self.pick_paths.setEnabled(True)
 
             initializer = morrf_init()
 
@@ -136,35 +135,24 @@ class Config(QtGui.QMainWindow):
             initializer.width = initializer.map.width
             initializer.height = initializer.map.height
 
-#            print "Goal is: %s, %s" % (initializer.goal.x, initializer.goal.y)
-#            print "Start is: %s, %s" % (initializer.start.x, initializer.start.y)
-#            print "Iterations are: %s" % (initializer.number_of_iterations)
-#            print "Segment Length is: %s" % (initializer.segment_length)
-#            print "Number of trees is: %s" % (initializer.number_of_trees)
-#            print "Objective Number is: %s" % (initializer.objective_number)
-#            print "Minimum distance enabled is: %s" % (initializer.minimum_distance_enabled)
-#            print "Method type is: %s" % self.method_box.currentText()
-#            print "Map image name is: %s" % initializer.map.name
-#            print "Map height is: %s" % initializer.map.height
-#            print "Map width is: %s" % initializer.map.width
-#
-            #self.printImage(StartImagePublisher(initializer.map))
+            self.costmap_response = StartCostmapPublisher(initializer.map, self.stealth.isChecked(), self.safe.isChecked(), self.image_window.getEnemyLocations())
 
-            initializer.cost_maps = StartCostmapPublisher(initializer.map, self.stealth.isChecked(),                               self.safe.isChecked(), self.image_window.getEnemyLocations())
+            initializer.cost_maps = self.costmap_response.cost_maps
 
-            response = StartCommanderPublisher(initializer)
+            self.morrf_response = StartCommanderPublisher(initializer)
 
-            self.image_window.printMorrfPaths(response)
-
-            #self.outputToDropbox(response)
+            self.image_window.printMorrfPaths(self.morrf_response)
+            self.pick_paths.setEnabled(True)
 
         else:
             self.error = NotInitialized()
 
     def sendToPathPicker(self):
-        pass
+        print "Sending to path palette"
 
-    def printImage(self, image):
+        self.outputToDropbox(self.morrf_response)
+
+    def saveBoundImage(self, image):
 
         test = QImage(image.width, image.height, QImage.Format_RGB16)
 
@@ -178,7 +166,7 @@ class Config(QtGui.QMainWindow):
 
                 test.setPixel(j, i, qrgb.rgb())
 
-        test.save("/home/wfearn/Pictures/test.png")
+        test.save("/home/wfearn/Dropbox/MORRF_OUTPUT/maps/boundary.png")
 
 
     def getObjectiveNumbers(self):
@@ -245,9 +233,10 @@ class Config(QtGui.QMainWindow):
     def outputToDropbox(self, morrf_output):
 
         self.image_window.saveMapToDropbox()
+        self.saveBoundImage(self.costmap_response.boundary_image)
 
-        morrf_output_path = "/home/wfearn/Dropbox/morrf_output/morrf_output.txt"
-        map_output_path = "/home/wfearn/Dropbox/map/%s" % self.image_window.getMapName()
+        morrf_output_path = "/home/wfearn/Dropbox/MORRF_OUTPUT/morrf_output/morrf_output.txt"
+        map_output_path = "/home/wfearn/Dropbox/MORRF_OUTPUT/maps/%s" % self.image_window.getMapName()
         start = self.image_window.getStartPoint()
         goal = self.image_window.getGoalPoint()
 
@@ -262,7 +251,7 @@ class Config(QtGui.QMainWindow):
 
         #Making file path concise for retrieval from other computer
         path_array = morrf_output_path.split("/")
-        json_output["morrf_output"] = path_array[4] + "/" + path_array[5]
+        json_output["morrf_output"] = path_array[4] + "/" + path_array[5] + "/" + path_array[6]
 
         waypoint_output = []
         cost_output = []
@@ -281,17 +270,25 @@ class Config(QtGui.QMainWindow):
         print cost_output
         print json.dumps(json_output)
 
-        f = open(morrf_output_path, "w")
+        f = open("/home/wfearn/Dropbox/MORRF_OUTPUT/morrf_output/output_values.txt", "w")
 
-        for path in cost_output:
-            for cost in path:
-                f.write(str(cost.data) + " ")
+        for i in range(len(self.costmap_response.cost_values)):
 
-            f.write("\n")
+            cv = self.costmap_response.cost_values[i]
+            for j in range(len(cv.vals)):
 
-        for path in waypoint_output:
-            for point in path:
-                f.write(str(point.x) + " " + str(point.y) + " ")
-            f.write("\n")
+                f.write("%s %s\t%s\n" % (cv.vals[j].position.x, cv.vals[j].position.y, cv.vals[j].cost))
+
+
+       # for path in cost_output:
+       #     for cost in path:
+       #         f.write(str(cost.data) + " ")
+
+       #     f.write("\n")
+
+       # for path in waypoint_output:
+       #     for point in path:
+       #         f.write(str(point.x) + " " + str(point.y) + " ")
+       #     f.write("\n")
 
         f.close()

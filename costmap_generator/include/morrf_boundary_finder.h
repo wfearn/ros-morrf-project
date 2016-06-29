@@ -19,19 +19,8 @@ bool find_boundaries( morrf_ros::int16_image &img,  morrf_ros::int16_image &boun
 
     cv::Mat src = get_cv_image(img);
 
-   // cv::Mat src(img.height, img.width, CV_8UC1, cv::Scalar(255));
-
-   // for(int i = 0; i < img.height; i++) {
-   //     for(int j = 0; j < img.width; j++) {
-
-   //         int index = i * img.width + j;
-   //         src.at<uchar>(i, j) = img.int_array[index];
-   //     }
-   // }
-
-    imwrite("/home/wfearn/Pictures/matfile.png", src);
-
     cv::threshold(src, src, 200, 255, cv::THRESH_BINARY_INV);
+
     std::vector< std::vector<cv::Point> > contours;
     std::vector<cv::Vec4i> hierarchy;
 
