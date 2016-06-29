@@ -192,7 +192,7 @@ class Image(QtGui.QMainWindow):
         return False
 
     def printMorrfPaths(self, response):
-        if len(response.paths) > 0:
+        if hasattr(response, "paths") and len(response.paths) > 0:
             self.morrf_paths = response
             self.update()
         else:

@@ -149,6 +149,7 @@ class Config(QtGui.QMainWindow):
 #            print "Map width is: %s" % initializer.map.width
 #
             #self.printImage(StartImagePublisher(initializer.map))
+
             initializer.cost_maps = StartCostmapPublisher(initializer.map, self.stealth.isChecked(),                               self.safe.isChecked(), self.image_window.getEnemyLocations())
 
             response = StartCommanderPublisher(initializer)
