@@ -176,7 +176,7 @@ void Generator::writeImage(morrf_ros::int16_image &cost_map, commander::outputVa
     cost_map.width = width;
     cost_map.height = height;
 
-    ov.name = "Stealth Text file";
+    ov.name = "Stealth";
 
     for(int y = 0; y < height; y++) {
         for(int x = 0; x < width; x++) {
@@ -329,7 +329,7 @@ void Generator::writeSafeImage(morrf_ros::int16_image &cost_map, commander::outp
     cost_map.width = width;
     cost_map.height = height;
 
-    ov.name = "safe output vals";
+    ov.name = "Safe";
 
     double origRange = maxProbOfNearness - minProbOfNearness;
     double newRange = MAX_GRAYSCALE_VALUE - MIN_GRAYSCALE_VALUE;

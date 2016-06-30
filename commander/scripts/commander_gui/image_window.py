@@ -121,6 +121,25 @@ class Image(QtGui.QMainWindow):
                 obj.setClicked(False)
         self.update()
 
+    def keyPressEvent(self, event):
+        key = event.key()
+        if hasattr(self, 'morrf_paths'):
+            if key == QtCore.Qt.Key_Left:
+                if self.path_index == 0:
+                    self.path_index = ( len(self.morrf_paths.paths) - 1 )
+
+                else:
+                    self.path_index -= 1
+
+            if key == QtCore.Qt.Key_Right:
+                if self.path_index == ( len(self.morrf_paths.paths) - 1 ):
+                    self.path_index = 0
+
+                else:
+                    self.path_index += 1
+
+        self.update()
+
     def paintEvent(self, event):
         painter = QtGui.QPainter()
         painter.begin(self)
@@ -133,15 +152,16 @@ class Image(QtGui.QMainWindow):
             painter.drawImage(obj.getDrawQPoint(), img)
 
         if hasattr(self, 'morrf_paths'):
-            for path in self.morrf_paths.paths:
-                for index in range(len(path.waypoints)):
+            for index in range(len(self.morrf_paths.paths[self.path_index].waypoints)):
 
-                    #Inefficient to draw line between first point and itself
-                    if index != 0:
-                        point1 = QPoint(path.waypoints[index - 1].x, path.waypoints[index - 1].y)
-                        point2 = QPoint(path.waypoints[index].x, path.waypoints[index].y)
+                path = self.morrf_paths.paths[self.path_index]
 
-                        painter.drawLine(point1, point2)
+                #Inefficient to draw line between first point and itself
+                if index != 0:
+                    point1 = QPoint(path.waypoints[index - 1].x, path.waypoints[index - 1].y)
+                    point2 = QPoint(path.waypoints[index].x, path.waypoints[index].y)
+
+                    painter.drawLine(point1, point2)
 
         painter.end()
 
@@ -184,7 +204,7 @@ class Image(QtGui.QMainWindow):
         i.save("/home/wfearn/Dropbox/MORRF_OUTPUT/maps/map.png")
 
     def getMapName(self):
-        return self.image_name
+        return str(self.image_name)
 
     def contains(self, objective):
         for obj in self.objectives:
@@ -193,10 +213,13 @@ class Image(QtGui.QMainWindow):
 
         return False
 
-    def printMorrfPaths(self, response):
+    def startPathCycler(self, response):
         if hasattr(response, "paths") and len(response.paths) > 0:
+            self.showStatusBar()
             self.morrf_paths = response
+            self.path_index = 0
             self.update()
+
         else:
             self.error = NoPath()
 
@@ -204,3 +227,6 @@ class Image(QtGui.QMainWindow):
         if hasattr(self, 'morrf_paths'):
             delattr(self, 'morrf_paths')
             self.update()
+
+    def showStatusBar(self):
+        self.statusBar().showMessage("Use the arrow keys to cycle between path options")

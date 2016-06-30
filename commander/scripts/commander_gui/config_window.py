@@ -19,11 +19,28 @@ from error_popup.no_image_selected import NoImage
 from publishers.image_publisher import StartImagePublisher
 from publishers.commander_publisher import StartCommanderPublisher
 from publishers.costmap_publisher import StartCostmapPublisher
+from publishers.continue_publisher import StartContinuePublisher
 
 STARTX = 1000
 STARTY = 1000
 WIDTH = 250
 HEIGHT = 700
+
+MORRF_OUTPUT_FILE = "/home/wfearn/Dropbox/MORRF_OUTPUT/morrf_output/{}"
+IMG_OUTPUT_FILE = "/home/wfearn/Dropbox/MORRF_OUTPUT/maps/{}"
+
+PATHS_FILE = MORRF_OUTPUT_FILE.format("paths.txt")
+COSTS_FILE = MORRF_OUTPUT_FILE.format("costs.txt")
+SAFE_VALS_FILE = MORRF_OUTPUT_FILE.format("safe_values.txt")
+STEALTH_VALS_FILE = MORRF_OUTPUT_FILE.format("stealth_values.txt")
+ENEMIES_FILE = MORRF_OUTPUT_FILE.format("enemies.txt")
+
+MAP_IMG = IMG_OUTPUT_FILE.format("map.png")
+BOUNDARY_IMG = IMG_OUTPUT_FILE.format("boundary.png")
+
+JSON_FILE = "/home/wfearn/Dropbox/MORRF_OUTPUT/morrf.json"
+
+
 
 class Config(QtGui.QMainWindow):
 
@@ -52,6 +69,11 @@ class Config(QtGui.QMainWindow):
         self.pick_paths.resize(250, 50)
         self.pick_paths.clicked.connect(self.sendToPathPicker)
         self.pick_paths.setEnabled(False)
+
+        self.continue_btn = QtGui.QPushButton("Continue MORRF", self)
+        self.continue_btn.resize(250, 50)
+        self.continue_btn.clicked.connect(self.continueMorrf)
+        self.continue_btn.setEnabled(False)
 
         self.iterations = QtGui.QLineEdit()
         self.iterations.setFrame(True)
@@ -100,6 +122,7 @@ class Config(QtGui.QMainWindow):
         main_layout.addLayout(layout)
         main_layout.addWidget(launch_button)
         main_layout.addWidget(self.pick_paths)
+        main_layout.addWidget(self.continue_btn)
 
         self.win = QtGui.QWidget(self)
         self.win.setLayout(main_layout)
@@ -141,7 +164,7 @@ class Config(QtGui.QMainWindow):
 
             self.morrf_response = StartCommanderPublisher(initializer)
 
-            self.image_window.printMorrfPaths(self.morrf_response)
+            self.image_window.startPathCycler(self.morrf_response)
             self.pick_paths.setEnabled(True)
 
         else:
@@ -166,8 +189,10 @@ class Config(QtGui.QMainWindow):
 
                 test.setPixel(j, i, qrgb.rgb())
 
-        test.save("/home/wfearn/Dropbox/MORRF_OUTPUT/maps/boundary.png")
+        test.save(BOUNDARY_IMG)
 
+    def continueMorrf(self):
+        pass
 
     def getObjectiveNumbers(self):
 
@@ -235,60 +260,139 @@ class Config(QtGui.QMainWindow):
         self.image_window.saveMapToDropbox()
         self.saveBoundImage(self.costmap_response.boundary_image)
 
-        morrf_output_path = "/home/wfearn/Dropbox/MORRF_OUTPUT/morrf_output/morrf_output.txt"
-        map_output_path = "/home/wfearn/Dropbox/MORRF_OUTPUT/maps/%s" % self.image_window.getMapName()
         start = self.image_window.getStartPoint()
         goal = self.image_window.getGoalPoint()
+        paths = self.writePathsToFile(morrf_output.paths)
 
         json_output = {}
 
-        json_output["enemies"] = []
-        for pos in self.image_window.getEnemyLocations():
-            json_output["enemies"].append(str(pos.x) + "," + str(pos.y))
-
         json_output["start"] = str(start[0]) + "," + str(start[1])
         json_output["goal"] = str(goal[0]) + "," + str(goal[1])
+        json_output["map_image"] = self.image_window.getMapName()
+        json_output["enemies"] = self.writeEnemyPosToFile(self.image_window.getEnemyLocations())
+        json_output["boundary_image"] = BOUNDARY_IMG
+        json_output["paths"] = paths[0]
+        json_output["costs"] = paths[1]
 
-        #Making file path concise for retrieval from other computer
-        path_array = morrf_output_path.split("/")
-        json_output["morrf_output"] = path_array[4] + "/" + path_array[5] + "/" + path_array[6]
+        self.writeCostValuesToFile(self.costmap_response.cost_values, json_output)
 
-        waypoint_output = []
-        cost_output = []
+        js = open(JSON_FILE, "w")
+        js.write(json.dumps(json_output))
+        js.close()
 
-        for index in range(len(morrf_output.paths)):
-            waypoint_output.append([])
-            cost_output.append([])
+    def writeCostValuesToFile(self, cost_values, json_file):
+        if len(cost_values) == 2:
+            for i in range(len(cost_values)):
+                cv = cost_values[i]
 
-            for point in morrf_output.paths[index].waypoints:
-                waypoint_output[index].append(point)
+                if cv.name == "Stealth":
+                    f = open(STEALTH_VALS_FILE, "w")
 
-            for cost in morrf_output.paths[index].cost:
-                cost_output[index].append(cost)
-
-        print waypoint_output
-        print cost_output
-        print json.dumps(json_output)
-
-        f = open("/home/wfearn/Dropbox/MORRF_OUTPUT/morrf_output/output_values.txt", "w")
-
-        for i in range(len(self.costmap_response.cost_values)):
-
-            cv = self.costmap_response.cost_values[i]
-            for j in range(len(cv.vals)):
-
-                f.write("%s %s\t%s\n" % (cv.vals[j].position.x, cv.vals[j].position.y, cv.vals[j].cost))
+                    for j in range(len(cv.vals)):
+                        f.write("%s %s %s\n" % (cv.vals[j].position.x, cv.vals[j].position.y, cv.vals[j].cost))
 
 
-       # for path in cost_output:
-       #     for cost in path:
-       #         f.write(str(cost.data) + " ")
+                    json_file["stealth_vals"] = f.name
+                    f.close()
 
-       #     f.write("\n")
+                else:
+                    f = open(SAFE_VALS_FILE, "w")
 
-       # for path in waypoint_output:
-       #     for point in path:
-       #         f.write(str(point.x) + " " + str(point.y) + " ")
-       #     f.write("\n")
+                    for j in range(len(cv.vals)):
+                        f.write("%s %s %s\n" % (cv.vals[j].position.x, cv.vals[j].position.y, cv.vals[j].cost))
 
-        f.close()
+                    json_file["safe_vals"] = f.name
+                    f.close()
+
+        else:
+            cv = cost_values[0]
+
+            if cv.name == "Stealth":
+                f = open(STEALTH_VALS_FILE, "w")
+
+                for j in range(len(cv.vals)):
+                    f.write("%s %s %s\n" % (cv.vals[j].position.x, cv.vals[j].position.y, cv.vals[j].cost))
+
+                json_file["stealth_vals"] = f.name
+                f.close()
+            else:
+                f = open(SAFE_VALS_FILE, "w")
+
+                for j in range(len(cv.vals)):
+                    f.write("%s %s %s\n" % (cv.vals[j].position.x, cv.vals[j].position.y, cv.vals[j].cost))
+
+                json_file["safe_vals"] = f.name
+                f.close()
+
+    def writeEnemyPosToFile(self, enemy_locations):
+        enemies = open(ENEMIES_FILE, "w")
+
+        for pos in enemy_locations:
+            enemies.write(str(pos.x) + "," + str(pos.y) + "E")
+
+        return enemies.name
+
+    def writePathsToFile(self, paths):
+
+        waypoint_output = open(PATHS_FILE, "w")
+        cost_output = open(COSTS_FILE, "w")
+
+        for i in range(len(paths)):
+            for point in paths[i].waypoints:
+                waypoint_output.write( str(int(point.x)) + " " + str(int(point.y)) + " " )
+
+            waypoint_output.write("\n")
+
+            if len(paths[i].cost) == 3:
+                for cost in paths[i].cost:
+                    cost_output.write(str(cost.data) + " ")
+
+                cost_output.write("\n")
+
+            elif len(paths[i].cost) == 2:
+                if self.min_distance.isChecked():
+                    cost_output.write(str(paths[i].cost[0].data) + " ")
+
+                    if self.stealth.isChecked():
+                        cost_output.write(str(paths[i].cost[1].data) + " ")
+                        cost_output.write(str(0))
+
+                    else:
+                        cost_output.write(str(0) + " ")
+                        cost_output.write(str(paths[i].cost[1].data))
+
+                elif self.stealth.isChecked():
+                    cost_output.write(str(0) + " ")
+                    for cost in paths[i].cost:
+                        cost_output.write(str(cost.data) + " ")
+
+                else:
+                    cost_output.write(str(0) + " " + str(0) + " ")
+                    cost_output.write(str(paths[i].cost[0].data))
+
+                cost_output.write("\n")
+
+            else:
+                if self.min_distance.isChecked():
+                    cost_output.write(str(paths[i].cost[0].data) + " ")
+                    cost_output.write(str(0) + " " + str(0))
+
+                elif self.stealth.isChecked():
+                    cost_output.write(str(0) + " ")
+                    cost_output.write(str(paths[i].cost[0].data) + " ")
+                    cost_output.write(str(0))
+
+                else:
+                    cost_output.write(str(0) + " " + str(0) + " ")
+                    cost_output.write(str(paths[i].cost[0].data) + " ")
+
+                cost_output.write("\n")
+
+        waypoint_name = waypoint_output.name
+        cost_name = cost_output.name
+
+        waypoint_output.close()
+        cost_output.close()
+
+
+        return (waypoint_name, cost_name)
