@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys
 import rospy
 
@@ -166,6 +168,7 @@ class Config(QtGui.QMainWindow):
 
             self.image_window.startPathCycler(self.morrf_response)
             self.pick_paths.setEnabled(True)
+            self.continue_btn.setEnabled(True)
 
         else:
             self.error = NotInitialized()
@@ -192,7 +195,8 @@ class Config(QtGui.QMainWindow):
         test.save(BOUNDARY_IMG)
 
     def continueMorrf(self):
-        pass
+        self.morrf_response = StartContinuePublisher(int(self.iterations.text()))
+        self.image_window.startPathCycler(self.morrf_response)
 
     def getObjectiveNumbers(self):
 

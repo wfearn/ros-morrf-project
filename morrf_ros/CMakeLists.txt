@@ -32,7 +32,8 @@ add_message_files (
 
 add_service_files(
   FILES
-  morrf_mopp.srv
+  morrf_initialize.srv
+  morrf_continue.srv
 )
 
 generate_messages (
@@ -56,8 +57,15 @@ include_directories(include ${catkin_INCLUDE_DIRS}
 add_executable(morrf_node src/morrf_service.cpp
                           src/morrf_service_node.cpp
               )
+
+add_executable(morrf_continue_node src/morrf_continue_node.cpp)
+
 target_link_libraries(morrf_node ${catkin_LIBRARIES}
                                  ${MORRF_LIBRARY}
+                     )
+
+target_link_libraries(morrf_continue_node ${catkin_LIBRARIES}
+                                          ${MORRF_LIBRARY}
                      )
 
 install(TARGETS morrf_node

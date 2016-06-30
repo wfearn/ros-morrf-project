@@ -5,12 +5,12 @@ import rospy
 from morrf_ros.srv import *
 from morrf_ros.msg import *
 
-def StartContinuePublisher(boolean, iterations):
-    print "Starting continue publisher"
+def StartContinuePublisher(iterations):
+    print "Starting continue publisher\n iterations: %s" % (iterations)
     rospy.wait_for_service("/morrf/continue")
     try:
-        morrf_ros = rospy.ServiceProxy("/morrf/continue", continuation)
-        response = morrf_ros(boolean, iterations)
+        morrf_ros = rospy.ServiceProxy("/morrf/continue", morrf_continue)
+        response = morrf_ros(iterations)
         print "Received continued paths, %s" % str(response)
         return response
 

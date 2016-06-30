@@ -5,6 +5,7 @@
 using namespace std;
 
 #define MORRF_SERVICE_NAME "/morrf/get_multi_obj_paths"
+#define MORRF_CONTINUE_SERVICE "/morrf/continue"
 
 
 static double calcDist(POS2D pos_a, POS2D pos_b, int** distribution, void* tree) {
@@ -15,7 +16,7 @@ static double calcDist(POS2D pos_a, POS2D pos_b, int** distribution, void* tree)
   double delta_x = fabs(pos_a[0]-pos_b[0]);
   double delta_y = fabs(pos_a[1]-pos_b[1]);
   dist = sqrt(delta_x*delta_x+delta_y*delta_y);
- 
+
   return dist;
 }
 
@@ -33,7 +34,7 @@ static double calcCost(POS2D pos_a, POS2D pos_b, int** pp_distribution, void* tr
   float y1 = pos_a[1];
   float x2 = pos_b[0];
   float y2 = pos_b[1];
- 
+
   const bool steep = (fabs(y2 - y1) > fabs(x2 - x1));
   if (steep) {
     std::swap(x1, y1);
@@ -81,117 +82,195 @@ static double calcCost(POS2D pos_a, POS2D pos_b, int** pp_distribution, void* tr
 MORRFService::MORRFService() {
 
   m_mopp_srv = m_nh.advertiseService( MORRF_SERVICE_NAME, &MORRFService::get_multi_obj_paths, this);
+  morrf_continue = m_cont.advertiseService( MORRF_CONTINUE_SERVICE, &MORRFService::continuation, this);
+
+  morrf = NULL;
 }
 
 MORRFService::~MORRFService() {
 }
-  
 
-bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_mopp::Request& req,
-                                        morrf_ros::morrf_mopp::Response& res) {
-  std::cout << "---------------------------------" << std::endl;
-  std::cout << "MORRFService::get_multi_obj_paths" << std::endl;
-  std::cout << "SERVICE RECEIVED" << std::endl;
-  //std::cout << req.init << std::endl;
-  std::cout << "size:" << req.init.width << "*" << req.init.height << std::endl;
-  std::cout << "num of obj: " << req.init.objective_number << " , num of sub: " << req.init.number_of_trees;
-  std::cout << "segment: " << req.init.segment_length << " method:" << req.init.method_type << std::endl;
-  std::cout << "start x:" << req.init.start.x << " y:" << req.init.start.y << std::endl;
-  std::cout << "goal x:" << req.init.goal.x << " y:" << req.init.goal.y << std::endl;
-  std::cout << "num of iteration:" << req.init.number_of_iterations << std::endl;
-  std::cout << "---------------------------------" << std::endl;
+bool MORRFService::continuation( morrf_ros::morrf_continue::Request& req,
+                                 morrf_ros::morrf_continue::Response& res) {
+    if(morrf != NULL) {
 
-  std::vector<COST_FUNC_PTR> funcs;
-  std::vector<int**> fitnessDistributions;
+        int new_iterations = morrf->get_current_iteration() + req.iterations;
 
-  int** pp_obstacle = new int*[req.init.map.width];
-  for(unsigned int w=0; w < req.init.map.width; w++) {
-    pp_obstacle[w] = new int[req.init.map.height];
-    for(unsigned int h=0; h < req.init.map.height; h++) {
-      pp_obstacle[w][h] = req.init.map.int_array[w+req.init.map.width*h];
+        while(morrf->get_current_iteration() <= new_iterations) {
+            morrf->extend();
+        }
+
+        std::vector<Path*> paths = morrf->get_paths();
+
+        for(unsigned int i=0; i < paths.size(); i++) {
+            Path* p = paths[i];
+            if(p) {
+
+                morrf_ros::multi_objective_path pp;
+                for(unsigned int k=0; k < p->m_objective_num; k++ ) {
+                  std_msgs::Float64 val;
+                  val.data = p->m_cost[k];
+                  pp.cost.push_back(val);
+                }
+
+                for(unsigned int j=0; j < p->m_waypoints.size(); j++) {
+
+                  geometry_msgs::Pose2D point;
+                  point.x = p->m_waypoints[j][0];
+                  point.y = p->m_waypoints[j][1];
+                  pp.waypoints.push_back(point);
+                }
+
+                res.paths.push_back(pp);
+            }
+        }
+
+       return true;
     }
-  }
-  MORRF morrf(req.init.width, req.init.height, req.init.objective_number, req.init.number_of_trees,
+
+    return false;
+}
+
+
+bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_initialize::Request& req,
+                                        morrf_ros::morrf_initialize::Response& res) {
+//  std::cout << "---------------------------------" << std::endl;
+//  std::cout << "MORRFService::get_multi_obj_paths" << std::endl;
+//  std::cout << "SERVICE RECEIVED" << std::endl;
+//  //std::cout << req.init << std::endl;
+//  std::cout << "size:" << req.init.width << "*" << req.init.height << std::endl;
+//  std::cout << "num of obj: " << req.init.objective_number << " , num of sub: " << req.init.number_of_trees;
+//  std::cout << "segment: " << req.init.segment_length << " method:" << req.init.method_type << std::endl;
+//  std::cout << "start x:" << req.init.start.x << " y:" << req.init.start.y << std::endl;
+//  std::cout << "goal x:" << req.init.goal.x << " y:" << req.init.goal.y << std::endl;
+//  std::cout << "num of iteration:" << req.init.number_of_iterations << std::endl;
+//  std::cout << "---------------------------------" << std::endl;
+
+    int** pp_obstacle = new int*[req.init.map.width];
+    for(unsigned int w=0; w < req.init.map.width; w++) {
+
+        pp_obstacle[w] = new int[req.init.map.height];
+
+        for(unsigned int h=0; h < req.init.map.height; h++) {
+
+            pp_obstacle[w][h] = req.init.map.int_array[w+req.init.map.width*h];
+        }
+    }
+
+    this->delete_morrf();
+
+    morrf = new MORRF(req.init.width, req.init.height, req.init.objective_number, req.init.number_of_trees,
               req.init.segment_length, (MORRF::MORRF_TYPE)req.init.method_type);
 
-  if(req.init.minimum_distance_enabled == true) {
-    funcs.push_back(calcDist);
-    fitnessDistributions.push_back(NULL);
-  }
-
-  for(unsigned int i=0; i < req.init.cost_maps.size(); i++) {
-    morrf_ros::int16_image img = req.init.cost_maps[i];
-    int** p_costmap = new int*[img.width];
-    for(unsigned int w=0; w < img.width; w++) {
-      p_costmap[w] = new int[img.height];
-      for(unsigned int h=0; h < img.height; h++) {
-        p_costmap[w][h] = img.int_array[w + img.width*h];
-      }
+    if(req.init.minimum_distance_enabled == true) {
+        funcs.push_back(calcDist);
+        fitnessDistributions.push_back(NULL);
     }
-    funcs.push_back(calcCost);
-    fitnessDistributions.push_back(p_costmap);
-  }
 
-  morrf.add_funcs(funcs, fitnessDistributions);
-  POS2D start(req.init.start.x, req.init.start.y);
-  POS2D goal(req.init.goal.x, req.init.goal.y);
-  morrf.init(start, goal);
-  morrf.load_map(pp_obstacle);
-  
+    for(unsigned int i=0; i < req.init.cost_maps.size(); i++) {
+
+        morrf_ros::int16_image img = req.init.cost_maps[i];
+        int** p_costmap = new int*[img.width];
+
+        for(unsigned int w=0; w < img.width; w++) {
+
+            p_costmap[w] = new int[img.height];
+
+            for(unsigned int h=0; h < img.height; h++) {
+
+                p_costmap[w][h] = img.int_array[w + img.width*h];
+            }
+        }
+
+        funcs.push_back(calcCost);
+        fitnessDistributions.push_back(p_costmap);
+    }
+
+    morrf->add_funcs(funcs, fitnessDistributions);
+    POS2D start(req.init.start.x, req.init.start.y);
+    POS2D goal(req.init.goal.x, req.init.goal.y);
+    morrf->init(start, goal);
+    morrf->load_map(pp_obstacle);
+
   /*
   std::cout << "dump map info " << std::endl;
   morrf.dump_map_info("./test_obs.txt");
   */
 
-  std::cout << "start planning" << std::endl;
-  while(morrf.get_current_iteration() <= req.init.number_of_iterations) {
-    morrf.extend();
-    std::cout << "Iteration " << morrf.get_current_iteration() << std::endl;
-  }
-
-  std::vector<Path*> paths = morrf.get_paths();
-
-  std::cout << paths.size() << " paths found " << std::endl;
-  for(unsigned int i=0; i < paths.size(); i++) {
-    Path* p = paths[i];
-    if(p) {
-      morrf_ros::multi_objective_path pp;
-      for(unsigned int k=0; k < p->m_objective_num; k++ ) {
-        std_msgs::Float64 val;
-        val.data = p->m_cost[k];
-        pp.cost.push_back(val);
-      }
-      for(unsigned int j=0; j < p->m_waypoints.size(); j++) {
-        geometry_msgs::Pose2D point;
-        point.x = p->m_waypoints[j][0];
-        point.y = p->m_waypoints[j][1];
-        pp.waypoints.push_back(point);
-      }
-      res.paths.push_back(pp);
+  //std::cout << "start planning" << std::endl;
+    while(morrf->get_current_iteration() <= req.init.number_of_iterations) {
+      morrf->extend();
     }
-  }
-  std::cout << paths.size() << " paths exported " << std::endl;
 
-  for(unsigned int w=0; w < req.init.map.width; w++) {
-    delete [] pp_obstacle[w];
-    pp_obstacle[w] = NULL;
-  }
-  delete [] pp_obstacle;
+    std::vector<Path*> paths = morrf->get_paths();
 
-  funcs.clear();
-  for(unsigned int i=0; i < fitnessDistributions.size(); i++) {
-    if(fitnessDistributions[i] != NULL) {
-      for(unsigned int w=0; w < req.init.width; w++) {
-        delete [] fitnessDistributions[i][w];
-      }
-      delete [] fitnessDistributions[i];
-      fitnessDistributions[i] = NULL;
+    for(unsigned int i=0; i < paths.size(); i++) {
+
+        Path* p = paths[i];
+
+        if(p) {
+
+            morrf_ros::multi_objective_path pp;
+
+            for(unsigned int k=0; k < p->m_objective_num; k++ ) {
+
+              std_msgs::Float64 val;
+              val.data = p->m_cost[k];
+              pp.cost.push_back(val);
+
+            }
+
+            for(unsigned int j=0; j < p->m_waypoints.size(); j++) {
+
+              geometry_msgs::Pose2D point;
+              point.x = p->m_waypoints[j][0];
+              point.y = p->m_waypoints[j][1];
+              pp.waypoints.push_back(point);
+
+            }
+
+            res.paths.push_back(pp);
+        }
     }
-  }
-  fitnessDistributions.clear();
 
-  return true;
+    for(unsigned int w=0; w < req.init.map.width; w++) {
+            delete [] pp_obstacle[w];
+            pp_obstacle[w] = NULL;
+         }
+
+         delete [] pp_obstacle;
+
+
+  //std::cout << paths.size() << " paths exported " << std::endl;
+
+    return true;
 }
 
+void MORRFService::delete_morrf() {
 
+    if(morrf != NULL) {
+        delete morrf;
+        morrf = NULL;
 
+    }
+
+    funcs.clear();
+
+    for(unsigned int i = 0; i < fitnessDistributions.size(); i++) {
+        if(fitnessDistributions[i] != NULL) {
+
+            unsigned int array_size = sizeof(fitnessDistributions[i])/sizeof(int*);
+
+        for(unsigned int w=0; w < array_size; w++) {
+            delete [] fitnessDistributions[i][w];
+        }
+
+        delete [] fitnessDistributions[i];
+        fitnessDistributions[i] = NULL;
+
+       }
+
+    }
+
+    fitnessDistributions.clear();
+}

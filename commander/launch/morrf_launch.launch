@@ -2,4 +2,5 @@
 <launch>
     <include file="$(find morrf_ros)/launch/launch_morrf_node.launch"/>
     <node pkg="commander" type="morrf_commander.py" name="morrf_commander" output="screen"/>
+    <node pkg="costmap_generator" type="costmap_subscriber" name="costmap_generator" output="screen"/>
 </launch>

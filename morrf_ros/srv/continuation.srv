@@ -1,4 +1,0 @@
-bool continuation
-int64 iterations
----
-multi_objective_path[] paths
