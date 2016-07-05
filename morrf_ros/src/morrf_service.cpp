@@ -197,7 +197,7 @@ bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_initialize::Request& re
   morrf.dump_map_info("./test_obs.txt");
   */
 
-  //std::cout << "start planning" << std::endl;
+  std::cout << "start planning" << std::endl;
     while(morrf->get_current_iteration() <= req.init.number_of_iterations) {
       morrf->extend();
     }
@@ -241,7 +241,7 @@ bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_initialize::Request& re
          delete [] pp_obstacle;
 
 
-  //std::cout << paths.size() << " paths exported " << std::endl;
+  std::cout << paths.size() << " paths exported " << std::endl;
 
     return true;
 }

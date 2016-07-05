@@ -58,15 +58,15 @@ add_executable(morrf_node src/morrf_service.cpp
                           src/morrf_service_node.cpp
               )
 
-add_executable(morrf_continue_node src/morrf_continue_node.cpp)
+#add_executable(morrf_continue_node src/morrf_continue_node.cpp)
 
 target_link_libraries(morrf_node ${catkin_LIBRARIES}
                                  ${MORRF_LIBRARY}
                      )
 
-target_link_libraries(morrf_continue_node ${catkin_LIBRARIES}
-                                          ${MORRF_LIBRARY}
-                     )
+#target_link_libraries(morrf_continue_node ${catkin_LIBRARIES}
+ #                                         ${MORRF_LIBRARY}
+  #                   )
 
 install(TARGETS morrf_node
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
