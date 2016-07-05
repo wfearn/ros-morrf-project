@@ -14,7 +14,8 @@ def StartCostmapPublisher(map_image, stealth, safe, enemy_points):
 
         response = boundary_img(map_image, stealth, safe, enemy_points)
 
-        print "Received costmap array, %s" % str(response.cost_maps)
+	print "Received costmap array"
+        #print "Received costmap array, %s" % str(response.cost_maps)
 
         return response
 
