@@ -10,6 +10,7 @@ import rospkg
 GOAL_PATH = "{}/data/objective_icons/goal.png"
 START_PATH = "{}/data/objective_icons/start.png"
 ENEMY_PATH = "{}/data/objective_icons/enemy.png"
+ROBOT_PATH = "{}/data/objective_icons/robot1.png"
 
 class Objective:
     def __init__(self, objective, xpos, ypos):
@@ -32,7 +33,11 @@ class Objective:
 
         elif self.objective_type == "goal":
             self.image = QImage(GOAL_PATH.format(path))
-        else:
+
+        elif self.objective_type == "robot":
+	    self.image = QImage(ROBOT_PATH.format(path))
+
+	else:
             self.image = QImage(ENEMY_PATH.format(path))
 
     def setClicked(self, boolean):

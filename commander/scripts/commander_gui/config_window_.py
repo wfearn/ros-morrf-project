@@ -11,6 +11,9 @@ from morrf_ros.msg import *
 
 import cv2 
 import numpy as np
+import math
+
+from objective.objective import Objective
 
 from error_popup.not_initialized import NotInitialized
 from error_popup.no_image_selected import NoImage
@@ -22,6 +25,7 @@ STARTX = 1200
 STARTY = 1200
 WIDTH = 200 
 HEIGHT = 300
+ROBOT_PATH = "{}/data/objective_icons/robot.png"
 
 class Window(QtGui.QMainWindow):
 
@@ -42,6 +46,10 @@ class Window(QtGui.QMainWindow):
 
 		self.statusBar()
 
+		self.green_pen = QtGui.QPen(QtCore.Qt.green, 5, QtCore.Qt.SolidLine)
+		
+		self.objectives = []
+	
 		self.view()
 	
 	def view(self):
@@ -51,6 +59,10 @@ class Window(QtGui.QMainWindow):
 		btn = QtGui.QPushButton("Exit", self)
 		btn.clicked.connect(QtCore.QCoreApplication.instance().quit)
 	
+		self.robot = QtGui.QPushButton("Send Robot", self)
+		self.robot.setEnabled(False)
+		self.robot.clicked.connect(self.send_robot)		
+
 		self.quick = QtGui.QCheckBox("Quickly", self)
 		self.quick.setChecked(False)
 		#self.quick.setStatusTip('Need a Quick Path')
@@ -74,6 +86,7 @@ class Window(QtGui.QMainWindow):
 		layout.addWidget(self.stealth)
 		layout.addWidget(self.safe)
  		layout.addWidget(self.launch)
+		layout.addWidget(self.robot)			
 		layout.addWidget(btn)
 	
 		self.widget = QtGui.QWidget(self)
@@ -81,6 +94,35 @@ class Window(QtGui.QMainWindow):
 		self.setCentralWidget(self.widget)
 
 		self.show()	
+
+	def send_robot(self):
+		path = self.morrf_response.paths[0].waypoints
+		
+		self.image_window.createRobot((self.start.x, self.start.y))	
+		rob = self.image_window.getRobot()
+		
+		v = .1 
+		
+		
+		for point in path:
+				
+			p1 = (point.x, point.y)
+			p2 = rob.getPosition()
+
+
+			while self.dist(p1, p2) > 1:
+				theta = math.atan2( (p1[1] - p2[1]), (p1[0] - p2[0]) )
+				x = v * math.cos(theta)
+				y = v * math.sin(theta)
+				
+				p2 = (p2[0] + x, p2[1] + y) 
+				self.image_window.updateRobPosition( p2 )	
+				QtCore.QCoreApplication.instance().processEvents()
+			
+
+	def dist(self, p1, p2):
+		return math.sqrt( (p2[0] - p1[0]) **2 + (p2[1] - p1[1]) **2)
+		
 
 	def load_image(self):
 		self.image_name = QtGui.QFileDialog.getOpenFileName(self, "Load Image")
@@ -106,7 +148,6 @@ class Window(QtGui.QMainWindow):
 			self.error1 = NoImage()
 			
 			resolution = QtGui.QDesktopWidget().screenGeometry()
-			#print ("width of desktop: %s", QApplication.desktop().width())	
 
 			self.error1.move((resolution.width() / 2), (resolution.height() / 2))
 			#print ("x of error widget: %d, y of error widget: %d" %(self.error1.pos().x(), self.error1.pos().y()))
@@ -116,6 +157,7 @@ class Window(QtGui.QMainWindow):
 		else:
 			self.image_window.delMorrfPaths()			
 			self.initialize()
+			self.robot.setEnabled(True)
 			
 	def initialize(self):
 			goal = self.image_window.getGoalPoint()
@@ -128,6 +170,8 @@ class Window(QtGui.QMainWindow):
 			initializer.start.x = start[0]
 			initializer.start.y = start[1]
 
+			self.start = initializer.start
+			
 			initializer.map = self.map_convert()
 			initializer.width = initializer.map.width
 			initializer.height = initializer.map.height
@@ -145,6 +189,8 @@ class Window(QtGui.QMainWindow):
 			initializer.cost_maps = self.costmap_response.cost_maps
 			
 			self.morrf_response = StartCommanderPublisher(initializer)
+			
+			#print (self.morrf_response)	
 
 			self.image_window.startPathCycler(self.morrf_response)			
 			

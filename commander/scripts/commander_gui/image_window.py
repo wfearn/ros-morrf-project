@@ -88,6 +88,27 @@ class Image(QtGui.QMainWindow):
 
         self.update()
 
+    def createRobot(self, start):
+        #if not self.contains("robot"):
+        #print ("does not contain robot")
+        obj = Objective("robot", start[0], start[1])
+        self.objectives.append(obj)
+        self.update()
+
+    def getRobot(self):
+	for obj in self.objectives:
+		if obj.getObjectiveType() == 'robot':
+			return obj
+	return None
+
+    def updateRobPosition(self, p):
+	for obj in self.objectives:
+		if obj.getObjectiveType() == 'robot':
+			obj.setPosition(p[0], p[1])
+
+	self.update()		
+
+	
     def createEnemy(self):
         obj = Objective("enemy", self.mouseX, self.mouseY)
         self.objectives.append(obj)
@@ -148,10 +169,10 @@ class Image(QtGui.QMainWindow):
         painter.setPen(self.green_pen)
 
         for obj in self.objectives:
-            img = obj.getImage()
+            img = obj.getImage() 
             painter.drawImage(obj.getDrawQPoint(), img)
-
-        if hasattr(self, 'morrf_paths'):
+	    
+	if hasattr(self, 'morrf_paths'):
             for index in range(len(self.morrf_paths.paths[self.path_index].waypoints)):
 
                 path = self.morrf_paths.paths[self.path_index]
@@ -162,8 +183,8 @@ class Image(QtGui.QMainWindow):
                     point2 = QPoint(path.waypoints[index].x, path.waypoints[index].y)
 
                     painter.drawLine(point1, point2)
-
-        painter.end()
+	
+	painter.end()
 
     def reset(self):
         self.objectives = []
