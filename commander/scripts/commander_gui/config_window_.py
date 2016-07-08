@@ -96,11 +96,18 @@ class Window(QtGui.QMainWindow):
 		self.show()	
 
 	def send_robot(self):
-		path = self.morrf_response.paths[0].waypoints
 		
-		self.image_window.createRobot((self.start.x, self.start.y))	
+		index = self.image_window.getPathIndex()
+		path = self.morrf_response.paths[index].waypoints
+		
+
+		if self.image_window.getRobot() == None:
+			self.image_window.createRobot((self.start.x, self.start.y))	
+		else:
+			self.image_window.updateRobPosition( (self.start.x, self.start.y) )		
+
 		rob = self.image_window.getRobot()
-		
+
 		v = .1 
 		
 		
@@ -127,12 +134,16 @@ class Window(QtGui.QMainWindow):
 	def load_image(self):
 		self.image_name = QtGui.QFileDialog.getOpenFileName(self, "Load Image")
 		self.image_window = Image(self.image_name)
+
+		self.robot.setEnabled(False)
 		
 	def enable_launch(self, state):
 		if state == QtCore.Qt.Checked:
 			self.launch.setEnabled(True)
+
 		elif self.quick.checkState() or self.stealth.checkState() or self.safe.checkState():
 			self.launch.setEnabled(True)
+
 		else:
 			self.launch.setEnabled(False)
 
@@ -157,7 +168,6 @@ class Window(QtGui.QMainWindow):
 		else:
 			self.image_window.delMorrfPaths()			
 			self.initialize()
-			self.robot.setEnabled(True)
 			
 	def initialize(self):
 			goal = self.image_window.getGoalPoint()
@@ -183,17 +193,19 @@ class Window(QtGui.QMainWindow):
 			initializer.minimum_distance_enabled = self.quick.isChecked()
 			initializer.method_type = 0 #Weighted Sum		
 	
-			#print("stealth: ", self.stealth.isChecked())
 			self.costmap_response = StartCostmapPublisher(initializer.map, self.stealth.isChecked(), self.safe.isChecked(), self.image_window.getEnemyLocations())
 			
 			initializer.cost_maps = self.costmap_response.cost_maps
 			
 			self.morrf_response = StartCommanderPublisher(initializer)
 			
-			#print (self.morrf_response)	
-
 			self.image_window.startPathCycler(self.morrf_response)			
 			
+			if not hasattr(self.image_window, 'error'):
+				self.robot.setEnabled(True)
+			else:
+				self.robot.setEnabled(False)
+
 	def map_convert(self):
 		if hasattr(self, "image_name"):
 			
@@ -208,6 +220,7 @@ class Window(QtGui.QMainWindow):
 				for i in range (image.width):
 					image.int_array.append(np.int16(img[j, i, 0]))
 			return image
+
 		else:
 			return None	
 	

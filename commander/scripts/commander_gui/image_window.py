@@ -244,6 +244,9 @@ class Image(QtGui.QMainWindow):
         else:
             self.error = NoPath()
 
+    def getPathIndex(self):
+	return self.path_index
+
     def delMorrfPaths(self):
         if hasattr(self, 'morrf_paths'):
             delattr(self, 'morrf_paths')
