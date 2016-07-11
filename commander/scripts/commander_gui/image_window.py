@@ -60,7 +60,11 @@ class Image(QtGui.QMainWindow):
         self.setPalette(palette)
 
         self.black_pen = QtGui.QPen(QtCore.Qt.black, 5, QtCore.Qt.SolidLine)
-        self.green_pen = QtGui.QPen(QtCore.Qt.green, 5, QtCore.Qt.SolidLine)
+	self.fade_color = QtGui.QColor(QtCore.Qt.gray)
+	self.fade_color.setAlpha(80)
+	self.highlighter = QtCore.Qt.magenta
+        self.fade_green_pen = QtGui.QPen(self.fade_color, 5, QtCore.Qt.SolidLine)
+	self.dark_green_pen = QtGui.QPen(self.highlighter, 5, QtCore.Qt.SolidLine)
 
         self.show()
 
@@ -165,25 +169,29 @@ class Image(QtGui.QMainWindow):
         painter = QtGui.QPainter()
         painter.begin(self)
 
-
-        painter.setPen(self.green_pen)
-
         for obj in self.objectives:
             img = obj.getImage() 
             painter.drawImage(obj.getDrawQPoint(), img)
 	    
 	if hasattr(self, 'morrf_paths'):
-            for index in range(len(self.morrf_paths.paths[self.path_index].waypoints)):
 
-                path = self.morrf_paths.paths[self.path_index]
+	    for i in range(len(self.morrf_paths.paths)):
 
-                #Inefficient to draw line between first point and itself
-                if index != 0:
-                    point1 = QPoint(path.waypoints[index - 1].x, path.waypoints[index - 1].y)
-                    point2 = QPoint(path.waypoints[index].x, path.waypoints[index].y)
+		    for index in range(len(self.morrf_paths.paths[i].waypoints)):
 
-                    painter.drawLine(point1, point2)
+			if i == self.path_index:
+				painter.setPen(self.dark_green_pen)
+			else:
+				painter.setPen(self.fade_green_pen)
 	
+			path = self.morrf_paths.paths[i]
+
+			#Inefficient to draw line between first point and itself
+			if index != 0:
+			    point1 = QPoint(path.waypoints[index - 1].x, path.waypoints[index - 1].y)
+			    point2 = QPoint(path.waypoints[index].x, path.waypoints[index].y)
+
+			    painter.drawLine(point1, point2)
 	painter.end()
 
     def reset(self):
