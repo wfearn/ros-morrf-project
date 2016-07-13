@@ -32,13 +32,12 @@ bool generate_costmap(commander::get_cost_map::Request &req,
 
             if(req.stealth == 1) {
 
+		std::cout << "Generating stealth costmap..." << endl;
+
                 morrf_ros::int16_image cost;
                 commander::outputVals ov;
 
                 generator.probOfSeenByEnemy(enemy_points, req.map, bound, cost, ov);
-
-                print_array_image(cost, "/home/tkatuka/Pictures/stealth_cost.png");
-                write_output_vals(ov, "/home/tkatuka/Pictures/stealth.txt");
 
                 res.cost_maps.push_back(cost);
                 res.cost_values.push_back(ov);
@@ -46,17 +45,18 @@ bool generate_costmap(commander::get_cost_map::Request &req,
 
             if(req.safe == 1) {
 
+		std::cout << "Generating safety costmap..." << endl;
+
                 morrf_ros::int16_image cost;
                 commander::outputVals ov;
 
                 generator.probOfBeingNearToObstacle(enemy_points, req.map, bound, cost, ov);
 
-                print_array_image(cost, "/home/tkatuka/Pictures/safe_cost.png");
-                write_output_vals(ov, "/home/tkatuka/Pictures/safe.txt");
-
                 res.cost_maps.push_back(cost);
                 res.cost_values.push_back(ov);
             }
+
+	    std::cout << "Costmaps generated!" << endl;
 
             /*Meher's Parameters
             1. Map Scores FileName

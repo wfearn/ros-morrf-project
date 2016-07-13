@@ -140,6 +140,8 @@ class Config(QtGui.QMainWindow):
 
         elif self.is_completed() and self.image_window.isCompleted():
 
+	    print "Launching MORRF"
+
             #Deinitializing variable to prevent errors
             self.image_window.delMorrfPaths()
 
@@ -167,6 +169,8 @@ class Config(QtGui.QMainWindow):
             initializer.cost_maps = self.costmap_response.cost_maps
 
             self.morrf_response = StartCommanderPublisher(initializer)
+	    
+            print "MORRF paths received, printing..."
 
             self.image_window.startPathCycler(self.morrf_response)
             self.pick_paths.setEnabled(True)
@@ -176,7 +180,7 @@ class Config(QtGui.QMainWindow):
             self.error = NotInitialized()
 
     def sendToPathPicker(self):
-        print "Sending to path palette"
+        print "Sending to path palette..."
 
         self.outputToDropbox(self.morrf_response)
 
