@@ -62,6 +62,7 @@ class Config(QtGui.QMainWindow):
         load_menu.addAction(self.image_load)
         load_menu.addAction(self.appQuit)
 
+	self.statusBar()
 
         launch_button = QtGui.QPushButton("Launch MORRF", self)
         launch_button.resize(250, 50)
@@ -75,6 +76,7 @@ class Config(QtGui.QMainWindow):
         self.continue_btn = QtGui.QPushButton("Continue MORRF", self)
         self.continue_btn.resize(250, 50)
         self.continue_btn.clicked.connect(self.continueMorrf)
+	self.continue_btn.setStatusTip('To make paths smoother')
         self.continue_btn.setEnabled(False)
 
         self.iterations = QtGui.QLineEdit()

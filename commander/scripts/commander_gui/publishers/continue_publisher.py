@@ -11,7 +11,8 @@ def StartContinuePublisher(iterations):
     try:
         morrf_ros = rospy.ServiceProxy("/morrf/continue", morrf_continue)
         response = morrf_ros(iterations)
-        print "Received continued paths, %s" % str(response)
+        #print "Received continued paths, %s" % str(response)
+	print "Received paths"
         return response
 
     except rospy.ServiceException, e:
