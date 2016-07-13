@@ -6,7 +6,8 @@ from morrf_ros.srv import *
 from morrf_ros.msg import *
 
 def StartCommanderPublisher(morrf_initiator):
-    print "Received at commander publisher, %s" % morrf_initiator.map.name
+    print "Starting MORRF to generate paths..."
+
     rospy.wait_for_service("/morrf/get_multi_obj_paths")
     try:
         morrf_ros = rospy.ServiceProxy("/morrf/get_multi_obj_paths", morrf_initialize)

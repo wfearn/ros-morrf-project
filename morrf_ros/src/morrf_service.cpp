@@ -92,13 +92,20 @@ MORRFService::~MORRFService() {
 
 bool MORRFService::continuation( morrf_ros::morrf_continue::Request& req,
                                  morrf_ros::morrf_continue::Response& res) {
+
+    std::cout << "Continuing iterations on MORRF..." << std::endl;
+
     if(morrf != NULL) {
 
         int new_iterations = morrf->get_current_iteration() + req.iterations;
 
+        std::cout << "Starting MORRF iterations..." << std::endl;
+
         while(morrf->get_current_iteration() <= new_iterations) {
             morrf->extend();
         }
+
+	std::cout << "MORRF iterations completed..." << std::endl;
 
         std::vector<Path*> paths = morrf->get_paths();
 
@@ -125,6 +132,8 @@ bool MORRFService::continuation( morrf_ros::morrf_continue::Request& req,
             }
         }
 
+       std::cout << "MORRF finished!" << std::endl;
+
        return true;
     }
 
@@ -134,20 +143,8 @@ bool MORRFService::continuation( morrf_ros::morrf_continue::Request& req,
 
 bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_initialize::Request& req,
                                         morrf_ros::morrf_initialize::Response& res) {
-//  std::cout << "---------------------------------" << std::endl;
-//  std::cout << "MORRFService::get_multi_obj_paths" << std::endl;
-//  std::cout << "SERVICE RECEIVED" << std::endl;
-//  //std::cout << req.init << std::endl;
-//  std::cout << "size:" << req.init.width << "*" << req.init.height << std::endl;
-//  std::cout << "num of obj: " << req.init.objective_number << " , num of sub: " << req.init.number_of_trees;
-//  std::cout << "segment: " << req.init.segment_length << " method:" << req.init.method_type << std::endl;
-//  std::cout << "start x:" << req.init.start.x << " y:" << req.init.start.y << std::endl;
-//  std::cout << "goal x:" << req.init.goal.x << " y:" << req.init.goal.y << std::endl;
-//  std::cout << "num of iteration:" << req.init.number_of_iterations << std::endl;
-//  std::cout << "---------------------------------" << std::endl;
 
-
-//	std::cout << "started get_multi_obj_paths()" << endl;	
+    std::cout << "Starting MORRF..." << std::endl;
 
     int** pp_obstacle = new int*[req.init.map.width];
     for(unsigned int w=0; w < req.init.map.width; w++) {
@@ -195,15 +192,13 @@ bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_initialize::Request& re
     morrf->init(start, goal);
     morrf->load_map(pp_obstacle);
 
-  /*
-  std::cout << "dump map info " << std::endl;
-  morrf.dump_map_info("./test_obs.txt");
-  */
+    std::cout << "Starting MORRF iterations..." << std::endl;
 
- // std::cout << "start planning" << std::endl;
     while(morrf->get_current_iteration() <= req.init.number_of_iterations) {
       morrf->extend();
     }
+
+    std:: cout << "MORRF iterations completed..." << std::endl;
 
     std::vector<Path*> paths = morrf->get_paths();
 
@@ -243,8 +238,7 @@ bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_initialize::Request& re
 
          delete [] pp_obstacle;
 
-
-  //std::cout << paths.size() << " paths exported " << std::endl;
+    std::cout << "MORRF finished!" << std::endl;
 
     return true;
 }
