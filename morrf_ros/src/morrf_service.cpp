@@ -99,8 +99,6 @@ bool MORRFService::continuation( morrf_ros::morrf_continue::Request& req,
 
         int new_iterations = morrf->get_current_iteration() + req.iterations;
 
-        std::cout << "Starting MORRF iterations..." << std::endl;
-
         while(morrf->get_current_iteration() <= new_iterations) {
             morrf->extend();
         }
