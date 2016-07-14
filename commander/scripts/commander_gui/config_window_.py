@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys
 import rospy
 
@@ -161,7 +163,6 @@ class Window(QtGui.QMainWindow):
 			resolution = QtGui.QDesktopWidget().screenGeometry()
 
 			self.error1.move((resolution.width() / 2), (resolution.height() / 2))
-			#print ("x of error widget: %d, y of error widget: %d" %(self.error1.pos().x(), self.error1.pos().y()))
 		
 		elif not self.image_window.isCompleted():			
 			self.error2 = NotInitialized()
@@ -201,7 +202,7 @@ class Window(QtGui.QMainWindow):
 			
 			self.image_window.startPathCycler(self.morrf_response)			
 			
-			if not hasattr(self.image_window, 'error'):
+			if hasattr(self.image_window, 'morrf_paths'):
 				self.robot.setEnabled(True)
 			else:
 				self.robot.setEnabled(False)

@@ -28,8 +28,8 @@ STARTY = 1000
 WIDTH = 250
 HEIGHT = 700
 
-MORRF_OUTPUT_FILE = "/home/wfearn/Dropbox/MORRF_OUTPUT/morrf_output/{}"
-IMG_OUTPUT_FILE = "/home/wfearn/Dropbox/MORRF_OUTPUT/maps/{}"
+MORRF_OUTPUT_FILE = "/home/tkatuka/Dropbox/MORRF_OUTPUT/morrf_output/{}"
+IMG_OUTPUT_FILE = "/home/tkatuka/Dropbox/MORRF_OUTPUT/maps/{}"
 
 PATHS_FILE = MORRF_OUTPUT_FILE.format("paths.txt")
 COSTS_FILE = MORRF_OUTPUT_FILE.format("costs.txt")
@@ -40,7 +40,7 @@ ENEMIES_FILE = MORRF_OUTPUT_FILE.format("enemies.txt")
 MAP_IMG = IMG_OUTPUT_FILE.format("map.png")
 BOUNDARY_IMG = IMG_OUTPUT_FILE.format("boundary.png")
 
-JSON_FILE = "/home/wfearn/Dropbox/MORRF_OUTPUT/morrf.json"
+JSON_FILE = "/home/tkatuka/Dropbox/MORRF_OUTPUT/morrf.json"
 
 
 
@@ -62,6 +62,7 @@ class Config(QtGui.QMainWindow):
         load_menu.addAction(self.image_load)
         load_menu.addAction(self.appQuit)
 
+	self.statusBar()
 
         launch_button = QtGui.QPushButton("Launch MORRF", self)
         launch_button.resize(250, 50)
@@ -75,6 +76,7 @@ class Config(QtGui.QMainWindow):
         self.continue_btn = QtGui.QPushButton("Continue MORRF", self)
         self.continue_btn.resize(250, 50)
         self.continue_btn.clicked.connect(self.continueMorrf)
+	self.continue_btn.setStatusTip('To make paths smoother')
         self.continue_btn.setEnabled(False)
 
         self.iterations = QtGui.QLineEdit()
@@ -277,7 +279,8 @@ class Config(QtGui.QMainWindow):
         json_output["start"] = str(start[0]) + "," + str(start[1])
         json_output["goal"] = str(goal[0]) + "," + str(goal[1])
         json_output["map_image"] = self.image_window.getMapName()
-        json_output["enemies"] = self.writeEnemyPosToFile(self.image_window.getEnemyLocations())
+        #json_output["enemies"] = self.writeEnemyPosToFile(self.image_window.getEnemyLocations())
+	json_output["enemies"] = self.writeEnemyPos(self.image_window.getEnemyLocations())	
         json_output["boundary_image"] = BOUNDARY_IMG
         json_output["paths"] = paths[0]
         json_output["costs"] = paths[1]
@@ -332,13 +335,15 @@ class Config(QtGui.QMainWindow):
                 json_file["safe_vals"] = f.name
                 f.close()
 
-    def writeEnemyPosToFile(self, enemy_locations):
-        enemies = open(ENEMIES_FILE, "w")
+    def writeEnemyPos(self, enemy_locations):
+        #enemies = open(ENEMIES_FILE, "w")
+	
+	toReturn = ""
 
         for pos in enemy_locations:
-            enemies.write(str(pos.x) + "," + str(pos.y) + "E")
+            toReturn += (str(pos.x) + "," + str(pos.y) + "E")
 
-        return enemies.name
+        return toReturn
 
     def writePathsToFile(self, paths):
 
@@ -347,19 +352,19 @@ class Config(QtGui.QMainWindow):
 
         for i in range(len(paths)):
             for point in paths[i].waypoints:
-                waypoint_output.write( str(int(point.x)) + " " + str(int(point.y)) + " " )
+                waypoint_output.write( str(int(point.x)) + " " + str(int(point.y)) + "\t" )
 
             waypoint_output.write("\n")
 
             if len(paths[i].cost) == 3:
                 for cost in paths[i].cost:
-                    cost_output.write(str(cost.data) + " ")
+                    cost_output.write(str( round(cost.data, 3) ) + "\t")
 
                 cost_output.write("\n")
 
             elif len(paths[i].cost) == 2:
                 if self.min_distance.isChecked():
-                    cost_output.write(str(paths[i].cost[0].data) + " ")
+                    cost_output.write(str( round(paths[i].cost[0].data, 3) + "\t") )
 
                     if self.stealth.isChecked():
                         cost_output.write(str(paths[i].cost[1].data) + " ")
