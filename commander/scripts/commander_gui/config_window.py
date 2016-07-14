@@ -28,18 +28,8 @@ STARTY = 1000
 WIDTH = 250
 HEIGHT = 700
 
-#WIN_MORRF_OUTPUT = "Dropbox\\MORRF_OUTPUT\\morrf_output\\{}"
-#WIN_IMG_OUTPUT = "Dropbox\\MORRF_OUTPUT\\maps\\{}"
-#WIN_PATHS = WIN_MORRF_OUTPUT.format("paths.txt")
-#WIN_COSTS = WIN_MORRF_OUTPUT.format("costs.txt")
-#WIN_SAFE_VALS = WIN_MORRF_OUTPUT.format("safe_values.txt")
-#WIN_STEALTH_VALS = WIN_MORRF_OUTPUT.format("stealth_values.txt")
-#WIN_ENEMIES = WIN_MORRF_OUTPUT.format("enemies.txt")
-#WIN_MAP_IMG = WIN_IMG_OUTPUT.format("map.png")
-#WIN_BOUND_IMG = WIN_IMG_OUTPUT.format("boundary.png")
-
-MORRF_OUTPUT_FILE = "$HOME/Dropbox/MORRF_OUTPUT/morrf_output/{}"
-IMG_OUTPUT_FILE = "$HOME/Dropbox/MORRF_OUTPUT/maps/{}"
+MORRF_OUTPUT_FILE = "/home/wfearn/Dropbox/MORRF_OUTPUT/morrf_output/{}"
+IMG_OUTPUT_FILE = "/home/wfearn/Dropbox/MORRF_OUTPUT/maps/{}"
 
 PATHS_FILE = MORRF_OUTPUT_FILE.format("paths.txt")
 COSTS_FILE = MORRF_OUTPUT_FILE.format("costs.txt")
@@ -50,7 +40,7 @@ ENEMIES_FILE = MORRF_OUTPUT_FILE.format("enemies.txt")
 MAP_IMG = IMG_OUTPUT_FILE.format("map.png")
 BOUNDARY_IMG = IMG_OUTPUT_FILE.format("boundary.png")
 
-JSON_FILE = "$HOME/Dropbox/MORRF_OUTPUT/morrf.json"
+JSON_FILE = "/home/wfearn/Dropbox/MORRF_OUTPUT/morrf.json"
 
 
 
@@ -63,8 +53,11 @@ class Config(QtGui.QMainWindow):
 
         self.image_load = QtGui.QAction("Load Image", self)
         self.image_load.triggered.connect(self.load_image)
+        self.image_load.setShortcut("Ctrl+O")
+
         self.appQuit = QtGui.QAction("Quit", self)
         self.appQuit.triggered.connect(qApp.quit)
+        self.appQuit.setShortcut("Ctrl+Q")
 
         main_menu = self.menuBar()
 
@@ -72,7 +65,7 @@ class Config(QtGui.QMainWindow):
         load_menu.addAction(self.image_load)
         load_menu.addAction(self.appQuit)
 
-	self.statusBar()
+        self.statusBar()
 
         launch_button = QtGui.QPushButton("Launch MORRF", self)
         launch_button.resize(250, 50)
@@ -86,7 +79,7 @@ class Config(QtGui.QMainWindow):
         self.continue_btn = QtGui.QPushButton("Continue MORRF", self)
         self.continue_btn.resize(250, 50)
         self.continue_btn.clicked.connect(self.continueMorrf)
-	self.continue_btn.setStatusTip('To make paths smoother')
+        self.continue_btn.setStatusTip('To make paths smoother')
         self.continue_btn.setEnabled(False)
 
         self.iterations = QtGui.QLineEdit()
@@ -150,7 +143,7 @@ class Config(QtGui.QMainWindow):
 
         elif self.is_completed() and self.image_window.isCompleted():
 
-	    print "Launching MORRF"
+            print "Launching MORRF"
 
             #Deinitializing variable to prevent errors
             self.image_window.delMorrfPaths()
@@ -179,7 +172,7 @@ class Config(QtGui.QMainWindow):
             initializer.cost_maps = self.costmap_response.cost_maps
 
             self.morrf_response = StartCommanderPublisher(initializer)
-	    
+
             print "MORRF paths received, printing..."
 
             self.image_window.startPathCycler(self.morrf_response)
@@ -288,8 +281,8 @@ class Config(QtGui.QMainWindow):
 
         json_output["start"] = str(int(start[0])) + "," + str(int(start[1]))
         json_output["goal"] = str(int(goal[0])) + "," + str(int(goal[1]))
-        json_output["map_image"] = MAP_IMG 
-	json_output["enemies"] = self.writeEnemyPos(self.image_window.getEnemyLocations())	
+        json_output["map_image"] = MAP_IMG
+        json_output["enemies"] = self.writeEnemyPos(self.image_window.getEnemyLocations())
         json_output["boundary_image"] = BOUNDARY_IMG
         json_output["paths"] = paths[0]
         json_output["costs"] = paths[1]
@@ -345,8 +338,8 @@ class Config(QtGui.QMainWindow):
                 f.close()
 
     def writeEnemyPos(self, enemy_locations):
-	
-	toReturn = ""
+
+        toReturn = ""
 
         for pos in enemy_locations:
             toReturn += (str(pos.x) + "," + str(pos.y) + "E")

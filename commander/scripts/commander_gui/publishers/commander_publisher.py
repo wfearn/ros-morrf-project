@@ -12,8 +12,6 @@ def StartCommanderPublisher(morrf_initiator):
     try:
         morrf_ros = rospy.ServiceProxy("/morrf/get_multi_obj_paths", morrf_initialize)
         response = morrf_ros(morrf_initiator)
-        #print "Received paths"
-	#print "Received paths, %s" % str(response)
         return response
 
     except rospy.ServiceException, e:
