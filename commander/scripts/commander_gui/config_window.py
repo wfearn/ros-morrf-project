@@ -28,8 +28,18 @@ STARTY = 1000
 WIDTH = 250
 HEIGHT = 700
 
-MORRF_OUTPUT_FILE = "/home/tkatuka/Dropbox/MORRF_OUTPUT/morrf_output/{}"
-IMG_OUTPUT_FILE = "/home/tkatuka/Dropbox/MORRF_OUTPUT/maps/{}"
+#WIN_MORRF_OUTPUT = "Dropbox\\MORRF_OUTPUT\\morrf_output\\{}"
+#WIN_IMG_OUTPUT = "Dropbox\\MORRF_OUTPUT\\maps\\{}"
+#WIN_PATHS = WIN_MORRF_OUTPUT.format("paths.txt")
+#WIN_COSTS = WIN_MORRF_OUTPUT.format("costs.txt")
+#WIN_SAFE_VALS = WIN_MORRF_OUTPUT.format("safe_values.txt")
+#WIN_STEALTH_VALS = WIN_MORRF_OUTPUT.format("stealth_values.txt")
+#WIN_ENEMIES = WIN_MORRF_OUTPUT.format("enemies.txt")
+#WIN_MAP_IMG = WIN_IMG_OUTPUT.format("map.png")
+#WIN_BOUND_IMG = WIN_IMG_OUTPUT.format("boundary.png")
+
+MORRF_OUTPUT_FILE = "$HOME/Dropbox/MORRF_OUTPUT/morrf_output/{}"
+IMG_OUTPUT_FILE = "$HOME/Dropbox/MORRF_OUTPUT/maps/{}"
 
 PATHS_FILE = MORRF_OUTPUT_FILE.format("paths.txt")
 COSTS_FILE = MORRF_OUTPUT_FILE.format("costs.txt")
@@ -40,7 +50,7 @@ ENEMIES_FILE = MORRF_OUTPUT_FILE.format("enemies.txt")
 MAP_IMG = IMG_OUTPUT_FILE.format("map.png")
 BOUNDARY_IMG = IMG_OUTPUT_FILE.format("boundary.png")
 
-JSON_FILE = "/home/tkatuka/Dropbox/MORRF_OUTPUT/morrf.json"
+JSON_FILE = "$HOME/Dropbox/MORRF_OUTPUT/morrf.json"
 
 
 
@@ -276,10 +286,9 @@ class Config(QtGui.QMainWindow):
 
         json_output = {}
 
-        json_output["start"] = str(start[0]) + "," + str(start[1])
-        json_output["goal"] = str(goal[0]) + "," + str(goal[1])
-        json_output["map_image"] = self.image_window.getMapName()
-        #json_output["enemies"] = self.writeEnemyPosToFile(self.image_window.getEnemyLocations())
+        json_output["start"] = str(int(start[0])) + "," + str(int(start[1]))
+        json_output["goal"] = str(int(goal[0])) + "," + str(int(goal[1]))
+        json_output["map_image"] = MAP_IMG 
 	json_output["enemies"] = self.writeEnemyPos(self.image_window.getEnemyLocations())	
         json_output["boundary_image"] = BOUNDARY_IMG
         json_output["paths"] = paths[0]
@@ -300,7 +309,7 @@ class Config(QtGui.QMainWindow):
                     f = open(STEALTH_VALS_FILE, "w")
 
                     for j in range(len(cv.vals)):
-                        f.write("%s %s %s\n" % (cv.vals[j].position.x, cv.vals[j].position.y, cv.vals[j].cost))
+                        f.write("%s %s\t%s\n" % ( int(cv.vals[j].position.x), int(cv.vals[j].position.y), int(cv.vals[j].cost)) )
 
 
                     json_file["stealth_vals"] = f.name
@@ -310,7 +319,7 @@ class Config(QtGui.QMainWindow):
                     f = open(SAFE_VALS_FILE, "w")
 
                     for j in range(len(cv.vals)):
-                        f.write("%s %s %s\n" % (cv.vals[j].position.x, cv.vals[j].position.y, cv.vals[j].cost))
+                        f.write("%s %s\t%s\n" % ( int(cv.vals[j].position.x), int(cv.vals[j].position.y), int(cv.vals[j].cost)) )
 
                     json_file["safe_vals"] = f.name
                     f.close()
@@ -322,7 +331,7 @@ class Config(QtGui.QMainWindow):
                 f = open(STEALTH_VALS_FILE, "w")
 
                 for j in range(len(cv.vals)):
-                    f.write("%s %s %s\n" % (cv.vals[j].position.x, cv.vals[j].position.y, cv.vals[j].cost))
+                    f.write("%s %s\t%s\n" % ( int(cv.vals[j].position.x), int(cv.vals[j].position.y), int(cv.vals[j].cost)) )
 
                 json_file["stealth_vals"] = f.name
                 f.close()
@@ -330,13 +339,12 @@ class Config(QtGui.QMainWindow):
                 f = open(SAFE_VALS_FILE, "w")
 
                 for j in range(len(cv.vals)):
-                    f.write("%s %s %s\n" % (cv.vals[j].position.x, cv.vals[j].position.y, cv.vals[j].cost))
+                    f.write("%s %s\t%s\n" % ( int(cv.vals[j].position.x), int(cv.vals[j].position.y), int(cv.vals[j].cost)) )
 
                 json_file["safe_vals"] = f.name
                 f.close()
 
     def writeEnemyPos(self, enemy_locations):
-        #enemies = open(ENEMIES_FILE, "w")
 	
 	toReturn = ""
 
@@ -367,37 +375,37 @@ class Config(QtGui.QMainWindow):
                     cost_output.write(str( round(paths[i].cost[0].data, 3) + "\t") )
 
                     if self.stealth.isChecked():
-                        cost_output.write(str(paths[i].cost[1].data) + " ")
+                        cost_output.write(str( round(paths[i].cost[1].data, 3) ) + "\t")
                         cost_output.write(str(0))
 
                     else:
                         cost_output.write(str(0) + " ")
-                        cost_output.write(str(paths[i].cost[1].data))
+                        cost_output.write(str( round(paths[i].cost[1].data, 3) ))
 
                 elif self.stealth.isChecked():
-                    cost_output.write(str(0) + " ")
+                    cost_output.write(str(0) + "\t")
                     for cost in paths[i].cost:
-                        cost_output.write(str(cost.data) + " ")
+                        cost_output.write(str( round(cost.data, 3) ) + "\t")
 
                 else:
-                    cost_output.write(str(0) + " " + str(0) + " ")
-                    cost_output.write(str(paths[i].cost[0].data))
+                    cost_output.write(str(0) + "\t" + str(0) + "\t")
+                    cost_output.write(str( round(paths[i].cost[0].data, 3) ))
 
                 cost_output.write("\n")
 
             else:
                 if self.min_distance.isChecked():
-                    cost_output.write(str(paths[i].cost[0].data) + " ")
-                    cost_output.write(str(0) + " " + str(0))
+                    cost_output.write(str( round(paths[i].cost[0].data, 3) ) + "\t")
+                    cost_output.write(str(0) + "\t" + str(0))
 
                 elif self.stealth.isChecked():
-                    cost_output.write(str(0) + " ")
-                    cost_output.write(str(paths[i].cost[0].data) + " ")
+                    cost_output.write(str(0) + "\t")
+                    cost_output.write(str( round(paths[i].cost[0].data, 3) ) + "\t")
                     cost_output.write(str(0))
 
                 else:
-                    cost_output.write(str(0) + " " + str(0) + " ")
-                    cost_output.write(str(paths[i].cost[0].data) + " ")
+                    cost_output.write(str(0) + "\t" + str(0) + "\t")
+                    cost_output.write(str( round(paths[i].cost[0].data, 3) ) + "\t")
 
                 cost_output.write("\n")
 
