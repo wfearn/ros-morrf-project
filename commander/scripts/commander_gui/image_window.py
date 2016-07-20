@@ -3,6 +3,7 @@
 from enum import Enum
 import os
 import sys
+import rospy
 
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import *
@@ -34,7 +35,7 @@ class Image(QtGui.QMainWindow):
 
         self.image = QPixmap(image_name)
 
-        self.setGeometry(50, 50, self.image.width(), self.image.height())
+        self.setGeometry(50, 50, (self.image.width() + 25) , (self.image.height() + 25) )
 
         self.setContextMenuPolicy(Qt.ActionsContextMenu)
 
@@ -60,11 +61,11 @@ class Image(QtGui.QMainWindow):
         self.setPalette(palette)
 
         self.black_pen = QtGui.QPen(QtCore.Qt.black, 5, QtCore.Qt.SolidLine)
-	self.fade_color = QtGui.QColor(QtCore.Qt.gray)
-	self.fade_color.setAlpha(80)
-	self.highlighter = QtCore.Qt.magenta
+        self.fade_color = QtGui.QColor(QtCore.Qt.gray)
+        self.fade_color.setAlpha(80)
+        self.highlighter = QtCore.Qt.magenta
         self.fade_green_pen = QtGui.QPen(self.fade_color, 5, QtCore.Qt.SolidLine)
-	self.dark_green_pen = QtGui.QPen(self.highlighter, 5, QtCore.Qt.SolidLine)
+        self.dark_green_pen = QtGui.QPen(self.highlighter, 5, QtCore.Qt.SolidLine)
 
         self.show()
 

@@ -106,7 +106,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES commander
-   CATKIN_DEPENDS message_runtime rospy std_msgs geometry_msgs
+   CATKIN_DEPENDS message_runtime rospy std_msgs geometry_msgs morrf_ros
 #  DEPENDS system_lib
 )
 
