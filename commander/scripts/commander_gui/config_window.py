@@ -22,6 +22,7 @@ from publishers.image_publisher import StartImagePublisher
 from publishers.commander_publisher import StartCommanderPublisher
 from publishers.costmap_publisher import StartCostmapPublisher
 from publishers.continue_publisher import StartContinuePublisher
+from publishers.follow_publisher import StartFollowPublisher
 
 STARTX = 1000
 STARTY = 1000
@@ -82,6 +83,11 @@ class Config(QtGui.QMainWindow):
         self.continue_btn.setStatusTip('To make paths smoother')
         self.continue_btn.setEnabled(False)
 
+        self.send_robot_btn = QtGui.QPushButton("Send To Robot", self)
+        self.send_robot_btn.resize(250, 50)
+        self.send_robot_btn.clicked.connect(self.sendToRobot)
+        self.send_robot_btn.setEnabled(False)
+
         self.iterations = QtGui.QLineEdit()
         self.iterations.setFrame(True)
         self.iterations.setMaxLength(4)
@@ -130,6 +136,7 @@ class Config(QtGui.QMainWindow):
         main_layout.addWidget(launch_button)
         main_layout.addWidget(self.pick_paths)
         main_layout.addWidget(self.continue_btn)
+        main_layout.addWidget(self.send_robot_btn)
 
         self.win = QtGui.QWidget(self)
         self.win.setLayout(main_layout)
@@ -178,9 +185,15 @@ class Config(QtGui.QMainWindow):
             self.image_window.startPathCycler(self.morrf_response)
             self.pick_paths.setEnabled(True)
             self.continue_btn.setEnabled(True)
+            self.send_robot_btn.setEnabled(True)
 
         else:
             self.error = NotInitialized()
+
+    def sendToRobot(self):
+        i = self.image_window.getPathIndex()
+
+        StartFollowPublisher(self.morrf_response.paths[i])
 
     def sendToPathPicker(self):
         print "Sending to path palette..."
