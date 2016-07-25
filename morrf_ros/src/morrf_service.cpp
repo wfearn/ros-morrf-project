@@ -187,8 +187,10 @@ bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_initialize::Request& re
     morrf->add_funcs(funcs, fitnessDistributions);
     POS2D start(req.init.start.x, req.init.start.y);
     POS2D goal(req.init.goal.x, req.init.goal.y);
-    morrf->init(start, goal);
+    std::vector< std::vector<float> > weights;
+    morrf->init(start, goal, weights);
     morrf->load_map(pp_obstacle);
+    morrf->set_theta(req.init.boundary_intersection_penalty);
 
     std::cout << "Starting MORRF iterations..." << std::endl;
 
