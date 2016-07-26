@@ -105,7 +105,7 @@ bool MORRFService::continuation( morrf_ros::morrf_continue::Request& req,
 
 	std::cout << "MORRF iterations completed..." << std::endl;
 
-        std::vector<Path*> paths = morrf->get_paths();
+        std::vector<Path*> paths = morrf->get_paths(false, false);
 
         for(unsigned int i=0; i < paths.size(); i++) {
             Path* p = paths[i];
@@ -123,8 +123,10 @@ bool MORRFService::continuation( morrf_ros::morrf_continue::Request& req,
                   geometry_msgs::Pose2D point;
                   point.x = p->m_waypoints[j][0];
                   point.y = p->m_waypoints[j][1];
+                  //std::cout << "(" << point.x << ", " << point.y << ") "; 
                   pp.waypoints.push_back(point);
                 }
+                //std::cout << std::endl;
 
                 res.paths.push_back(pp);
             }
@@ -171,11 +173,9 @@ bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_initialize::Request& re
         int** p_costmap = new int*[img.width];
 
         for(unsigned int w=0; w < img.width; w++) {
-
             p_costmap[w] = new int[img.height];
 
             for(unsigned int h=0; h < img.height; h++) {
-
                 p_costmap[w][h] = img.int_array[w + img.width*h];
             }
         }
@@ -187,20 +187,25 @@ bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_initialize::Request& re
     morrf->add_funcs(funcs, fitnessDistributions);
     POS2D start(req.init.start.x, req.init.start.y);
     POS2D goal(req.init.goal.x, req.init.goal.y);
+    morrf->set_sparsity_k(2);
     std::vector< std::vector<float> > weights;
     morrf->init(start, goal, weights);
     morrf->load_map(pp_obstacle);
-    morrf->set_theta(req.init.boundary_intersection_penalty);
+    morrf->set_boundary_intersection_penalty(req.init.boundary_intersection_penalty);
 
+    //std::cout << "START " << req.init.start.x << " " << req.init.start.y << std::endl;
+    //std::cout << "GOAL " << req.init.goal.x << " " << req.init.goal.y << std::endl;
     std::cout << "Starting MORRF iterations..." << std::endl;
 
     while(morrf->get_current_iteration() <= req.init.number_of_iterations) {
       morrf->extend();
     }
 
-    std:: cout << "MORRF iterations completed..." << std::endl;
+    std::cout << "MORRF iterations completed..." << std::endl;
 
-    std::vector<Path*> paths = morrf->get_paths();
+    std::vector<Path*> paths = morrf->get_paths(false, false);
+   
+    std::cout << "Paths obtained!" << std::endl; 
 
     for(unsigned int i=0; i < paths.size(); i++) {
 
@@ -224,8 +229,10 @@ bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_initialize::Request& re
               point.x = p->m_waypoints[j][0];
               point.y = p->m_waypoints[j][1];
               pp.waypoints.push_back(point);
+              //std::cout << "(" << point.x << ", " << point.y << ") "; 
 
             }
+            //std::cout << std::endl;
 
             res.paths.push_back(pp);
         }
