@@ -3,6 +3,7 @@
 from enum import Enum
 import os
 import sys
+import rospy
 
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import *
@@ -34,7 +35,7 @@ class Image(QtGui.QMainWindow):
 
         self.image = QPixmap(image_name)
 
-        self.setGeometry(50, 50, self.image.width(), self.image.height())
+        self.setGeometry(50, 50, (self.image.width() + 25) , (self.image.height() + 25) )
 
         self.setContextMenuPolicy(Qt.ActionsContextMenu)
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-from follower import Follower
+from sphero_follower import Follower
+
 
 def main():
     f = Follower()

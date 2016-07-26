@@ -3,24 +3,26 @@ import rospy
 
 from geometry_msgs.msg import Pose2D
 from geometry_msgs.msg import Twist
-from morrf_ros.msg import mutli_objective_path
+from morrf_ros.msg import multi_objective_path
 
 import math
 #import the msg file - April_tag_Pos
 MAXVEL = 60
-RADIUS = 10
+RADIUS = 20
+ALPHA = 2
 
 class Follower():
     def __init__(self):
+        print "Initiated sphero follower"
+
         rospy.init_node("follower", anonymous=False)
-        rospy.on_shutdown(self.shutdown)
 
         self.robot_movement = rospy.Publisher("cmd_vel", Twist, queue_size=10)
 
         self.robot_position = rospy.Subscriber("robot_pos", Pose2D, self.follow)
         self.path_getter = rospy.Subscriber("follower", multi_objective_path, self.start_follow)
 
-        self.initialize == False
+        self.initialize = False
 
         self.lin_vel = 50
 
@@ -31,6 +33,8 @@ class Follower():
         rospy.spin()
 
     def start_follow(self, path):
+        print "Initializing path in sphero follower"
+
         self.path = path.waypoints
         self.initialize = True
 
@@ -38,21 +42,20 @@ class Follower():
 
         if self.initialize == True:
 
-            if self.index != (len(self.path) - 1):
+            print "Updating sphero to follow path"
+            if self.index != (len(self.path) - 0):
 
                 distance = self.dist(pos, self.path[self.index])
-                if distance > 1:
+                if distance > RADIUS:
                     p2 = self.path[self.index]
 
-                    theta = math.atan2((p2.y - ry), (p2.x - rx) )
+                    theta = math.atan2((p2.y - pos.y), (p2.x - pos.x) )
 
                     rob_move = Twist()
-                    if distance < MAXVEL:
-                        distance = 0
 
-                    vel = min(MAXVEL, distance)
+                    vel = min(MAXVEL, distance*ALPHA)
                     rob_move.linear.x = vel * math.cos(theta)
-                    rob_move.linear.y = vel * math.cos(theta)
+                    rob_move.linear.y = -vel * math.sin(theta)
                     self.robot_movement.publish(rob_move)
 
                 else:
@@ -78,5 +81,5 @@ class Follower():
 
         self.robot_movement.publish(rob_turn)
 
-    def dist(p1, p2):
+    def dist(self, p1, p2):
         return math.sqrt( (p2.x - p1.x)**2 + (p2.y - p2.y)**2 )
