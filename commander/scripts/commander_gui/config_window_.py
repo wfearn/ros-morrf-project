@@ -224,7 +224,7 @@ class Window(QtGui.QMainWindow):
 
       else:
           return None
-  
+
 def main():
   app = QtGui.QApplication(sys.argv)
   GUI = Window()
