@@ -8,6 +8,6 @@ int64 number_of_iterations
 int32 segment_length
 int8 number_of_trees
 int8 objective_number
+float32 boundary_intersection_penalty
 int8  method_type # 0 - weighted-sum, 1 - Tchebycheff, 2 - Boundary Intersection
 bool minimum_distance_enabled
-
