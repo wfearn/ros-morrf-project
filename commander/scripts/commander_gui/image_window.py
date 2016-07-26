@@ -237,6 +237,7 @@ class Image(QtGui.QMainWindow):
     def startPathCycler(self, response):
         if hasattr(response, "paths") and len(response.paths) > 0:
             self.showStatusBar()
+
             self.morrf_paths = response
             self.path_index = 0
             self.update()
