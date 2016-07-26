@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from enum import Enum
 import os
 import sys
 import rospy
@@ -16,18 +15,9 @@ from morrf_ros.msg import *
 from morrf_ros.srv import *
 from geometry_msgs.msg import *
 
-class State(Enum):
-    start = 0
-    goal = 1
-    enemies = 2
-
 class Image(QtGui.QMainWindow):
     def __init__(self, image_name):
         super(Image, self).__init__()
-
-        #keeps track of what point is
-        #being set ie. start point, goal point, the enemy locations, etc.
-        self.state = State.start
 
         self.image_name = image_name
 

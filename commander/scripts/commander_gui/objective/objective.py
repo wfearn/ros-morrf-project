@@ -12,6 +12,8 @@ START_PATH = "{}/data/objective_icons/start.png"
 ENEMY_PATH = "{}/data/objective_icons/enemy.png"
 ROBOT_PATH = "{}/data/objective_icons/robot1.png"
 
+#TODO:Create an Objectives class that manages objectives
+
 class Objective:
     def __init__(self, objective, xpos, ypos):
 
@@ -35,9 +37,9 @@ class Objective:
             self.image = QImage(GOAL_PATH.format(path))
 
         elif self.objective_type == "robot":
-	    self.image = QImage(ROBOT_PATH.format(path))
+            self.image = QImage(ROBOT_PATH.format(path))
 
-	else:
+        else:
             self.image = QImage(ENEMY_PATH.format(path))
 
     def setClicked(self, boolean):
@@ -65,7 +67,7 @@ class Objective:
 
     def getDrawQPoint(self):
         #sets image center to draw point
-        point = QPoint(self.x - (self.image.width() / 2), self.y - (self.image.height() / 2))
+        point = QPoint( (self.x - (self.image.width() / 2)), (self.y - (self.image.height() / 2)) )
         return point
 
     def isInsideBoundary(self, mouse_coordinate):
