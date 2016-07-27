@@ -24,6 +24,7 @@ from error_popup.no_image_selected import NoImage
 
 from publishers.costmap_publisher import StartCostmapPublisher
 from publishers.commander_publisher import StartCommanderPublisher
+from publishers.follow_publisher import StartFollowPublisher
 
 from advanced_options.advanced_options import AdvancedOptions
 
@@ -75,6 +76,7 @@ class CameraConfig(QtGui.QMainWindow):
 
     self.robot = QtGui.QPushButton("Send Robot", self)
     self.robot.setEnabled(False)
+    self.robot.clicked.connect(self.send_to_robot)
 
     self.quick = QtGui.QCheckBox("Quickly", self)
     self.quick.setChecked(False)
@@ -118,6 +120,9 @@ class CameraConfig(QtGui.QMainWindow):
 
   def activate_options(self):
       self.options.activate()
+
+  def send_to_robot(self):
+      StartFollowPublisher(self.image_window.getMORRFPath())
 
   def center(self):
       frameGm = self.frameGeometry()
