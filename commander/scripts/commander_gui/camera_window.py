@@ -8,10 +8,12 @@ from PyQt4.QtGui import *
 
 from objective.premade_objectives import PremadeObjs
 
+from error_popup.no_path_error import NoPath
+
 from mm_apriltags_tracker.msg import april_tag_pos
 from geometry_msgs.msg import Pose2D
 
-APRILTAG = 6
+APRILTAG = 30
 TBOT = 32
 HEIGHT = 600
 WIDTH = 600
@@ -29,6 +31,12 @@ class CameraWindow(QtGui.QWidget):
 
         self.black_pen = QtGui.QPen(QtCore.Qt.black, 5, QtCore.Qt.SolidLine)
         self.blue_pen = QtGui.QPen(QtCore.Qt.blue, 5, QtCore.Qt.SolidLine)
+        self.fade_color = QtGui.QColor(QtCore.Qt.gray)
+        self.fade_color.setAlpha(80)
+        self.highlighter = QtCore.Qt.magenta
+
+        self.pink_pen = QtGui.QPen(self.highlighter, 5, QtCore.Qt.SolidLine)
+        self.fade_pen = QtGui.QPen(self.fade_color, 5, QtCore.Qt.SolidLine)
 
         self.agent_map = {}
 
@@ -74,6 +82,24 @@ class CameraWindow(QtGui.QWidget):
             elif key == 51 and self.image_creation == False:
                 painter.drawImage( self.po.getGoalDrawPoint(value.x, value.y), self.po.getGoalImage() )
 
+        if hasattr(self, "morrf_paths") and self.image_creation == False:
+            for i in range(len(self.morrf_paths.paths)):
+                for index in range(len(self.morrf_paths.paths[i].waypoints)):
+
+                    if i == self.path_index:
+                        painter.setPen(self.pink_pen)
+
+                    else:
+                        painter.setPen(self.fade_pen)
+
+                    path = self.morrf_paths.paths[i]
+
+                    if index != 0:
+                        p1 = QPoint(path.waypoints[index - 1].x, path.waypoints[index - 1].y)
+                        p2 = QPoint(path.waypoints[index].x, path.waypoints[index].y)
+
+                        painter.drawLine(p1, p2)
+
         painter.end()
 
     def getMORRFImage(self):
@@ -112,3 +138,31 @@ class CameraWindow(QtGui.QWidget):
                 enemies.append(p)
 
         return enemies
+
+    def keyPressEvent(self, event):
+        key = event.key()
+        if hasattr(self, "morrf_paths"):
+            if key == QtCore.Qt.Key_Left:
+                if self.path_index == 0:
+                    self.path_index = ( len(self.morrf_paths.paths) - 1 )
+
+                else:
+                    self.path_index -= 1
+
+            if key == QtCore.Qt.Key_Right:
+                if self.path_index == ( len(self.morrf_paths.paths) - 1 ):
+                    self.path_index = 0
+
+                else:
+                    self.path_index += 1
+
+        self.update()
+
+    def startPathCycler(self, response):
+        if hasattr(response, "paths") and len(response.paths) > 0:
+            self.morrf_paths = response
+            self.path_index = 0
+            self.update()
+
+        else:
+            self.error = NoPath()
