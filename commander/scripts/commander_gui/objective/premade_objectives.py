@@ -23,6 +23,7 @@ class PremadeObjs:
         self.enemy_image = QImage(ENEMY_PATH.format(self.path))
         self.start_image = QImage(START_PATH.format(self.path))
         self.goal_image = QImage(GOAL_PATH.format(self.path))
+        self.robo_image = QImage(ROBOT_PATH.format(self.path))
 
     def getEnemyDrawPoint(self, x, y):
         return self.getDrawQPoint(x, y, self.enemy_image)
@@ -32,6 +33,9 @@ class PremadeObjs:
 
     def getGoalDrawPoint(self, x, y):
         return self.getDrawQPoint(x, y, self.goal_image)
+
+    def getRoboDrawPoint(self, x, y):
+        return self.getDrawQPoint(x, y, self.robo_image)
 
     def getImage(self):
         return self.image
@@ -48,3 +52,6 @@ class PremadeObjs:
 
     def getGoalImage(self):
         return self.goal_image
+
+    def getRoboImage(self):
+        return self.robo_image

@@ -82,6 +82,9 @@ class CameraWindow(QtGui.QWidget):
             elif key == 51 and self.image_creation == False:
                 painter.drawImage( self.po.getGoalDrawPoint(value.x, value.y), self.po.getGoalImage() )
 
+            elif key == 97 and self.image_creation == False:
+                painter.drawImage( self.po.getRoboDrawPoint(value.x, value.y), self.po.getRoboImage() )
+
         if hasattr(self, "morrf_paths") and self.image_creation == False:
             for i in range(len(self.morrf_paths.paths)):
                 for index in range(len(self.morrf_paths.paths[i].waypoints)):
@@ -166,3 +169,8 @@ class CameraWindow(QtGui.QWidget):
 
         else:
             self.error = NoPath()
+
+    def getMORRFPath(self):
+        return self.morrf_paths.paths[self.path_index]
+
+
