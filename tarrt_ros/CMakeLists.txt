@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 # Declare the name of the CMake Project
-project(harrt_ros)
+project(tarrt_ros)
 
 # Find Catkin
 find_package(catkin REQUIRED COMPONENTS
@@ -33,6 +33,17 @@ find_library(HARRT_LIBRARY tpp-harrts
     HINTS ${HARRT_LIB_DIR} ${HARRT_LIBRARY_DIRS})
 #message("HARRT_LIBRARY:")
 #message(${HARRT_LIBRARY})
+
+# Find package tarrt
+find_path(TARRT_INCLUDE_DIR tpp/tarrt/mlrrtstar.h
+    HINTS ${TARRT_INCLUDE_DIR} ${TARRT_INCLUDE_DIRS})
+#message("TARRT_INCLUDE_DIR:")
+#message(${TARRT_INCLUDE_DIR})
+
+find_library(TARRT_LIBRARY tpp-tarrts
+    HINTS ${TARRT_LIB_DIR} ${TARRT_LIBRARY_DIRS})
+#message("TARRT_LIBRARY:")
+#message(${TARRT_LIBRARY})
 
 # search for the libxml2 package, exit if not found
 find_package(LibXml2)
@@ -69,14 +80,14 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 add_message_files (
   FILES
   int16_image.msg
-  harrt_init.msg
+  tarrt_init.msg
   single_objective_path.msg
 )
 
 add_service_files(
   FILES
-  harrt_initialize.srv
-  harrt_continue.srv
+  tarrt_initialize.srv
+  tarrt_continue.srv
 )
 
 generate_messages (
@@ -99,20 +110,21 @@ include_directories(include
                     ${HARRT_INCLUDE_DIR}
                     )
 
-add_executable(harrt_node src/harrt_service.cpp
-                          src/harrt_service_node.cpp
+add_executable(tarrt_node src/tarrt_service.cpp
+                          src/tarrt_service_node.cpp
               )
 
-add_dependencies(harrt_node harrt_ros_generate_messages_cpp)
+add_dependencies(tarrt_node tarrt_ros_generate_messages_cpp)
 
-target_link_libraries(harrt_node ${catkin_LIBRARIES}
+target_link_libraries(tarrt_node ${catkin_LIBRARIES}
                                  ${HOMOTOPY_LIBRARY}
                                  ${HARRT_LIBRARY}
+                                 ${TARRT_LIBRARY}
                                  ${CGAL_LIBRARY}
                                  ${OpenCV_LIBRARIES}
                      )
 
-install(TARGETS harrt_node
+install(TARGETS tarrt_node
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
