@@ -81,10 +81,10 @@ static double calcCost(POS2D pos_a, POS2D pos_b, int** pp_distribution, void* tr
 
 MORRFService::MORRFService() {
 
-  m_mopp_srv = m_nh.advertiseService( MORRF_SERVICE_NAME, &MORRFService::get_multi_obj_paths, this);
-  morrf_continue = m_cont.advertiseService( MORRF_CONTINUE_SERVICE, &MORRFService::continuation, this);
+    m_mopp_srv = m_nh.advertiseService( MORRF_SERVICE_NAME, &MORRFService::get_multi_obj_paths, this);
+    morrf_continue = m_cont.advertiseService( MORRF_CONTINUE_SERVICE, &MORRFService::continuation, this);
 
-  morrf = NULL;
+    morrf = NULL;
 }
 
 MORRFService::~MORRFService() {
@@ -113,18 +113,18 @@ bool MORRFService::continuation( morrf_ros::morrf_continue::Request& req,
 
                 morrf_ros::multi_objective_path pp;
                 for(unsigned int k=0; k < p->m_objective_num; k++ ) {
-                  std_msgs::Float64 val;
-                  val.data = p->m_cost[k];
-                  pp.cost.push_back(val);
+                    std_msgs::Float64 val;
+                    val.data = p->m_cost[k];
+                    pp.cost.push_back(val);
                 }
 
                 for(unsigned int j=0; j < p->m_waypoints.size(); j++) {
 
-                  geometry_msgs::Pose2D point;
-                  point.x = p->m_waypoints[j][0];
-                  point.y = p->m_waypoints[j][1];
-                  //std::cout << "(" << point.x << ", " << point.y << ") "; 
-                  pp.waypoints.push_back(point);
+                    geometry_msgs::Pose2D point;
+                    point.x = p->m_waypoints[j][0];
+                    point.y = p->m_waypoints[j][1];
+                    //std::cout << "(" << point.x << ", " << point.y << ") "; 
+                    pp.waypoints.push_back(point);
                 }
                 //std::cout << std::endl;
 
@@ -160,7 +160,7 @@ bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_initialize::Request& re
     this->delete_morrf();
 
     morrf = new MORRF(req.init.width, req.init.height, req.init.objective_number, req.init.number_of_trees,
-              req.init.segment_length, (MORRF::MORRF_TYPE)req.init.method_type);
+                      req.init.segment_length, (MORRF::MORRF_TYPE)req.init.method_type);
 
     if(req.init.minimum_distance_enabled == true) {
         funcs.push_back(calcDist);
@@ -198,7 +198,7 @@ bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_initialize::Request& re
     std::cout << "Starting MORRF iterations..." << std::endl;
 
     while(morrf->get_current_iteration() <= req.init.number_of_iterations) {
-      morrf->extend();
+        morrf->extend();
     }
 
     std::cout << "MORRF iterations completed..." << std::endl;
@@ -212,25 +212,19 @@ bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_initialize::Request& re
         Path* p = paths[i];
 
         if(p) {
-
             morrf_ros::multi_objective_path pp;
-
             for(unsigned int k=0; k < p->m_objective_num; k++ ) {
-
-              std_msgs::Float64 val;
-              val.data = p->m_cost[k];
-              pp.cost.push_back(val);
-
+                std_msgs::Float64 val;
+                val.data = p->m_cost[k];
+                pp.cost.push_back(val);
             }
 
             for(unsigned int j=0; j < p->m_waypoints.size(); j++) {
-
-              geometry_msgs::Pose2D point;
-              point.x = p->m_waypoints[j][0];
-              point.y = p->m_waypoints[j][1];
-              pp.waypoints.push_back(point);
-              //std::cout << "(" << point.x << ", " << point.y << ") "; 
-
+                geometry_msgs::Pose2D point;
+                point.x = p->m_waypoints[j][0];
+                point.y = p->m_waypoints[j][1];
+                pp.waypoints.push_back(point);
+                //std::cout << "(" << point.x << ", " << point.y << ") "; 
             }
             //std::cout << std::endl;
 
@@ -239,11 +233,11 @@ bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_initialize::Request& re
     }
 
     for(unsigned int w=0; w < req.init.map.width; w++) {
-            delete [] pp_obstacle[w];
-            pp_obstacle[w] = NULL;
-         }
+        delete [] pp_obstacle[w];
+        pp_obstacle[w] = NULL;
+    }
 
-         delete [] pp_obstacle;
+    delete [] pp_obstacle;
 
     std::cout << "MORRF finished!" << std::endl;
 
