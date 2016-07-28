@@ -155,8 +155,7 @@ include_directories(
 
 add_executable(costmap_subscriber src/costmap_subscriber.cpp src/generator.cpp)
 target_link_libraries(costmap_subscriber ${catkin_LIBRARIES} ${QT_LIBRARIES} ${OpenCV_LIBRARIES} )
-
-#add_dependencies(costmap costmap_generator_generate_messages_cpp)
+add_dependencies(costmap_subscriber costmap_generator_generate_messages_cpp)
 
 ## Declare a C++ library
 # add_library(commander
