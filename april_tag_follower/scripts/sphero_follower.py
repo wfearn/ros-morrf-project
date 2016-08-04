@@ -34,7 +34,7 @@ class Follower():
 
     def start_follow(self, path):
         print "Initializing path in sphero follower"
-
+        self.index = 0
         self.path = path.waypoints
         self.initialize = True
 
@@ -42,9 +42,9 @@ class Follower():
 
         if self.initialize == True:
 
-            print "Updating sphero to follow path"
             if self.index != (len(self.path) - 0):
 
+                print "Updating sphero to follow path"
                 distance = self.dist(pos, self.path[self.index])
                 if distance > RADIUS:
                     p2 = self.path[self.index]
