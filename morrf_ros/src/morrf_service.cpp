@@ -205,8 +205,6 @@ bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_initialize::Request& re
     std::cout << "Starting MORRF iterations..." << std::endl;
 
     while(morrf->get_current_iteration() <= req.init.number_of_iterations) {
-<<<<<<< HEAD
-      morrf->extend();
 
       int i = req.init.number_of_iterations / 10;
 
@@ -222,9 +220,7 @@ bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_initialize::Request& re
           p.data = ((current_itr / max_itr) * 75) + 25;
           morrf_progress.publish(p);
       }
-=======
-        morrf->extend();
->>>>>>> a5388f9a8b052752da73541fbacc5a52a8325c21
+      morrf->extend();
     }
 
     std::cout << "MORRF iterations completed..." << std::endl;
@@ -246,21 +242,12 @@ bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_initialize::Request& re
             }
 
             for(unsigned int j=0; j < p->m_waypoints.size(); j++) {
-<<<<<<< HEAD
 
-              geometry_msgs::Pose2D point;
-              point.x = p->m_waypoints[j][0];
-              point.y = p->m_waypoints[j][1];
-              pp.waypoints.push_back(point);
-              //std::cout << "(" << point.x << ", " << point.y << ") ";
-
-=======
                 geometry_msgs::Pose2D point;
                 point.x = p->m_waypoints[j][0];
                 point.y = p->m_waypoints[j][1];
                 pp.waypoints.push_back(point);
                 //std::cout << "(" << point.x << ", " << point.y << ") "; 
->>>>>>> a5388f9a8b052752da73541fbacc5a52a8325c21
             }
             //std::cout << std::endl;
 

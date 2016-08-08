@@ -20,7 +20,7 @@ bool generate_costmap(commander::get_cost_map::Request &req,
             morrf_ros::int16_image bound;
             find_boundaries(req.map, bound);
 
-            res.boundary_image = bound;
+            res.response.boundary_image = bound;
 
             list<Point> enemy_points;
 
@@ -39,8 +39,8 @@ bool generate_costmap(commander::get_cost_map::Request &req,
 
                 generator.probOfSeenByEnemy(enemy_points, req.map, bound, cost, ov);
 
-                res.cost_maps.push_back(cost);
-                res.cost_values.push_back(ov);
+                res.response.cost_maps.push_back(cost);
+                res.response.cost_values.push_back(ov);
             }
 
             if(req.safe == 1) {
@@ -52,8 +52,8 @@ bool generate_costmap(commander::get_cost_map::Request &req,
 
                 generator.probOfBeingNearToObstacle(enemy_points, req.map, bound, cost, ov);
 
-                res.cost_maps.push_back(cost);
-                res.cost_values.push_back(ov);
+                res.response.cost_maps.push_back(cost);
+                res.response.cost_values.push_back(ov);
             }
 
 	    std::cout << "Costmaps generated!" << endl;
