@@ -50,6 +50,7 @@ find_package(catkin REQUIRED COMPONENTS
    FILES
    outputVals.msg
    point_cost.msg
+   costmap_response.msg
  )
 
 # Generate services in the 'srv' folder

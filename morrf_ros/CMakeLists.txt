@@ -28,6 +28,7 @@ add_message_files (
   int16_image.msg
   morrf_init.msg
   multi_objective_path.msg
+  multi_path_array.msg
 )
 
 add_service_files(

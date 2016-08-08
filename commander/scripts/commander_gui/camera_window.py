@@ -18,10 +18,23 @@ TBOT = 32
 HEIGHT = 600
 WIDTH = 600
 
+MORRF_OUTPUT_FILE = "/home/wfearn/Dropbox/MORRF_OUTPUT/morrf_output/{}"
+IMG_OUTPUT_FILE = "/home/wfearn/Dropbox/MORRF_OUTPUT/maps/{}"
+
+PATHS_FILE = MORRF_OUTPUT_FILE.format("paths.txt")
+COSTS_FILE = MORRF_OUTPUT_FILE.format("costs.txt")
+SAFE_VALS_FILE = MORRF_OUTPUT_FILE.format("safe_values.txt")
+STEALTH_VALS_FILE = MORRF_OUTPUT_FILE.format("stealth_values.txt")
+ENEMIES_FILE = MORRF_OUTPUT_FILE.format("enemies.txt")
+
+MAP_IMG = IMG_OUTPUT_FILE.format("map.png")
+BOUNDARY_IMG = IMG_OUTPUT_FILE.format("boundary.png")
+
+JSON_FILE = "/home/wfearn/Dropbox/MORRF_OUTPUT/morrf.json"
+
 class CameraWindow(QtGui.QWidget):
     def __init__(self):
         super(QtGui.QWidget, self).__init__()
-        rospy.init_node("camera_window", anonymous = True)
 
         self.setWindowTitle("Camera Window")
 
@@ -112,12 +125,27 @@ class CameraWindow(QtGui.QWidget):
         QApplication.processEvents()
 
         p = QPixmap.grabWidget(self)
-        img = p.toImage()
+        self.img = p.toImage()
 
         self.image_creation = False
         self.update()
 
-        return img
+        return self.img
+
+    def isInitialized(self):
+        has_goal = False
+        has_start = False
+
+        for key, value in self.agent_map.iteritems():
+            if key == 51:
+                has_goal = True
+            elif key == 50:
+                has_start = True
+
+        if has_goal and has_start:
+            return True
+        else:
+            return False
 
     def getGoalPoint(self):
         for key, value in self.agent_map.iteritems():
@@ -172,5 +200,25 @@ class CameraWindow(QtGui.QWidget):
 
     def getMORRFPath(self):
         return self.morrf_paths.paths[self.path_index]
+
+    def saveMapToDropbox(self):
+        self.img.save("/home/wfearn/Dropbox/MORRF_OUTPUT/maps/map.png")
+
+    def saveBoundImage(self, img):
+
+        test = QImage(img.width, img.height, QImage.Format_RGB16)
+
+        for i in range(img.height):
+            for j in range(img.width):
+
+                index = i * img.width + j
+                color = img.int_array[index]
+
+                qrgb = QColor(color, color, color)
+
+                test.setPixel(j, i, qrgb.rgb())
+
+        test.save(BOUNDARY_IMG)
+
 
 

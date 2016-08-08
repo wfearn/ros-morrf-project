@@ -5,20 +5,21 @@ import rospy
 from morrf_ros.srv import *
 from morrf_ros.msg import *
 from commander.srv import *
+from commander.msg import *
 
 def StartCostmapPublisher(map_image, stealth, safe, enemy_points):
     print "Generating costmaps..."
 
     rospy.wait_for_service("/morrf/get_cost_map")
+    pub = rospy.Publisher("costmap_response", costmap_response, queue_size = 10)
+
     try:
-        boundary_img = rospy.ServiceProxy("/morrf/get_cost_map", get_cost_map)
+        costmaps = rospy.ServiceProxy("/morrf/get_cost_map", get_cost_map)
 
-        response = boundary_img(map_image, stealth, safe, enemy_points)
+        response = costmaps(map_image, stealth, safe, enemy_points)
 
-	#print "Received costmap array"
-        #print "Received costmap array, %s" % str(response.cost_maps)
+        return response.response
 
-        return response
 
     except rospy.ServiceException, e:
         print "Service call failed: %s"%e

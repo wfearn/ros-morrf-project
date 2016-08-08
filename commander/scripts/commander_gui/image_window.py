@@ -255,3 +255,7 @@ class Image(QtGui.QMainWindow):
 
     def showStatusBar(self):
         self.statusBar().showMessage("Use the arrow keys to cycle between path options")
+
+    def setPathIndex(self, index):
+        self.path_index = index
+        self.update()

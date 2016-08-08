@@ -9,6 +9,7 @@ from commander_gui.config_camera import CameraConfig
 def main():
 
     app = QtGui.QApplication(sys.argv)
+    QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_X11InitThreads)
 
     c = CameraConfig()
 
