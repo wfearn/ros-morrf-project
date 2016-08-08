@@ -1,0 +1,28 @@
+<package>
+  <!-- Package Metadata -->
+  <name>tarrt_ros</name>
+  <maintainer email="yi@byu.edu">Walter</maintainer>
+  <description>
+    ROS node for TARRT*
+  </description>
+  <version>0.0.5</version>
+  <license>BSD</license>
+
+  <!-- Required by Catkin -->
+  <buildtool_depend>catkin</buildtool_depend>
+
+
+  <!-- Package Dependencies -->
+  <build_depend>roscpp</build_depend>
+  <run_depend>roscpp</run_depend>
+
+  <build_depend>int16_image_msg</build_depend>
+  <run_depend>int16_image_msg</run_depend>
+  <build_depend>tarrt_init_msg</build_depend>
+  <run_depend>tarrt_init_msg</run_depend>
+  <build_depend>single_objective_path_msg</build_depend>
+  <run_depend>single_objective_path_msg</run_depend>
+
+  <build_depend>message_generation</build_depend>
+  <run_depend>message_runtime</run_depend>
+</package>

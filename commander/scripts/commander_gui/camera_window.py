@@ -13,7 +13,7 @@ from error_popup.no_path_error import NoPath
 from mm_apriltags_tracker.msg import april_tag_pos
 from geometry_msgs.msg import Pose2D
 
-APRILTAG = 30
+APRILTAG = 100
 TBOT = 32
 HEIGHT = 600
 WIDTH = 600

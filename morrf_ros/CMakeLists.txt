@@ -59,6 +59,7 @@ add_executable(morrf_node src/morrf_service.cpp
                           src/morrf_service_node.cpp
               )
 
+add_dependencies(morrf_node morrf_ros_generate_messages_cpp)
 #add_executable(morrf_continue_node src/morrf_continue_node.cpp)
 
 target_link_libraries(morrf_node ${catkin_LIBRARIES}

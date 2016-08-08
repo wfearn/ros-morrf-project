@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(costmap_generator)
+project(sphero_costmap_generator)
 
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
@@ -155,7 +155,8 @@ include_directories(
 
 add_executable(costmap_subscriber src/costmap_subscriber.cpp src/generator.cpp)
 target_link_libraries(costmap_subscriber ${catkin_LIBRARIES} ${QT_LIBRARIES} ${OpenCV_LIBRARIES} )
-add_dependencies(costmap_subscriber costmap_generator_generate_messages_cpp)
+
+#add_dependencies(costmap costmap_generator_generate_messages_cpp)
 
 ## Declare a C++ library
 # add_library(commander
