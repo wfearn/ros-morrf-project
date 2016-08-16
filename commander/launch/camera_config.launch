@@ -2,5 +2,5 @@
 <launch>
     <include file="$(find morrf_ros)/launch/launch_morrf_node.launch"/>
     <node pkg="commander" type="run_camera_window.py" name="camera_window" output="screen"/>
-    <node pkg="costmap_generator" type="costmap_subscriber" name="costmap_generator" output="screen"/>
+    <node pkg="sphero_costmap_generator" type="costmap_subscriberT" name="costmap_generator" output="screen"/>
 </launch>

@@ -8,6 +8,11 @@ from morrf_ros.msg import multi_objective_path
 import math
 #import the msg file - April_tag_Pos
 
+DISTANCE_THRESHOLD = 20
+
+#Corresponds to about 5 degrees
+THETA_THRESHOLD = .087
+
 class Follower():
     def __init__(self):
         print "Follower started"
@@ -21,8 +26,8 @@ class Follower():
 
         self.initialize = False
 
-        self.lin_vel = 1
-        self.ang_vel = 1
+        self.lin_vel = .25
+        self.ang_scalar = .50
 
         self.rate = rospy.Rate(5)
 
@@ -31,58 +36,84 @@ class Follower():
         rospy.spin()
 
     def start_follow(self, path):
-        print "Received paths, setting initializer to true"
+        print "Received paths, setting initializer to true, path received was\n %s" % (str(path.waypoints))
 
         self.path = path.waypoints
         self.initialize = True
 
-    def follow(self, pos):
-        print "Moving robot to follow path"
+    def follow(self, robot_pos):
 
         if self.initialize == True:
 
             if self.index != (len(self.path) - 1):
 
-                if self.dist(pos, self.path[self.index]) > 1:
+                if self.dist(robot_pos, self.path[self.index]) > DISTANCE_THRESHOLD:
+                    print "Moving robot from point %s to point %s" % (str(robot_pos), str(self.path[self.index]))
 
-                    rx = pos.x
-                    ry = pos.y
-                    rtheta = pos.theta
+                    rx = robot_pos.x
+                    ry = robot_pos.y
+                    rtheta = robot_pos.theta
 
-                    p2 = self.path[self.index]
+                    waypoint = self.path[self.index]
+                    self.angle_to_waypoint = math.atan2( (waypoint.y - ry), (waypoint.x - rx) )
 
-                    self.new_theta = math.atan2( (p2.x - rx), (p2.y - ry) )
+                    if is_negative(rtheta):
 
-                    if abs(rtheta - new_theta) > 0.01:
-                        self.update_orientation(pos)
+                        #Converts it positive
+                        rtheta += 2 * math.pi
+
+                        robot_pos.theta = rtheta
+
+                    if is_negative(self.angle_to_waypoint):
+                        self.angle_to_waypoint += 2 * math.pi
+
+                    print "Rtheta and new theta is %s, %s" % (str(rtheta), str(self.angle_to_waypoint))
+                    rob_move = Twist()
+                    rob_move.angular.z = 0
+                    if abs(rtheta - self.angle_to_waypoint) > THETA_THRESHOLD:
+                       rob_move.angular.z = self.update_orientation(robot_pos)
 
                     else:
-                        self.update_position(pos)
+                       #rob_move.linear.x = self.update_position(rtheta, rob_move.angular.z)
+                        rob_move.linear.x = self.lin_vel
+
+                    self.robot_movement.publish(rob_move)
 
                 else:
                     self.index += 1
 
-    def update_position(self, rob_pos):
+            else:
+              self.initialize = False
+
+    def update_position(self, rtheta, angular_vel):
         print "Updating robot linear position"
-
-        rob_move = Twist()
-        rob_move.linear.x = lin_vel
-
-        self.robot_movement.publish(rob_move)
-
+        if abs(rtheta - self.angle_to_waypoint) > 0.174:
+            return 0
+        else:
+            return -( ( self.lin_vel / ( math.pi / self.ang_scalar ) ) * abs( angular_vel ) ) + self.lin_vel
 
     def update_orientation(self, rob_pos):
         print "Updating robot angular position"
         rob_theta = rob_pos.theta
+        diff = rob_theta - self.angle_to_waypoint
 
-        rob_turn = Twist()
+        if abs(diff) > math.pi:
+            diff = diff - (sign(diff) * (2 * math.pi))
 
-        if rob_theta - self.new_theta > 0:
-            rob_turn.angular.z = 0 - self.ang_vel
-        else:
-            rob_turn.angular.z = 0 + self.ang_vel
+        return  sign(diff) * self.ang_scalar * max(abs(diff), 0.5)
 
-        self.robot_movement.publish(rob_turn)
 
-    def dist(p1, p2):
-        return math.sqrt( (p2.x - p1.x)**2 + (p2.y - p2.y)**2 )
+
+    def dist(self, p1, p2):
+        return math.sqrt( (p2.x - p1.x)**2 + (p2.y - p1.y)**2 )
+
+def sign(number):
+    if number >= 0:
+        return 1
+    else:
+        return -1
+
+def is_negative(num):
+    return num < 0
+
+

@@ -15,7 +15,7 @@ import cv2
 import numpy as np
 import math
 
-from camera_window import CameraWindow
+from turtlebot_window import TurtlebotWindow
 
 from objective.objective import Objective
 
@@ -35,16 +35,16 @@ HEIGHT = 300
 ROBOT_PATH = "{}/data/objective_icons/robot.png"
 
 
-class CameraConfig(QtGui.QMainWindow):
+class TurtlebotConfig(QtGui.QMainWindow):
 
   def __init__(self):
-    super(CameraConfig, self).__init__()
+    super(TurtlebotConfig, self).__init__()
 
     self.setGeometry(STARTX, STARTY, WIDTH, HEIGHT)
     self.setWindowTitle("Camera Config")
     self.center()
 
-    self.image_window = CameraWindow()
+    self.image_window = TurtlebotWindow()
 
     action = QtGui.QAction("Close", self)
     action.setShortcut("Ctrl+C")

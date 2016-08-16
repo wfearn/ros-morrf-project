@@ -54,6 +54,7 @@ bool generate_costmap(commander::get_cost_map::Request &req,
 
             generator.probOfBeingNearToObstacle(enemy_points, req.map, bound, cost, ov);
 
+            print_array_image(cost, "/home/robotron5000/Documents/old_safety.png");
             res.cost_maps.push_back(cost);
             res.cost_values.push_back(ov);
 

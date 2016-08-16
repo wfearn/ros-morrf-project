@@ -1,4 +1,5 @@
 #include "generator.h"
+#include <cmath>
 
 using namespace std;
 
@@ -318,8 +319,12 @@ double Generator::getNearObsValue(Point pt) {
      //
     //  if(temp_inv_distance > nearObsValue)
     //     nearObsValue = temp_inv_distance;
-    distance <= 42 ? nearObsValue = 1 : nearObsValue = 0;
-
+    int edgeXMin = min(pt.x, (width - pt.x));
+    int edgeYMin = min(pt.y, (height - pt.y));
+    distance = min((double)edgeXMin, min((double)edgeYMin, distance));
+    nearObsValue = 1 - (1/(1+pow(2.718,-0.1 * (distance - 45))));
+    //distance <= 42 ? nearObsValue = 1 : nearObsValue = 0;
+    nearObsValue++; // avoid zero values
      return nearObsValue;
 }
 
@@ -353,6 +358,7 @@ void Generator::writeSafeImage(morrf_ros::int16_image &cost_map, commander::outp
       	    val.cost = ceil(imgProbVals[y][x]);
 
       	    ov.vals.push_back(val);
+
             cost_map.int_array.push_back(ceil(imgProbVals[y][x]));
         }
     }

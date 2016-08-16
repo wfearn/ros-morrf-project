@@ -17,15 +17,16 @@ APRILTAG = 100
 TBOT = 32
 HEIGHT = 550
 WIDTH = 550
+TURTLEBOT_OFFSET = 17 * 4
 
 OBS_DICT = {30:(52,52), 31:(46, 54), 33:(54, 74), 34:(72, 100)}
 
-class CameraWindow(QtGui.QWidget):
+class TurtlebotWindow(QtGui.QWidget):
     def __init__(self):
         super(QtGui.QWidget, self).__init__()
-        rospy.init_node("camera_window", anonymous = True)
+        rospy.init_node("turtlebot_window", anonymous = True)
 
-        self.setWindowTitle("Camera Window")
+        self.setWindowTitle("Turtlebot Window")
 
         self.resize(WIDTH, HEIGHT)
 
@@ -73,7 +74,10 @@ class CameraWindow(QtGui.QWidget):
             if key in OBS_DICT.keys():
                 dim = OBS_DICT[key]
 
-                rect = QRect( (value.x - dim[0] / 2), (value.y - dim[1] / 2), dim[0], dim[1])
+                width = dim[0] + TURTLEBOT_OFFSET
+                height = dim[1] + TURTLEBOT_OFFSET
+
+                rect = QRect( value.x - dim[0] / 2, value.y - dim[1] / 2, width, height)
                 painter.setBrush(Qt.black)
                 painter.drawRect(rect)
 
