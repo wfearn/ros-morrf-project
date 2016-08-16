@@ -7,6 +7,8 @@ from PyQt4.QtCore import *
 
 from std_msgs.msg import *
 
+from progress_subscriber_thread import ProgressBarThread
+
 class MORRFProgressBar(QWidget):
     def __init__(self):
         QWidget.__init__(self)
@@ -18,17 +20,23 @@ class MORRFProgressBar(QWidget):
         self.progress.setGeometry(50, 10, 300, 30)
         self.progress.setTextVisible(True)
 
-        self.morrf_progress = rospy.Subscriber("/morrf_status", Float64, self.updateProgress)
+        self.morrf_progress = ProgressBarThread()
 
     def getValue(self):
         return self.progress.value()
 
     def activate(self):
+        self.progress.setValue(0)
+
         self.show()
 
+        self.morrf_progress.start()
+        self.connect(self.morrf_progress, QtCore.SIGNAL("MORRF_STATUS"), self.updateProgress)
+
     def updateProgress(self, data):
-        if data.data >= 100:
+        if data >= 100:
             self.hide()
+            self.morrf_progress.terminate()
 
         else:
-            self.progress.setValue(data.data)
+            self.progress.setValue(data)

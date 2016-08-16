@@ -18,8 +18,6 @@ class CommanderThread(QtCore.QThread):
 
 
     def run(self):
-        print "Running commander thread"
         response = StartCommanderPublisher(self.init)
 
-        print "Emitting morrf response"
         self.emit(QtCore.SIGNAL("MORRF_RESPONSE"), response)

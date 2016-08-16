@@ -101,17 +101,24 @@ bool MORRFService::continuation( morrf_ros::morrf_continue::Request& req,
     if(morrf != NULL) {
 
         int new_iterations = morrf->get_current_iteration() + req.iterations;
+        float max_itr = req.iterations;
+        int current_itr = 1;
+
+        int i = req.iterations / 10;
+
 
         while(morrf->get_current_iteration() <= new_iterations) {
             morrf->extend();
 
-            float current_itr = morrf->get_current_iteration();
-            float max_itr = req.iterations;
+            if (current_itr % i == 0) {
 
-            std_msgs::Float64 p;
-            p.data = ((current_itr / max_itr) * 100);
+                std_msgs::Float64 p;
+                p.data = ((current_itr / max_itr) * 100);
 
-            morrf_progress.publish(p);
+                morrf_progress.publish(p);
+            }
+
+            current_itr++;
         }
 
     std::cout << "MORRF iterations completed..." << std::endl;
@@ -208,7 +215,6 @@ bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_initialize::Request& re
 
       int i = req.init.number_of_iterations / 10;
 
-
       if(morrf->get_current_iteration() % i == 0) {
 
 
@@ -220,6 +226,7 @@ bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_initialize::Request& re
           p.data = ((current_itr / max_itr) * 75) + 25;
           morrf_progress.publish(p);
       }
+
       morrf->extend();
     }
 

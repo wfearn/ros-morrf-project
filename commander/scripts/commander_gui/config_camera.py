@@ -37,6 +37,7 @@ from progress_bar.progress_bar import MORRFProgressBar
 
 from commander_thread import CommanderThread
 from costmap_thread import CostmapThread
+from continue_thread import ContinueThread
 
 STARTX = 1200
 STARTY = 1200
@@ -48,9 +49,6 @@ class CameraConfig(QtGui.QMainWindow):
     def __init__(self):
         super(CameraConfig, self).__init__()
         rospy.init_node("camera_config", anonymous=True)
-
-        #self.morrf_sub = rospy.Subscriber("/morrf_response", multi_path_array, self.MORRFCallback)
-        #self.cost_sub = rospy.Subscriber("/costmap_response", costmap_response, self.costmapCallback)
 
         self.setGeometry(STARTX, STARTY, WIDTH, HEIGHT)
         self.setWindowTitle("Camera Config")
@@ -151,8 +149,17 @@ class CameraConfig(QtGui.QMainWindow):
     def continueMORRF(self):
         self.progress_bar.activate()
 
-        self.morrf_response = StartContinuePublisher(self.options.getIterations())
-        self.image_window.startPathCycler(self.morrf_response)
+        #self.morrf_response = StartContinuePublisher(self.options.getIterations())
+
+        self.continue_thread = ContinueThread(self.options.getIterations())
+        self.continue_thread.start()
+
+        self.connect(self.continue_thread, QtCore.SIGNAL("CONTINUE_RESPONSE"), self.continueCallback)
+        #self.image_window.startPathCycler(self.morrf_response)
+
+    def continueCallback(self, morrf_response):
+        self.image_window.startPathCycler(morrf_response)
+
 
     def activateOptions(self):
         self.options.activate()
@@ -182,9 +189,7 @@ class CameraConfig(QtGui.QMainWindow):
             self.error = NotInitialized()
 
     def costmapCallback(self, costmap_response):
-        print "Calling costmap callback..."
         self.initializer.cost_maps = costmap_response.cost_maps
-        print "Costmaps assigned to initializer"
 
         self.morrf_thread = CommanderThread(self.initializer)
         self.morrf_thread.start()

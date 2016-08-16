@@ -24,8 +24,6 @@ class CostmapThread(QtCore.QThread):
 
 
     def run(self):
-        print "Running costmap thread"
         response = StartCostmapPublisher(self.img, self.stealth, self.safe, self.locs)
 
-        print "Emitting costmap response"
         self.emit(QtCore.SIGNAL("COSTMAP_RESPONSE"), response)
