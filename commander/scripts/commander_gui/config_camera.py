@@ -45,6 +45,7 @@ WIDTH = 200
 HEIGHT = 300
 ROBOT_PATH = "{}/data/objective_icons/robot.png"
 
+
 class CameraConfig(QtGui.QMainWindow):
     def __init__(self):
         super(CameraConfig, self).__init__()

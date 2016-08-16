@@ -17,28 +17,16 @@ APRILTAG = 100
 TBOT = 32
 HEIGHT = 550
 WIDTH = 550
+TURTLEBOT_OFFSET = 17 * 4
 
 OBS_DICT = {30:(52,52), 31:(46, 54), 33:(54, 74), 34:(72, 100)}
 
-MORRF_OUTPUT_FILE = "/home/wfearn/Dropbox/MORRF_OUTPUT/morrf_output/{}"
-IMG_OUTPUT_FILE = "/home/wfearn/Dropbox/MORRF_OUTPUT/maps/{}"
-
-PATHS_FILE = MORRF_OUTPUT_FILE.format("paths.txt")
-COSTS_FILE = MORRF_OUTPUT_FILE.format("costs.txt")
-SAFE_VALS_FILE = MORRF_OUTPUT_FILE.format("safe_values.txt")
-STEALTH_VALS_FILE = MORRF_OUTPUT_FILE.format("stealth_values.txt")
-ENEMIES_FILE = MORRF_OUTPUT_FILE.format("enemies.txt")
-
-MAP_IMG = IMG_OUTPUT_FILE.format("map.png")
-BOUNDARY_IMG = IMG_OUTPUT_FILE.format("boundary.png")
-
-JSON_FILE = "/home/wfearn/Dropbox/MORRF_OUTPUT/morrf.json"
-
-class CameraWindow(QtGui.QWidget):
+class TurtlebotWindow(QtGui.QWidget):
     def __init__(self):
         super(QtGui.QWidget, self).__init__()
+        rospy.init_node("turtlebot_window", anonymous = True)
 
-        self.setWindowTitle("Camera Window")
+        self.setWindowTitle("Turtlebot Window")
 
         self.resize(WIDTH, HEIGHT)
 
@@ -86,7 +74,10 @@ class CameraWindow(QtGui.QWidget):
             if key in OBS_DICT.keys():
                 dim = OBS_DICT[key]
 
-                rect = QRect( (value.x - dim[0] / 2), (value.y - dim[1] / 2), dim[0], dim[1])
+                width = dim[0] + TURTLEBOT_OFFSET
+                height = dim[1] + TURTLEBOT_OFFSET
+
+                rect = QRect( value.x - dim[0] / 2, value.y - dim[1] / 2, width, height)
                 painter.setBrush(Qt.black)
                 painter.drawRect(rect)
 
@@ -129,27 +120,12 @@ class CameraWindow(QtGui.QWidget):
         QApplication.processEvents()
 
         p = QPixmap.grabWidget(self)
-        self.img = p.toImage()
+        img = p.toImage()
 
         self.image_creation = False
         self.update()
 
-        return self.img
-
-    def isInitialized(self):
-        has_goal = False
-        has_start = False
-
-        for key, value in self.agent_map.iteritems():
-            if key == 51:
-                has_goal = True
-            elif key == 50:
-                has_start = True
-
-        if has_goal and has_start:
-            return True
-        else:
-            return False
+        return img
 
     def getGoalPoint(self):
         for key, value in self.agent_map.iteritems():
@@ -204,25 +180,5 @@ class CameraWindow(QtGui.QWidget):
 
     def getMORRFPath(self):
         return self.morrf_paths.paths[self.path_index]
-
-    def saveMapToDropbox(self):
-        self.img.save("/home/wfearn/Dropbox/MORRF_OUTPUT/maps/map.png")
-
-    def saveBoundImage(self, img):
-
-        test = QImage(img.width, img.height, QImage.Format_RGB16)
-
-        for i in range(img.height):
-            for j in range(img.width):
-
-                index = i * img.width + j
-                color = img.int_array[index]
-
-                qrgb = QColor(color, color, color)
-
-                test.setPixel(j, i, qrgb.rgb())
-
-        test.save(BOUNDARY_IMG)
-
 
 

@@ -32,7 +32,7 @@ bool generate_costmap(commander::get_cost_map::Request &req,
 
             if(req.stealth == 1) {
 
-		std::cout << "Generating stealth costmap..." << endl;
+                std::cout << "Generating stealth costmap..." << endl;
 
                 morrf_ros::int16_image cost;
                 commander::outputVals ov;
@@ -45,7 +45,7 @@ bool generate_costmap(commander::get_cost_map::Request &req,
 
             if(req.safe == 1) {
 
-		std::cout << "Generating safety costmap..." << endl;
+                std::cout << "Generating safety costmap..." << endl;
 
                 morrf_ros::int16_image cost;
                 commander::outputVals ov;
@@ -56,7 +56,7 @@ bool generate_costmap(commander::get_cost_map::Request &req,
                 res.response.cost_values.push_back(ov);
             }
 
-	    std::cout << "Costmaps generated!" << endl;
+            std::cout << "Costmaps generated!" << endl;
 
             /*Meher's Parameters
             1. Map Scores FileName

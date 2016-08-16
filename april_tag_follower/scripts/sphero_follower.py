@@ -7,7 +7,7 @@ from morrf_ros.msg import multi_objective_path
 
 import math
 #import the msg file - April_tag_Pos
-MAXVEL = 60
+MAXVEL = 50
 RADIUS = 20
 ALPHA = 2
 
@@ -33,8 +33,8 @@ class Follower():
         rospy.spin()
 
     def start_follow(self, path):
-        print "Initializing path in sphero follower"
-
+        print "Initializing path in sphero follower: %d" % len(path.waypoints)
+        self.index = 0
         self.path = path.waypoints
         self.initialize = True
 
@@ -42,10 +42,10 @@ class Follower():
 
         if self.initialize == True:
 
-            print "Updating sphero to follow path"
             if self.index != (len(self.path) - 0):
 
                 distance = self.dist(pos, self.path[self.index])
+                print "Updating sphero to follow path: %f" % distance
                 if distance > RADIUS:
                     p2 = self.path[self.index]
 
@@ -82,4 +82,4 @@ class Follower():
         self.robot_movement.publish(rob_turn)
 
     def dist(self, p1, p2):
-        return math.sqrt( (p2.x - p1.x)**2 + (p2.y - p2.y)**2 )
+        return math.sqrt( (p2.x - p1.x)**2 + (p2.y - p1.y)**2 )

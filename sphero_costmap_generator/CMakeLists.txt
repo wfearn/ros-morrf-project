@@ -153,8 +153,9 @@ include_directories(
 #add_executable(costmap src/main.cpp src/generator.cpp)
 #target_link_libraries(costmap ${catkin_LIBRARIES} ${QT_LIBRARIES} ${OpenCV_LIBRARIES} )
 
-add_executable(sphero_costmap_subscriber src/costmap_subscriber.cpp src/generator.cpp)
-target_link_libraries(sphero_costmap_subscriber ${catkin_LIBRARIES} ${QT_LIBRARIES} ${OpenCV_LIBRARIES} )
+add_executable(costmap_subscriberT src/costmap_subscriber.cpp src/generator.cpp)
+target_link_libraries(costmap_subscriberT ${catkin_LIBRARIES} ${QT_LIBRARIES} ${OpenCV_LIBRARIES} )
+add_dependencies(costmap_subscriberT costmap_generator_generate_messages_cpp)
 
 #add_dependencies(costmap costmap_generator_generate_messages_cpp)
 
