@@ -1,6 +1,7 @@
 #include <iostream>
 #include "morrf/morrf.h"
 #include "morrf_ros/morrf_service.h"
+#include "std_msgs/Int64.h"
 
 using namespace std;
 
@@ -84,6 +85,8 @@ MORRFService::MORRFService() {
     m_mopp_srv = m_nh.advertiseService( MORRF_SERVICE_NAME, &MORRFService::get_multi_obj_paths, this);
     morrf_continue = m_cont.advertiseService( MORRF_CONTINUE_SERVICE, &MORRFService::continuation, this);
 
+    morrf_progress = p_pub.advertise<std_msgs::Float64>("morrf_status", 10000);
+
     morrf = NULL;
 }
 
@@ -98,14 +101,29 @@ bool MORRFService::continuation( morrf_ros::morrf_continue::Request& req,
     if(morrf != NULL) {
 
         int new_iterations = morrf->get_current_iteration() + req.iterations;
+        float max_itr = req.iterations;
+        int current_itr = 1;
+
+        int i = req.iterations / 10;
+
 
         while(morrf->get_current_iteration() <= new_iterations) {
             morrf->extend();
+
+            if (current_itr % i == 0) {
+
+                std_msgs::Float64 p;
+                p.data = ((current_itr / max_itr) * 100);
+
+                morrf_progress.publish(p);
+            }
+
+            current_itr++;
         }
 
-	std::cout << "MORRF iterations completed..." << std::endl;
+    std::cout << "MORRF iterations completed..." << std::endl;
 
-        std::vector<Path*> paths = morrf->get_paths(false, false);
+    std::vector<Path*> paths = morrf->get_paths(false, false);
 
         for(unsigned int i=0; i < paths.size(); i++) {
             Path* p = paths[i];
@@ -120,13 +138,11 @@ bool MORRFService::continuation( morrf_ros::morrf_continue::Request& req,
 
                 for(unsigned int j=0; j < p->m_waypoints.size(); j++) {
 
-                    geometry_msgs::Pose2D point;
-                    point.x = p->m_waypoints[j][0];
-                    point.y = p->m_waypoints[j][1];
-                    //std::cout << "(" << point.x << ", " << point.y << ") "; 
-                    pp.waypoints.push_back(point);
+                  geometry_msgs::Pose2D point;
+                  point.x = p->m_waypoints[j][0];
+                  point.y = p->m_waypoints[j][1];
+                  pp.waypoints.push_back(point);
                 }
-                //std::cout << std::endl;
 
                 res.paths.push_back(pp);
             }
@@ -193,19 +209,32 @@ bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_initialize::Request& re
     morrf->load_map(pp_obstacle);
     morrf->set_boundary_intersection_penalty(req.init.boundary_intersection_penalty);
 
-    //std::cout << "START " << req.init.start.x << " " << req.init.start.y << std::endl;
-    //std::cout << "GOAL " << req.init.goal.x << " " << req.init.goal.y << std::endl;
     std::cout << "Starting MORRF iterations..." << std::endl;
 
     while(morrf->get_current_iteration() <= req.init.number_of_iterations) {
-        morrf->extend();
+
+      int i = req.init.number_of_iterations / 10;
+
+      if(morrf->get_current_iteration() % i == 0) {
+
+
+          std_msgs::Float64 p;
+
+          float current_itr = morrf->get_current_iteration();
+          float max_itr = req.init.number_of_iterations;
+
+          p.data = ((current_itr / max_itr) * 75) + 25;
+          morrf_progress.publish(p);
+      }
+
+      morrf->extend();
     }
 
     std::cout << "MORRF iterations completed..." << std::endl;
 
     std::vector<Path*> paths = morrf->get_paths(false, false);
-   
-    std::cout << "Paths obtained!" << std::endl; 
+
+    std::cout << "Paths obtained!" << std::endl;
 
     for(unsigned int i=0; i < paths.size(); i++) {
 
@@ -220,6 +249,7 @@ bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_initialize::Request& re
             }
 
             for(unsigned int j=0; j < p->m_waypoints.size(); j++) {
+
                 geometry_msgs::Pose2D point;
                 point.x = p->m_waypoints[j][0];
                 point.y = p->m_waypoints[j][1];
@@ -228,7 +258,7 @@ bool MORRFService::get_multi_obj_paths( morrf_ros::morrf_initialize::Request& re
             }
             //std::cout << std::endl;
 
-            res.paths.push_back(pp);
+            res.path_array.paths.push_back(pp);
         }
     }
 

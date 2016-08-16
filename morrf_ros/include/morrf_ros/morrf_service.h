@@ -27,8 +27,12 @@ public:
   ros::NodeHandle m_nh;
   ros::NodeHandle m_cont;
 
+  ros::NodeHandle p_pub;
+
   ros::ServiceServer m_mopp_srv;
   ros::ServiceServer morrf_continue;
+
+  ros::Publisher morrf_progress;
 };
 
 #endif // MORRF_SERVICE_H_

@@ -1,6 +1,7 @@
 #include "ros/ros.h"
 #include "commander/get_cost_map.h"
 #include "morrf_ros/int16_image.h"
+#include "std_msgs/Float64.h"
 
 #include <vector>
 #include <list>
@@ -15,12 +16,17 @@ using namespace std;
 bool generate_costmap(commander::get_cost_map::Request &req,
                          commander::get_cost_map::Response &res) {
 
+        ros::NodeHandle nh;
+        ros::Publisher progress;
+
+        progress = nh.advertise<std_msgs::Float64>("morrf_status", 10000);
+
         Generator generator = Generator();
 
         morrf_ros::int16_image bound;
         find_boundaries(req.map, bound);
 
-        res.boundary_image = bound;
+        res.response.boundary_image = bound;
 
         list<Point> enemy_points;
 
@@ -40,8 +46,14 @@ bool generate_costmap(commander::get_cost_map::Request &req,
 
             generator.probOfSeenByEnemy(enemy_points, req.map, bound, cost, ov);
 
-            res.cost_maps.push_back(cost);
-            res.cost_values.push_back(ov);
+            res.response.cost_maps.push_back(cost);
+            res.response.cost_values.push_back(ov);
+
+            std_msgs::Float64 p;
+
+            p.data = 10.0;
+
+            progress.publish(p);
 
         }
 
@@ -54,9 +66,14 @@ bool generate_costmap(commander::get_cost_map::Request &req,
 
             generator.probOfBeingNearToObstacle(enemy_points, req.map, bound, cost, ov);
 
-            print_array_image(cost, "/home/robotron5000/Documents/old_safety.png");
-            res.cost_maps.push_back(cost);
-            res.cost_values.push_back(ov);
+            res.response.cost_maps.push_back(cost);
+            res.response.cost_values.push_back(ov);
+
+            std_msgs::Float64 p;
+
+            p.data = 20.0;
+
+            progress.publish(p);
 
         }
 

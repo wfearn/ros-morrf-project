@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-import sys
-import rospy
+import sys, rospy, time, os
+import os.path
 
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtGui import *
@@ -11,6 +11,7 @@ from image_window import Image
 from image_window import Image
 
 from morrf_ros.msg import *
+
 import cv2
 import numpy as np
 import json
@@ -43,7 +44,7 @@ BOUNDARY_IMG = IMG_OUTPUT_FILE.format("boundary.png")
 
 JSON_FILE = "/home/wfearn/Dropbox/MORRF_OUTPUT/morrf.json"
 
-
+PATH_RESPONSE_FILE = "/home/wfearn/Dropbox/MORRF_OUTPUT/path_response/pathNumber.txt"
 
 class Config(QtGui.QMainWindow):
 
@@ -199,6 +200,22 @@ class Config(QtGui.QMainWindow):
         print "Sending to path palette..."
 
         self.outputToDropbox(self.morrf_response)
+
+        while not os.path.isfile(PATH_RESPONSE_FILE):
+            time.sleep(.5)
+
+        print "Response file found!"
+        f = open(PATH_RESPONSE_FILE, "r")
+
+        index = int(f.read())
+
+        print "Path %s selected" % index
+
+        self.image_window.setPathIndex(index)
+
+        f.close()
+        os.remove(PATH_RESPONSE_FILE)
+
 
     def saveBoundImage(self, image):
 

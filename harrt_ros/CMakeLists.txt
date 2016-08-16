@@ -45,7 +45,7 @@ include_directories(${LIBXML2_INCLUDE_DIR})
 # search for CGAL, exit if not found
 find_package(CGAL QUIET COMPONENTS Core)
 if( NOT CGAL_FOUND )
-  message( FATAL_ERROR "CGAL not found\n" ) 
+  message( FATAL_ERROR "CGAL not found\n" )
   return()
 endif()
 #message( "CGAL FOUND ")
@@ -56,7 +56,7 @@ include_directories(${CGAL_INCLUDE_DIR})
 
 # search for Open CV, exit if not found
 find_package( OpenCV REQUIRED )
-if( NOT OpenCV_FOUND ) 
+if( NOT OpenCV_FOUND )
   message( FATAL_ERROR "OpenCV not found\n")
   return()
 endif()
@@ -93,7 +93,7 @@ catkin_package(
 )
 
 # Add the headers from roscpp
-include_directories(include 
+include_directories(include
                     ${catkin_INCLUDE_DIRS}
                     ${HOMOTOPY_INCLUDE_DIR}
                     ${HARRT_INCLUDE_DIR}
