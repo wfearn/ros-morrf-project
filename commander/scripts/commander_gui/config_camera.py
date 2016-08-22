@@ -45,7 +45,6 @@ WIDTH = 200
 HEIGHT = 300
 ROBOT_PATH = "{}/data/objective_icons/robot.png"
 
-
 class CameraConfig(QtGui.QMainWindow):
     def __init__(self):
         super(CameraConfig, self).__init__()
@@ -260,7 +259,6 @@ class CameraConfig(QtGui.QMainWindow):
 
     def mapConvert(self):
         img = self.image_window.getMORRFImage()
-        img.save("/home/wfearn/Documents/camera_img.png")
 
         image = int16_image()
         image.width = img.width()

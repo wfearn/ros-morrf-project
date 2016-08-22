@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   geometry_msgs
   morrf_ros
+  tarrt_ros
 )
 
 ## System dependencies are found with CMake's conventions
@@ -71,6 +72,7 @@ find_package(catkin REQUIRED COMPONENTS
  generate_messages(
    DEPENDENCIES
    morrf_ros
+   tarrt_ros
    std_msgs  # Or other packages containing msgs
    geometry_msgs
 )
@@ -107,7 +109,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES commander
-   CATKIN_DEPENDS message_runtime rospy std_msgs geometry_msgs morrf_ros
+   CATKIN_DEPENDS message_runtime rospy std_msgs geometry_msgs morrf_ros tarrt_ros
 #  DEPENDS system_lib
 )
 

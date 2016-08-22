@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-import os
-import sys
+import os, sys, rospy
 import math as math
 
 from PyQt4 import QtGui, QtCore
@@ -11,89 +10,70 @@ from PyQt4.QtGui import *
 from objective.objective import Objective
 from error_popup.impediment_error import ImpedimentError
 
+from objective.premade_objectives import PremadeObjs
+
+from error_popup.no_path_error import NoPath
+
+from mm_apriltags_tracker.msg import april_tag_pos
+from geometry_msgs.msg import Pose2D
+
 EPSILON = 1
 
-class Sketch(QtGui.QMainWindow):
-    def __init__(self, image_name):
-        super(Sketch, self).__init__()
+APRILTAG = 100
+TBOT = 32
+HEIGHT = 550
+WIDTH = 550
 
-        self.image_name = image_name
+OBS_DICT = {30:(52, 52), 31:(46, 54), 33:(54, 74), 34:(72, 100), 35:(50, 50)}
+
+MORRF_OUTPUT_FILE = "/home/wfearn/Dropbox/MORRF_OUTPUT/morrf_output/{}"
+IMG_OUTPUT_FILE = "/home/wfearn/Dropbox/MORRF_OUTPUT/maps/{}"
+
+PATHS_FILE = MORRF_OUTPUT_FILE.format("paths.txt")
+COSTS_FILE = MORRF_OUTPUT_FILE.format("costs.txt")
+
+
+class Sketch(QtGui.QMainWindow):
+    def __init__(self):
+        super(Sketch, self).__init__()
 
         self.setWindowTitle("Sketch GUI")
 
-        self.image = QPixmap(image_name)
+        self.setGeometry(50, 50, WIDTH, HEIGHT)
 
-        self.setGeometry(50, 50, self.image.width(), self.image.height())
+        self.tag_sub = rospy.Subscriber("/april_tag_pos", april_tag_pos, self.updateObjectPositions)
 
-        palette = QPalette()
-        palette.setBrush(QPalette.Background, QBrush(self.image))
-        self.setPalette(palette)
+        self.agent_map = {}
+        self.waypoints = []
+
+        self.po = PremadeObjs()
+
+        self.image_creation = False
 
         self.setContextMenuPolicy(Qt.ActionsContextMenu)
 
-        goalAction = QAction("Set Goal...", self)
-        startAction = QAction("Set Start...", self)
-        enemyAction = QAction("Set Enemy...", self)
         resetAction = QAction("Reset", self)
-        toggleAction = QAction("Toggle Draw State", self)
-
-        startAction.triggered.connect(self.createStart)
-        goalAction.triggered.connect(self.createGoal)
-        enemyAction.triggered.connect(self.createEnemy)
         resetAction.triggered.connect(self.reset)
-        toggleAction.triggered.connect(self.toggleDrawState)
 
-        self.addAction(goalAction)
-        self.addAction(startAction)
-        self.addAction(enemyAction)
         self.addAction(resetAction)
-        self.addAction(toggleAction)
 
-        self.objectives = []
-        self.waypoints = []
-
-        self.statusBar().showMessage("Select Objectives")
-        self.draw_state = False
+        self.fade_color = QtGui.QColor(QtCore.Qt.gray)
+        self.fade_color.setAlpha(80)
+        self.highlighter = QtCore.Qt.magenta
 
         self.black_pen = QtGui.QPen(QtCore.Qt.black, 5, QtCore.Qt.SolidLine)
         self.red_pen = QtGui.QPen(QtCore.Qt.red, 5, QtCore.Qt.SolidLine)
+        self.fade_pen = QtGui.QPen(self.fade_color, 5, QtCore.Qt.SolidLine)
+        self.pink_pen = QtGui.QPen(self.highlighter, 5, QtCore.Qt.SolidLine)
+
+        p = self.palette()
+        p.setColor(self.backgroundRole(), QtCore.Qt.white)
+        self.setPalette(p)
 
         self.show()
 
-    def createStart(self):
-        if not self.contains("start"):
-            obj = Objective("start", self.x, self.y)
-            self.objectives.append(obj)
-        else:
-            for obj in self.objectives:
-                if obj.getObjectiveType() == "start":
-                    obj.setPosition(self.x, self.y)
-
-        self.update()
-
-    def createGoal(self):
-        if not self.contains("goal"):
-            obj = Objective("goal", self.x, self.y)
-            self.objectives.append(obj)
-        else:
-            for obj in self.objectives:
-                if obj.getObjectiveType() == "goal":
-                    obj.setPosition(self.x, self.y)
-
-        self.update()
-
-    def createEnemy(self):
-        obj = Objective("enemy", self.x, self.y)
-        self.objectives.append(obj)
-
-        self.update()
-
     def reset(self):
-        if not self.draw_state:
-            self.objectives = []
-
-        else:
-            self.waypoints = []
+        self.waypoints = []
 
         self.update()
 
@@ -104,12 +84,7 @@ class Sketch(QtGui.QMainWindow):
         self.x = event.x()
         self.y = event.y()
 
-        if not self.draw_state:
-            for obj in self.objectives:
-                if obj.isInsideBoundary((self.x, self.y)) and mouse_state == QtCore.Qt.LeftButton:
-                    obj.setClicked(True)
-
-        elif mouse_state == QtCore.Qt.LeftButton:
+        if mouse_state == QtCore.Qt.LeftButton:
             if self.freeOfObstacle(self.x, self.y):
                 self.waypoints.append((self.x, self.y))
             else:
@@ -117,15 +92,29 @@ class Sketch(QtGui.QMainWindow):
 
         self.update()
 
+    def getImage(self):
+        self.image_creation = True
+
+        self.update()
+        QApplication.processEvents()
+
+        p = QPixmap.grabWidget(self)
+        self.img = p.toImage()
+
+        self.image_creation = False
+        self.update()
+
+        return self.img
+
     def freeOfObstacle(self, x, y):
 
-        img = self.image.toImage()
+        img = self.getImage()
 
         if len(self.waypoints) > 1:
 
             color = QColor(img.pixel(x, y))
 
-            if color.blue() == 0:
+            if color == QtCore.Qt.black:
                 return False
 
             else:
@@ -144,13 +133,13 @@ class Sketch(QtGui.QMainWindow):
 
                     color = QColor(img.pixel(p[0], p[1]))
 
-                    if color.blue() == 0:
+                    if color == QtCore.Qt.black:
                         return False
 
                 return True
         else:
 
-            if img.pixel(x, y) == 0:
+            if img.pixel(x, y) == QtCore.Qt.black:
                 return False
 
             else:
@@ -159,31 +148,53 @@ class Sketch(QtGui.QMainWindow):
     def distance(self, p1, p2):
         return math.sqrt( (p1[0] - p2[0])**2 + (p1[1] - p2[1])**2 )
 
-    def mouseMoveEvent(self, event):
-
-        if not self.draw_state:
-            for obj in self.objectives:
-                if obj.isClicked():
-                    obj.setPosition(event.x(), event.y())
+    def updateObjectPositions(self, msg):
+        for i in range(len(msg.id)):
+            self.agent_map[msg.id[i]] = msg.pose[i]
 
         self.update()
 
-    def mouseReleaseEvent(self, event):
-        for obj in self.objectives:
-            if obj.isClicked():
-                obj.setClicked(False)
+    def hasStart(self):
+        for key, value in self.agent_map.iteritems():
+            if key == 50:
+                return True
 
-        self.update()
+        return False
+
+    def hasGoal(self):
+        for key, value in self.agent_map.iteritems():
+            if key == 51:
+                return True
+
+        return False
 
     def paintEvent(self, event):
 
         painter = QtGui.QPainter()
         painter.begin(self)
-        painter.setPen(self.red_pen)
+        painter.setPen(self.black_pen)
 
-        for obj in self.objectives:
-            img = obj.getImage()
-            painter.drawImage(obj.getDrawQPoint(), img)
+        for key, value in self.agent_map.iteritems():
+            if key in OBS_DICT.keys():
+                dim = OBS_DICT[key]
+
+                rect = QRect( (value.x - dim[0] / 2), (value.y - dim[1] / 2), dim[0], dim[1])
+                painter.setBrush(Qt.black)
+                painter.drawRect(rect)
+
+            elif key < 50 and key > 39 and self.image_creation == False:
+                painter.drawImage( self.po.getEnemyDrawPoint(value.x, value.y), self.po.getEnemyImage() )
+
+            elif key == 50 and self.image_creation == False:
+                painter.drawImage( self.po.getStartDrawPoint(value.x, value.y), self.po.getStartImage() )
+
+            elif key == 51 and self.image_creation == False:
+                painter.drawImage( self.po.getGoalDrawPoint(value.x, value.y), self.po.getGoalImage() )
+
+            elif key == 97 and self.image_creation == False:
+                painter.drawImage( self.po.getRoboDrawPoint(value.x, value.y), self.po.getRoboImage() )
+
+        painter.setPen(self.red_pen)
 
         for i in range(len(self.waypoints)):
             if i != 0:
@@ -192,24 +203,55 @@ class Sketch(QtGui.QMainWindow):
 
                 painter.drawLine(p1, p2)
 
+        if hasattr(self, "tarrt_paths") and self.image_creation == False:
+            for i in range(len(self.tarrt_paths.paths)):
+                for index in range(len(self.tarrt_paths.paths[i].waypoints)):
+
+                    if i == self.path_index:
+                        painter.setPen(self.pink_pen)
+
+                    else:
+                        painter.setPen(self.fade_pen)
+
+                    path = self.tarrt_paths.paths[i]
+
+                    if index != 0:
+                        p1 = QPoint(path.waypoints[index - 1].x, path.waypoints[index - 1].y)
+                        p2 = QPoint(path.waypoints[index].x, path.waypoints[index].y)
+
+                        painter.drawLine(p1, p2)
+
         painter.end()
 
-    def contains(self, objective):
-        for obj in self.objectives:
-            if obj.getObjectiveType() == objective:
-                return True
+    def getEnemyLocations(self):
+        enemies = []
 
-        return False
+        for key, value in self.agent_map.iteritems():
+            if key < 50 and key > 39:
+                p = Pose2D()
+                p.x = value.x
+                p.y = value.y
 
-    def setStatusBarMessage(self, message):
-        self.statusBar().showMessage(message)
+                enemies.append(p)
 
-    def toggleDrawState(self):
-        if self.draw_state == False:
-            self.draw_state = True
-            self.statusBar().showMessage("Select Waypoint Coordinates")
+        return enemies
+
+
+    def getGoalPoint(self):
+        for key, value in self.agent_map.iteritems():
+            if key == 51:
+                return (value.x, value.y)
+
+    def getStartPoint(self):
+        for key, value in self.agent_map.iteritems():
+            if key == 50:
+                return (value.x, value.y)
+
+    def startPathCycler(self, paths):
+        if hasattr(paths, "paths") and len(paths.paths) > 0:
+            self.tarrt_paths = paths
+            self.path_index = 0
+            self.update()
 
         else:
-            self.draw_state = False
-            self.statusBar().showMessage("Select Objectives")
-
+            self.error = NoPath()
