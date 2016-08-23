@@ -2,25 +2,29 @@
 
 Before anything, make sure that you're running Ubuntu 14.04 or a variant that runs it. We will discuss briefly small changes that you need to make if you're running Elementary OS, if your variant is not Elementary then you will be on your own if you run into issues.
 
-#### H4 1. Install ROS
-    You can follow the tutorial here: wiki.ros.org/indigo/Installation/Ubuntu
+####1. Install ROS
+You can follow the tutorial here: wiki.ros.org/indigo/Installation/Ubuntu
 
-    You may also install Jade, however if what you're doing requires use of the turtlebot, its better to install Indigo. If you install Jade you will not be able to run any of the turtlebot sims or anything like that.
+If what you're doing requires use of the turtlebot, its better to install Indigo.
 
-    Elementary OS Only:
-        You will be required to do the following command: echo "export ROS_OS_OVERRIDE=elementary" >> ~/.bashrc
+If you install Jade you will not be able to run any of the turtlebot sims or anything like that.
 
-        And on the part where you set up your sources.list in the ROS tutorial,
-        you need to replace $(lsb_release-sc) with the word "trusty" in order to get it to work correctly.
+Elementary OS Only:
+    You will be required to do the following command: echo "export ROS_OS_OVERRIDE=elementary" >> ~/.bashrc
 
-#### H4 2. Follow the tutorial link at the bottom of the ROS installation page.
+    And on the part where you set up your sources.list in the ROS tutorial,
+    you need to replace $(lsb_release-sc) with the word "trusty" in order to get it to work correctly.
 
-    Look where it says "Please proceed to the ROS Tutorials," to set up your ROS Environment.
+####2. Follow the tutorial link at the bottom of the ROS installation page.
 
-    Section 3 of "Installing and Configuring your ROS Environment" is the only one you need to follow, it will allow you to set up your catkin workspace. This is where you will put the ros-morrf-project in order to run it.
+Look where it says "Please proceed to the ROS Tutorials," to set up your ROS Environment.
+
+Section 3 of "Installing and Configuring your ROS Environment" is the only one you need to follow.
+It will allow you to set up your catkin workspace.
+This is where you will put the ros-morrf-project in order to run it.
 
 
-#### H4 3. Clone the ros-morrf-project and mm_apriltags_tracker into your ~/catkin_ws/src directory
+####3. Clone the ros-morrf-project and mm_apriltags_tracker into your ~/catkin_ws/src directory
 
     the links are found here respectively:
 
@@ -29,7 +33,7 @@ Before anything, make sure that you're running Ubuntu 14.04 or a variant that ru
 
     Don't run catkin_make yet, we need to install dependencies still.
 
-#### H4 4. Install dependencies.
+####4. Install dependencies.
 
     Go to somewhere that isn't your catkin_ws folder. I personally like to use the Documents folder in the home directory for this, but it doesn't really matter where you go.
 
