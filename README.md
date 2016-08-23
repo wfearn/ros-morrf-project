@@ -53,17 +53,9 @@ The third repository you will need to use svn. Run the following command:
 
 At this point you will need to install other packages if you don't have them installed already.
 
-Run the following commands:
+Run the following command:
 
-    sudo apt-get install qt-sdk
-
-    sudo apt-get install python-xlib
-
-    sudo apt-get install gengetopt
-
-    sudo apt-get install libcgal-dev
-
-    sudo apt-get install ros-indigo-usb-cam
+    sudo apt-get install qt-sdk python-xlib gengetopt libcgal-dev ros-indigo-usb-cam
 
 *Note*: You might have some of these installed already, if you don't when you try and install the libraries we have cloned the console output will let you know.
 
