@@ -98,12 +98,12 @@ If this doesn't work then you're on your own.
 
 The base command is "roslaunch commander ..." where the "..." can be one of several options:
 
-a. morrf_launch.launch:
+#####a. morrf_launch.launch:
 
     This will run the basic GUI. You'll need to load an image to run morrf on by clicking "file" and "load image"
     if you don't have images to run there are 3 that you can choose from in ~/catkin_ws/src/ros-morrf-project/commander/data/
 
-b. simple_launch.launch:
+#####b. simple_launch.launch:
 
     This will run an even simpler version of morrf_launch. Here you just need to select an image and decide what objectives you want.
 
@@ -118,13 +118,13 @@ Apriltags in the 30s correspond to obstacles.
 
 Read below to find out how to set up your environment correctly.
 
-c. turtlebot_config.launch:
+#####c. turtlebot_config.launch:
 
     This will run a window specifically made for the turtlebot. You can find more advanced options to mess with things such as the number of iterations MORRF will go through under file->advanced options
 
     You will not see obstacles here unless the apriltags are specific numbers. If you open commander/scripts/commander_gui/turtlebot_config.py you will see the variable OBS_DICT which has the numbers of the apriltags that correspond to obstacles, and the width and height of the obstacles they represent.
 
-d. topology.launch:
+#####d. topology.launch:
 
     This runs a variant of morrf where you select the path that you want morrf to build other paths around. You may only select one objective.
 
@@ -132,6 +132,6 @@ d. topology.launch:
 
     If the path is undesirable, you can right click and select "reset" to clear the path you have created.
 
-e. camera_config.launch:
+#####e. camera_config.launch:
 
     This runs something similar to turtlebot_config.launch except it uses a different costmap generator meant for the sphero robot. The paths generated with this will be farther from the obstacles than what you'll see with the other config files.
