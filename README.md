@@ -30,8 +30,8 @@ This is where you will put the ros-morrf-project in order to run it.
 
 the links are found here respectively:
 
-    ros-morrf-project: <https://github.com/wfearn/ros-morrf-project>
-    mm_apriltags_tracker: <https://github.com/darin-costello/mm_apriltags_tracker>
+ros-morrf-project: <https://github.com/wfearn/ros-morrf-project>
+mm_apriltags_tracker: <https://github.com/darin-costello/mm_apriltags_tracker>
 
 Don't run catkin_make yet, we need to install dependencies still.
 
@@ -43,8 +43,8 @@ but it doesn't really matter where you go.
 
 Clone the following two repositories into the folder of your choice:
 
-    <https://github.com/dqyi11/MORRF>
-    <https://github.com/dqyi11/TopologyPathPlanning>
+<https://github.com/dqyi11/MORRF>
+<https://github.com/dqyi11/TopologyPathPlanning>
 
 The third repository you will need to use svn. Run the following command:
     svn co https://svn.csail.mit.edu/apriltags
