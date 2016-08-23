@@ -10,8 +10,8 @@ If what you're doing requires use of the turtlebot, its better to install Indigo
 If you install Jade you will not be able to run any of the turtlebot sims or anything like that.
 
 Elementary OS Only:
-    You will be required to do the following command: echo "export ROS_OS_OVERRIDE=elementary" >> ~/.bashrc
 
+    You will be required to do the following command: echo "export ROS_OS_OVERRIDE=elementary" >> ~/.bashrc
     And on the part where you set up your sources.list in the ROS tutorial,
     you need to replace $(lsb_release-sc) with the word "trusty" in order to get it to work correctly.
 
@@ -26,57 +26,60 @@ This is where you will put the ros-morrf-project in order to run it.
 
 ####3. Clone the ros-morrf-project and mm_apriltags_tracker into your ~/catkin_ws/src directory
 
-    the links are found here respectively:
+the links are found here respectively:
 
-        ros-morrf-project: https://github.com/wfearn/ros-morrf-project
-        mm_apriltags_tracker: https://github.com/darin-costello/mm_apriltags_tracker
+    ros-morrf-project: <https://github.com/wfearn/ros-morrf-project>
+    mm_apriltags_tracker: <https://github.com/darin-costello/mm_apriltags_tracker>
 
-    Don't run catkin_make yet, we need to install dependencies still.
+Don't run catkin_make yet, we need to install dependencies still.
 
 ####4. Install dependencies.
 
-    Go to somewhere that isn't your catkin_ws folder. I personally like to use the Documents folder in the home directory for this, but it doesn't really matter where you go.
+Go to somewhere that isn't your catkin_ws folder.
+I personally like to use the Documents folder in the home directory for this,
+but it doesn't really matter where you go.
 
-    Clone the following two repositories into the folder of your choice:
+Clone the following two repositories into the folder of your choice:
 
-        1. https://github.com/dqyi11/MORRF
-        2. https://github.com/dqyi11/TopologyPathPlanning
+    1. <https://github.com/dqyi11/MORRF>
+    2. <https://github.com/dqyi11/TopologyPathPlanning>
 
-    The third repository you will need to use svn. Run the following command:
-        svn co https://svn.csail.mit.edu/apriltags
+The third repository you will need to use svn. Run the following command:
+    svn co https://svn.csail.mit.edu/apriltags
 
-    At this point you will need to install QT and other packages if you don't have them installed already.
-    Run the following commands:
+At this point you will need to install other packages if you don't have them installed already.
 
-        sudo apt-get install qt-sdk
+Run the following commands:
 
-        sudo apt-get install python-xlib
+    sudo apt-get install qt-sdk
 
-        sudo apt-get install gengetopt
+    sudo apt-get install python-xlib
 
-        sudo apt-get install libcgal-dev
+    sudo apt-get install gengetopt
 
-        sudo apt-get install ros-indigo-usb-cam
+    sudo apt-get install libcgal-dev
 
-   *Note*: You might have some of these installed already, if you don't when you try and install the libraries we have cloned the console output will let you know.
+    sudo apt-get install ros-indigo-usb-cam
 
-    a. Go to the MORRF folder that you have cloned
+*Note*: You might have some of these installed already, if you don't when you try and install the libraries we have cloned the console output will let you know.
 
-    b. type: mkdir build
+a. Go to the MORRF folder that you have cloned
 
-    c. type: cd build
+b. type: mkdir build
 
-    d. type: cmake ..
+c. type: cd build
 
-    e. Once it finishes, type: sudo make install
+d. type: cmake ..
 
-    f. At this point a bunch of lines should come up showing you that the program is compiling, if it is successful and has no error messages then you've installed the library correctly.
+e. Once it finishes, type: sudo make install
 
-    Repeat steps a through f for the TopologyPathPlanning and apriltags folders.
+f. At this point a bunch of lines should come up showing you that the program is compiling, if it is successful and has no error messages then you've installed the library correctly.
 
-    The only errors I've run into with these are dependency errors, but I have covered most of them, if not all, with the four package installations above.
+Repeat steps a through f for the TopologyPathPlanning and apriltags folders.
 
-    At this point you should be ready to run catin_make
+The only errors I've run into with these are dependency errors, but I have covered most of them, if not all, with the four package installations above.
+
+At this point you should be ready to run catin_make
 
 5. cd to ~/catkin_ws and run the catkin_make command
 
