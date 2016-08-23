@@ -132,7 +132,6 @@ class SketchConfig(QtGui.QMainWindow):
 
     def launchMORRF(self):
         if self.isCompleted():
-            print "Morrf launched"
 
             self.initializer = tarrt_ros.msg.tarrt_init()
 
@@ -144,7 +143,6 @@ class SketchConfig(QtGui.QMainWindow):
             stealth = self.stealth.isChecked()
             locs = self.image_window.getEnemyLocations()
 
-            print "Launching costmap thread"
             self.costmap_thread = CostmapThread(map_img, stealth, safe, locs)
             self.costmap_thread.start()
 
@@ -178,8 +176,6 @@ class SketchConfig(QtGui.QMainWindow):
         self.tarrt_thread.start()
 
         self.connect(self.tarrt_thread, QtCore.SIGNAL("TARRT_RESPONSE"), self.tarrtCallback)
-
-        print "Costmap callback called"
 
     def tarrtCallback(self, tarrt_response):
         self.startPathCycler(tarrt_response)

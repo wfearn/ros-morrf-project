@@ -36,23 +36,23 @@ class Window(QtGui.QMainWindow):
 
     #QtGui.QApplication.setStyle(QtGui.QStyleFactory.create("Plastique"))
 
-        self.setGeometry(STARTX, STARTY, WIDTH, HEIGHT)
-        self.setWindowTitle("Simple Config")
-        self.center()
+    self.setGeometry(STARTX, STARTY, WIDTH, HEIGHT)
+    self.setWindowTitle("Simple Config")
+    self.center()
 
-        action = QtGui.QAction("Close", self)
-        action.setShortcut("Ctrl+C")
-        action.triggered.connect (QtCore.QCoreApplication.instance().quit)
+    action = QtGui.QAction("Close", self)
+    action.setShortcut("Ctrl+C")
+    action.triggered.connect (QtCore.QCoreApplication.instance().quit)
 
-        self.addAction(action)
+    self.addAction(action)
 
-        self.statusBar()
+    self.statusBar()
 
-        self.green_pen = QtGui.QPen(QtCore.Qt.green, 5, QtCore.Qt.SolidLine)
+    self.green_pen = QtGui.QPen(QtCore.Qt.green, 5, QtCore.Qt.SolidLine)
 
-        self.objectives = []
+    self.objectives = []
 
-        self.view()
+    self.view()
 
   def view(self):
     self.imgLoad = QtGui.QPushButton("Load Image", self)
