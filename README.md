@@ -97,8 +97,8 @@ The base command is "roslaunch commander ..." where the "..." can be one of seve
 
 #####a. morrf_launch.launch:
 
-    This will run the basic GUI. You'll need to load an image to run morrf on by clicking "file" and "load image"
-    if you don't have images to run there are 3 that you can choose from in ~/catkin_ws/src/ros-morrf-project/commander/data/
+This will run the basic GUI. You'll need to load an image to run morrf on by clicking "file" and "load image"
+if you don't have images to run there are 3 that you can choose from in ~/catkin_ws/src/ros-morrf-project/commander/data/
 
 #####b. simple_launch.launch:
 
@@ -120,21 +120,21 @@ Read below to find out how to set up your environment correctly.
 
 #####c. turtlebot_config.launch:
 
-    This will run a window specifically made for the turtlebot. You can find more advanced options to mess with things such as the number of iterations MORRF will go through under file->advanced options
+This will run a window specifically made for the turtlebot. You can find more advanced options to mess with things such as the number of iterations MORRF will go through under file->advanced options
 
-    You will not see obstacles here unless the apriltags are specific numbers. If you open commander/scripts/commander_gui/turtlebot_config.py you will see the variable OBS_DICT which has the numbers of the apriltags that correspond to obstacles, and the width and height of the obstacles they represent.
+You will not see obstacles here unless the apriltags are specific numbers. If you open commander/scripts/commander_gui/turtlebot_config.py you will see the variable OBS_DICT which has the numbers of the apriltags that correspond to obstacles, and the width and height of the obstacles they represent.
 
 #####d. topology.launch:
 
-    This runs a variant of morrf where you select the path that you want morrf to build other paths around. You may only select one objective.
+This runs a variant of morrf where you select the path that you want morrf to build other paths around. You may only select one objective.
 
-    Once you have your obstacles, and start and end positions, you may click on the white window and create a path for MORRF to base its planning around. All subsequent clicks after the first click will draw paths from where you previously clicked to where you last clicked.
+Once you have your obstacles, and start and end positions, you may click on the white window and create a path for MORRF to base its planning around. All subsequent clicks after the first click will draw paths from where you previously clicked to where you last clicked.
 
-    If the path is undesirable, you can right click and select "reset" to clear the path you have created.
+If the path is undesirable, you can right click and select "reset" to clear the path you have created.
 
 #####e. camera_config.launch:
 
-    This runs something similar to turtlebot_config.launch except it uses a different costmap generator meant for the sphero robot. The paths generated with this will be farther from the obstacles than what you'll see with the other config files.
+This runs something similar to turtlebot_config.launch except it uses a different costmap generator meant for the sphero robot. The paths generated with this will be farther from the obstacles than what you'll see with the other config files.
 
 ##How to set up the apriltag camera environment
 
