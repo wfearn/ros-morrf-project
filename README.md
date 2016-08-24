@@ -191,3 +191,15 @@ In this case, the top left corner of the top left red square would be 0,0 accord
 *For example, if I wanted to modify the window for turtlebot_config.launch to be 800 by 800 instead of 600 by 600, I would open the pos.yaml and add 7 more numbers that corresponded to the outer right edge values of an 800 by 800 grid, basically adding 200 where necessary to the already existing values.*
 
 *Then I would open the /ros-morrf-project/commander/scripts/commander_gui/turtlebot_window.py file and modify the HEIGHT and WIDTH values to somewhere between 750 and 800.*
+
+Basically you just need to think of the apriltags as marking off a grid, and each one corresponds to a point on that grid, the camera picks them up and then infers where an object is based on its relative position to those apriltags.
+
+After you've run the file, if you see the word "Calibrated" in each output window, then it is successful.
+
+If you're not seeing "Calibrated" you could need to modify your exposure values in the cameras.
+
+Open a terminal and type in "qv4l2", a window should pop up. Go to the second tab over from General, then click the dropdown menu next to "Exposure, Auto" and change it to "Manual Mode."
+
+After this, if the "Exposure (Absolute)" is somewhere around 300+, you can just knock off the last number. You need it sub 50 or around there.
+
+At this point check the cameras again, and they should work.
