@@ -102,15 +102,19 @@ The base command is "roslaunch commander ..." where the "..." can be one of seve
 
 #####b. simple_launch.launch:
 
-    This will run an even simpler version of morrf_launch. Here you just need to select an image and decide what objectives you want.
+This will run an even simpler version of morrf_launch. Here you just need to select an image and decide what objectives you want.
 
 If you don't have a full setup and are just running the program for testing, you can use:
+
     roslaunch multi_apriltags_tracker launch_multi_april_tags_tracker.launch
 
 If you have a room set up, then you'll want to use more than one camera, in that case run:
+
     roslaunch mm_apriltags_tracker launchAll.launch
 
-*Note:* These use an apriltag tracking system, so you will just get a white window unless you have a usb camera hooked up to your computer and pointed at the apriltags.
+*Note:*Read down about how to properly configure your environment if you're using this option with multiple cameras.
+
+*Additional Note:* These use an apriltag tracking system, so you will just get a white window unless you have a usb camera hooked up to your computer and pointed at the apriltags.
 
 Read below to find out how to set up your environment correctly.
 
@@ -160,4 +164,27 @@ The apriltags are picked up by USB Webcams.
 We used four of them hooked up to two computers (two cameras for each computer).
 
 In our case, we hung the cameras from the ceiling with PVC pipe, however you choose to do it is your perogative.
-The important point is that you create a viable coordinate field for the cameras.
+
+The important part is that you create a viable coordinate field for the cameras.
+
+We used large white apriltags to mark off the coordinate field. Each camera must be able to see at least one, but if you don't have some overlap (meaning apriltags that more than one camera can see) you're going to get a lot of stuttering and dead zones (where the robot just stops because a camera loses track of it).
+
+You can find what apriltag numbers correspond to what values in the mm_apriltags_tracker/launch/param/pos.yaml file. You can modify these numbers as you wish, and you do not need to use all of them.
+
+In our case we used the following setup:
+
+![Alt text](/readme_images/ApriltagDiagram.jpg?raw=true "Apriltag Setup")
+
+The blue squares represent the large apriltags we used, the red squares represent what the camera is able to see.
+
+If you notice, there is an area of overlap in the shape of a cross, with the middle apriltag having overlap from all four cameras.
+
+If the cameras do not overlap at all, an object can get lost, and when more than one camera can see an object it will often jump around in the GUI. However, the more cameras that can see it the less it will jump.
+
+In this case, the top left corner of the top left red square would be 0,0 according to the camera, and the bottom right corner of the bottom right square would be 600, 600.
+
+*Note: If you're going to modify the size of the world, you will need to adjust the numbers in the pos.yaml file (whether changing their values or adding more) and adjust the window size in the python image file of the GUI you're wanting to use, otherwise it won't function how you want. 
+
+For example, if I wanted to modify the window for turtlebot_config.launch to be 800 by 800 instead of 600 by 600, I would open the pos.yaml and add 7 more numbers that corresponded to the outer right edge values of an 800 by 800 grid, basically adding 200 where necessary to the already existing values. 
+
+Then I would open the /ros-morrf-project/commander/scripts/commander_gui/turtlebot_window.py file and modify the HEIGHT and WIDTH values to somewhere between 750 and 800.*
