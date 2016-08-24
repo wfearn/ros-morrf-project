@@ -1,21 +1,22 @@
 ##How to get the ros-morrf-project up and running on your machine:
 
 Before anything, make sure that you're running Ubuntu 14.04 or a variant that runs it.
-We will discuss briefly small changes that you need to make if you're running Elementary OS,
-if your variant is not Elementary then you will be on your own if you run into issues.
+We will discuss small changes that you need to make if you're running Elementary OS,
+but if your variant is not Elementary then you will be on your own if you run into issues.
 
 ####1. Install ROS
 You can follow the tutorial here: <http://wiki.ros.org/indigo/Installation/Ubuntu>
 
-If what you're doing requires use of the turtlebot, its better to install Indigo.
+If what you're doing requires use of the turtlebot, it's better to install Indigo.
 
 If you install Jade you will not be able to run any of the turtlebot sims or anything like that.
 
 Elementary OS Only:
 
-    You will be required to do the following command: echo "export ROS_OS_OVERRIDE=elementary" >> ~/.bashrc
+    Run the following command before you install: echo "export ROS_OS_OVERRIDE=elementary" >> ~/.bashrc
+
     On the part where you set up your sources.list in the ROS tutorial,
-    you need to replace $(lsb_release-sc) with the word "trusty" in order to get it to work correctly.
+    you need to replace "$(lsb_release-sc)" with the word "trusty" in order to get it to work correctly.
 
 ####2. Follow the tutorial link at the bottom of the ROS installation page.
 
@@ -26,13 +27,15 @@ It will allow you to set up your catkin workspace.
 This is where you will put the ros-morrf-project in order to run it.
 
 
-####3. Clone the ros-morrf-project and mm_apriltags_tracker into your ~/catkin_ws/src directory
+####3. Clone the the following repositories into your ~/catkin_ws/src/ directory
 
 the links are found here respectively:
 
 ros-morrf-project: <https://github.com/wfearn/ros-morrf-project>
 
 mm_apriltags_tracker: <https://github.com/darin-costello/mm_apriltags_tracker>
+
+multi_apriltags_tracker: <https://github.com/dqyi11/multi_apriltags_tracker>
 
 Don't run catkin_make yet, we need to install dependencies still.
 
@@ -57,7 +60,7 @@ Run the following command:
 
     sudo apt-get install qt-sdk python-xlib gengetopt libcgal-dev ros-indigo-usb-cam
 
-*Note*: You might have some of these installed already, if you don't when you try and install the libraries we have cloned the console output will let you know.
+*Note:* You might have some of these installed already, if you don't when you try and install the libraries we have cloned the console output will let you know.
 
 a. Go to the MORRF folder that you have cloned
 
@@ -101,14 +104,13 @@ The base command is "roslaunch commander ..." where the "..." can be one of seve
 
     This will run an even simpler version of morrf_launch. Here you just need to select an image and decide what objectives you want.
 
-The other launch files will require you to run the following command in order for them to work:
+If you don't have a full setup and are just running the program for testing, you can use:
+    roslaunch multi_apriltags_tracker launch_multi_april_tags_tracker.launch
+
+If you have a room set up, then you'll want to use more than one camera, in that case run:
     roslaunch mm_apriltags_tracker launchAll.launch
 
-They use an apriltag tracking system, so you will just get a white window unless you have a usb camera hooked up to your computer and pointed at the apriltags.
-
-Apriltags number 50 and 51 correspond to the start and goal icons.
-Apriltags in the 40s correspond to enemy positions
-Apriltags in the 30s correspond to obstacles.
+*Note:* These use an apriltag tracking system, so you will just get a white window unless you have a usb camera hooked up to your computer and pointed at the apriltags.
 
 Read below to find out how to set up your environment correctly.
 
@@ -129,3 +131,33 @@ Read below to find out how to set up your environment correctly.
 #####e. camera_config.launch:
 
     This runs something similar to turtlebot_config.launch except it uses a different costmap generator meant for the sphero robot. The paths generated with this will be farther from the obstacles than what you'll see with the other config files.
+
+##How to set up the apriltag camera environment
+
+####1. Apriltags
+
+You can find all of the apriltags you need at the following link:
+<http://www.dotproduct3d.com/assets/pdf/apriltags.pdf>
+
+If you want to modify what values are associated with what icons,
+you will need to modify the image window python file that corresponds to the type of GUI you're running.
+
+As it stands, the numbers correspond to the following values:
+
+Apriltag 51 is the robot goal position.
+Apriltag 50 is the robot start position.
+Apriltag 97 is the robot itself.
+Apriltags 40 - 49 are considered enemies.
+
+Within each python image file there is an OBS_DICT variable that has the values associated with each obstacle.
+Some of the image files will just convert any apriltag from 30 - 39 into a generically sized obstacle.
+
+*Note:* We used color coded apriltags to help differentiate between them, the same may help you.
+
+####2. Camera Setup
+
+The apriltags are picked up by USB Webcams.
+We used four of them hooked up to two computers (two cameras for each computer).
+
+In our case, we hung the cameras from the ceiling with PVC pipe, however you choose to do it is your perogative.
+The important point is that you create a viable coordinate field for the cameras.
