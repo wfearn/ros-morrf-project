@@ -37,8 +37,6 @@ mm_apriltags_tracker: <https://github.com/darin-costello/mm_apriltags_tracker>
 
 multi_apriltags_tracker: <https://github.com/dqyi11/multi_apriltags_tracker>
 
-Don't run catkin_make yet, we need to install dependencies still.
-
 ####4. Install dependencies.
 
 Go to somewhere that isn't your catkin_ws folder.
@@ -142,6 +140,8 @@ This runs something similar to turtlebot_config.launch except it uses a differen
 
 You can find all of the apriltags you need at the following link:
 <http://www.dotproduct3d.com/assets/pdf/apriltags.pdf>
+
+If that link has been deprecated, the tag family we used was 36h11. You should be able to search that in Google and find apriltags you can print off.
 
 If you want to modify what values are associated with what icons,
 you will need to modify the image window python file that corresponds to the type of GUI you're running.
