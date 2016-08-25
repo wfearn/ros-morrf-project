@@ -17,14 +17,16 @@ from error_popup.no_path_error import NoPath
 from mm_apriltags_tracker.msg import april_tag_pos
 from geometry_msgs.msg import Pose2D
 
+from advanced_options.tarrt_adv_options import TarrtAdvancedOptions
+
 EPSILON = 1
 
-APRILTAG = 100
+APRILTAG = 50
 TBOT = 32
 HEIGHT = 550
 WIDTH = 550
 
-OBS_DICT = {30:(52, 52), 31:(46, 54), 33:(54, 74), 34:(72, 100), 35:(50, 50)}
+#OBS_DICT = {30:(52, 52), 31:(46, 54), 33:(54, 74), 34:(72, 100), 35:(50, 50)}
 
 MORRF_OUTPUT_FILE = "/home/wfearn/Dropbox/MORRF_OUTPUT/morrf_output/{}"
 IMG_OUTPUT_FILE = "/home/wfearn/Dropbox/MORRF_OUTPUT/maps/{}"
@@ -70,7 +72,36 @@ class Sketch(QtGui.QMainWindow):
         p.setColor(self.backgroundRole(), QtCore.Qt.white)
         self.setPalette(p)
 
+        self.start_apriltag_num = 50
+        self.goal_apriltag_num = 51
+        self.obs_lower = 30
+        self.obs_upper = 39
+        self.enemy_lower = 40
+        self.enemy_upper = 49
+        self.robot_apriltag_num = 97
+
         self.show()
+
+    def setStartNumber(self, num):
+        self.start_apriltag_num = num
+
+    def setGoalNumber(self, num):
+        self.goal_apriltag_num = num
+
+    def setObstacleLowerBound(self, num):
+        self.obs_lower = num
+
+    def setObstacleUpperBound(self, num):
+        self.obs_upper = num
+
+    def setEnemyLowerBound(self, num):
+        self.enemy_lower = num
+
+    def setEnemyUpperBound(self, num):
+        self.enemy_upper = num
+
+    def setRobotNumber(self, num):
+        self.robot_apriltag_num = num
 
     def reset(self):
         self.waypoints = []
@@ -175,23 +206,24 @@ class Sketch(QtGui.QMainWindow):
         painter.setPen(self.black_pen)
 
         for key, value in self.agent_map.iteritems():
-            if key in OBS_DICT.keys():
-                dim = OBS_DICT[key]
+            if key <= self.obs_upper and key >= self.obs_lower:
+                dim = (APRILTAG, APRILTAG)
 
                 rect = QRect( (value.x - dim[0] / 2), (value.y - dim[1] / 2), dim[0], dim[1])
                 painter.setBrush(Qt.black)
+                painter.setPen(self.black_pen)
                 painter.drawRect(rect)
 
-            elif key < 50 and key > 39 and self.image_creation == False:
+            elif key <= self.enemy_upper and key >= self.enemy_lower and self.image_creation == False:
                 painter.drawImage( self.po.getEnemyDrawPoint(value.x, value.y), self.po.getEnemyImage() )
 
-            elif key == 50 and self.image_creation == False:
+            elif key == self.start_apriltag_num and self.image_creation == False:
                 painter.drawImage( self.po.getStartDrawPoint(value.x, value.y), self.po.getStartImage() )
 
-            elif key == 51 and self.image_creation == False:
+            elif key == self.goal_apriltag_num and self.image_creation == False:
                 painter.drawImage( self.po.getGoalDrawPoint(value.x, value.y), self.po.getGoalImage() )
 
-            elif key == 97 and self.image_creation == False:
+            elif key == self.robot_apriltag_num and self.image_creation == False:
                 painter.drawImage( self.po.getRoboDrawPoint(value.x, value.y), self.po.getRoboImage() )
 
         painter.setPen(self.red_pen)

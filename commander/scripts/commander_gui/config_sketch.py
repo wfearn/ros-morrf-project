@@ -16,7 +16,7 @@ from error_popup.not_initialized import NotInitialized
 from costmap_thread import CostmapThread
 from tarrt_thread import TarrtThread
 
-from advanced_options.advanced_options import AdvancedOptions
+from advanced_options.tarrt_adv_options import TarrtAdvancedOptions
 
 STARTX = 1000
 STARTY = 1000
@@ -38,8 +38,9 @@ class SketchConfig(QtGui.QMainWindow):
 
         self.adv_options = QtGui.QAction("Advanced Options", self)
         self.adv_options.triggered.connect(self.activateOptions)
+        self.adv_options.setShortcut("Ctrl+A")
 
-        self.options = AdvancedOptions()
+        self.options = TarrtAdvancedOptions(self)
 
         main_menu = self.menuBar()
 
@@ -83,6 +84,27 @@ class SketchConfig(QtGui.QMainWindow):
 
     def activateOptions(self):
         self.options.activate()
+
+    def setStartNumber(self, num):
+        self.image_window.setStartNumber(num)
+
+    def setGoalNumber(self, num):
+        self.image_window.setGoalNumber(num)
+
+    def setObstacleLowerBound(self, num):
+        self.image_window.setObstacleLowerBound(num)
+
+    def setObstacleUpperBound(self, num):
+        self.image_window.setObstacleUpperBound(num)
+
+    def setEnemyLowerBound(self, num):
+        self.image_window.setEnemyLowerBound(num)
+
+    def setEnemyUpperBound(self, num):
+        self.image_window.setEnemyUpperBound(num)
+
+    def setRobotNumber(self, num):
+        self.image_window.setRobotNumber(num)
 
     def quickClicked(self):
         if self.quick.checkState() and self.stealth.checkState():
