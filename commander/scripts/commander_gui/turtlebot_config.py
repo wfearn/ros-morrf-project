@@ -69,7 +69,7 @@ class TurtlebotConfig(QtGui.QMainWindow):
     file_menu.addAction(self.adv_options)
     file_menu.addAction(self.appQuit)
 
-    self.options = AdvancedOptions()
+    self.options = AdvancedOptions(self)
 
   def view(self):
     btn = QtGui.QPushButton("Exit", self)
@@ -108,6 +108,21 @@ class TurtlebotConfig(QtGui.QMainWindow):
     self.setCentralWidget(self.widget)
 
     self.show()
+
+  def setStartNumber(self, num):
+    self.image_window.setStartNumber(num)
+
+  def setGoalNumber(self, num):
+    self.image_window.setGoalNumber(num)
+
+  def setEnemyLowerBound(self, num):
+    self.image_window.setEnemyLowerBound(num)
+
+  def setEnemyUpperBound(self, num):
+    self.image_window.setEnemyUpperBound(num)
+
+  def setRobotNumber(self, num):
+    self.image_window.setRobotNumber(num)
 
   def enable_launch(self, state):
     if state == QtCore.Qt.Checked:

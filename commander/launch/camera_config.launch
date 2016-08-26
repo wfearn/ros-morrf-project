@@ -3,4 +3,5 @@
     <include file="$(find morrf_ros)/launch/launch_morrf_node.launch"/>
     <node pkg="commander" type="run_camera_window.py" name="camera_window" output="screen"/>
     <node pkg="sphero_costmap_generator" type="costmap_subscriberT" name="costmap_generator" output="screen"/>
+    <node pkg="april_tag_follower" type="sphero_run_follower.py" name="sphero_follower" output="screen"/>
 </launch>

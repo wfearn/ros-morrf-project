@@ -58,4 +58,19 @@ This will reset all current icons, or paths, depending on the GUI you're utilizi
 
 *Note:* The right click menu will be different depending on the GUI you pick, some will have none, some will only have reset, and others will have all of the options listed above.
 
+##DEBUGGING
+
+This will be by no means comprehensive, but I just wanted to cover the general structure of the programs so you know where to look if you run into problems.
+
+The ros-morrf-project/commander/scripts folder has all of the executables that the launch files run.
+
+If you check the .launch files you can see which they are as they will be assigned to the "type" variable.
+
+Generally the executable will be tied to a config file inside the ros-morrf-project/commander/scripts/commander_gui/ folder.
+
+Each config class has a corresponding window class inside of it that is unique to each config class.
+
+Sorry for the lack of proper OOP, it only occured to me after the fact that there is a lot of redundancy between many of the config and image classes.
+
+
 That should be everything, if you have further questions feel free to email me at wilson.fearn+hcmilab@gmail.com

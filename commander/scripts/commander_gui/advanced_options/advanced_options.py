@@ -12,11 +12,13 @@ WIDTH = 200
 HEIGHT = 400
 
 class AdvancedOptions(QtGui.QWidget):
-    def __init__(self):
+    def __init__(self, parent_window):
         super(AdvancedOptions, self).__init__()
 
         self.setGeometry(STARTX, STARTY, WIDTH, HEIGHT)
         self.setWindowTitle("Advanced Options")
+
+        self.parent = parent_window
 
         self.iterations = QtGui.QLineEdit()
         self.iterations.setFrame(True)
@@ -48,16 +50,6 @@ class AdvancedOptions(QtGui.QWidget):
         self.goal.setMaxLength(2)
         self.goal.setText("51")
 
-        self.obs_least = QtGui.QLineEdit()
-        self.obs_least.setFrame(True)
-        self.obs_least.setMaxLength(2)
-        self.obs_least.setText("30")
-
-        self.obs_most = QtGui.QLineEdit()
-        self.obs_most.setFrame(True)
-        self.obs_most.setMaxLength(2)
-        self.obs_most.setText("39")
-
         self.enemy_least = QtGui.QLineEdit()
         self.enemy_least.setFrame(True)
         self.enemy_least.setMaxLength(2)
@@ -68,6 +60,17 @@ class AdvancedOptions(QtGui.QWidget):
         self.enemy_most.setMaxLength(2)
         self.enemy_most.setText("49")
 
+        self.robot = QtGui.QLineEdit()
+        self.robot.setFrame(True)
+        self.robot.setMaxLength(2)
+        self.robot.setText("97")
+
+        self.ok_btn = QtGui.QPushButton("Commit Changes", self)
+        self.ok_btn.resize(70, 40)
+        self.ok_btn.clicked.connect(self.commitChanges)
+
+        parent_layout = QtGui.QVBoxLayout()
+
         layout = QtGui.QFormLayout()
         layout.addRow("# of Iterations", self.iterations)
         layout.addRow("# of Paths", self.tree_number)
@@ -75,12 +78,22 @@ class AdvancedOptions(QtGui.QWidget):
         layout.addRow("Method Type", self.method_box)
         layout.addRow("Start Apriltag #", self.start)
         layout.addRow("Goal Apriltag #", self.goal)
-        layout.addRow("Low Obstacle #", self.obs_least)
-        layout.addRow("High Obstacle #", self.obs_most)
         layout.addRow("Low Enemy #", self.enemy_least)
         layout.addRow("High Enemy #", self.enemy_most)
+        layout.addRow("Robot #", self.robot)
 
-        self.setLayout(layout)
+        parent_layout.addLayout(layout)
+        parent_layout.addWidget(self.ok_btn)
+
+        self.setLayout(parent_layout)
+
+    def commitChanges(self):
+
+        self.parent.setStartNumber(int(self.start.text()))
+        self.parent.setGoalNumber(int(self.goal.text()))
+        self.parent.setEnemyLowerBound(int(self.enemy_least.text()))
+        self.parent.setEnemyUpperBound(int(self.enemy_most.text()))
+        self.parent.setRobotNumber(int(self.robot.text()))
 
     def getIterations(self):
         return int(self.iterations.text())

@@ -8,7 +8,7 @@ from PyQt4.QtCore import *
 
 STARTX = 1200
 STARTY = 1200
-WIDTH = 200
+WIDTH = 250
 HEIGHT = 450
 
 class TarrtAdvancedOptions(QtGui.QWidget):
@@ -19,6 +19,21 @@ class TarrtAdvancedOptions(QtGui.QWidget):
         self.setWindowTitle("Tarrt Advanced Options")
 
         self.parent = parent_window
+
+        self.iterations = QtGui.QLineEdit()
+        self.iterations.setFrame(True)
+        self.iterations.setMaxLength(5)
+        self.iterations.setText("2000")
+
+        self.segment_length = QtGui.QLineEdit()
+        self.segment_length.setFrame(True)
+        self.segment_length.setMaxLength(3)
+        self.segment_length.setText("5")
+
+        self.number_of_paths = QtGui.QLineEdit()
+        self.number_of_paths.setFrame(True)
+        self.number_of_paths.setMaxLength(3)
+        self.number_of_paths.setText("5")
 
         self.start = QtGui.QLineEdit()
         self.start.setFrame(True)
@@ -62,6 +77,9 @@ class TarrtAdvancedOptions(QtGui.QWidget):
         parent_layout = QtGui.QVBoxLayout()
 
         layout = QtGui.QFormLayout()
+        layout.addRow("# Of Iterations", self.iterations)
+        layout.addRow("# Of Paths", self.number_of_paths)
+        layout.addRow("Segment Length", self.segment_length)
         layout.addRow("Start Apriltag #", self.start)
         layout.addRow("Goal Apriltag #", self.goal)
         layout.addRow("Low Obstacle #", self.obs_least)
@@ -84,6 +102,15 @@ class TarrtAdvancedOptions(QtGui.QWidget):
         self.parent.setEnemyLowerBound(int(self.enemy_least.text()))
         self.parent.setEnemyUpperBound(int(self.enemy_most.text()))
         self.parent.setRobotNumber(int(self.robot.text()))
+
+    def getIterations(self):
+        return int(self.iterations.text())
+
+    def getNumberOfPaths(self):
+        return int(self.number_of_paths.text())
+
+    def getSegmentLength(self):
+        return int(self.segment_length.text())
 
     def getRobotNumber(self):
         return int(self.robot.text())

@@ -13,8 +13,6 @@ ALPHA = 2
 
 class Follower():
     def __init__(self):
-        print "Initiated sphero follower"
-
         rospy.init_node("follower", anonymous=False)
 
         self.robot_movement = rospy.Publisher("cmd_vel", Twist, queue_size=10)
@@ -33,7 +31,6 @@ class Follower():
         rospy.spin()
 
     def start_follow(self, path):
-        print "Initializing path in sphero follower: %d" % len(path.waypoints)
         self.index = 0
         self.path = path.waypoints
         self.initialize = True
@@ -41,11 +38,11 @@ class Follower():
     def follow(self, pos):
 
         if self.initialize == True:
+            print "Moving sphero..."
 
             if self.index != (len(self.path) - 0):
 
                 distance = self.dist(pos, self.path[self.index])
-                print "Updating sphero to follow path: %f" % distance
                 if distance > RADIUS:
                     p2 = self.path[self.index]
 

@@ -16,6 +16,7 @@ from error_popup.no_path_error import NoPath
 
 from mm_apriltags_tracker.msg import april_tag_pos
 from geometry_msgs.msg import Pose2D
+from geometry_msgs.msg import Point
 
 from advanced_options.tarrt_adv_options import TarrtAdvancedOptions
 
@@ -103,10 +104,53 @@ class Sketch(QtGui.QMainWindow):
     def setRobotNumber(self, num):
         self.robot_apriltag_num = num
 
+    def isCompleted(self):
+        if not self.hasStart():
+            return False
+
+        elif not self.hasGoal():
+            return False
+
+        elif len(self.waypoints) == 0:
+            return False
+
+        else:
+            return True
+
+    def keyPressEvent(self, event):
+        key = event.key()
+
+        if hasattr(self, "tarrt_paths"):
+            if key == QtCore.Qt.Key_Left:
+                if self.path_index == 0:
+                    self.path_index = ( len(self.tarrt_paths.paths) - 1)
+
+                else:
+                    self.path_index -= 1
+
+            if key == QtCore.Qt.Key_Right:
+                if self.path_index == ( len(self.tarrt_paths.paths) - 1):
+                    self.path_index = 0
+
+                else:
+                    self.path_index += 1
+
     def reset(self):
         self.waypoints = []
 
         self.update()
+
+    def getSketchedPath(self):
+        sketched_path = []
+        for i in range(len(self.waypoints)):
+            p = Point()
+
+            p.x = self.waypoints[i][0]
+            p.y = self.waypoints[i][1]
+
+            sketched_path.append(p)
+
+        return sketched_path
 
     def mousePressEvent(self, event):
 

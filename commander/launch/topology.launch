@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
     <node pkg="tarrt_ros" type="tarrt_node" name="tarrt_ros" output="screen"/>
+    <node pkg="harrt_ros" type="harrt_node" name="harrt_ros" output="screen"/>
     <node pkg="commander" type="sketch_gui.py" name="topology_morrf" output="screen"/>
     <node pkg="costmap_generator" type="costmap_subscriber" name="costmap_generator" output="screen"/>
 </launch>

@@ -134,6 +134,8 @@ If the path is undesirable, you can right click and select "reset" to clear the 
 
 This runs something similar to turtlebot_config.launch except it uses a different costmap generator meant for the sphero robot. The paths generated with this will be farther from the obstacles than what you'll see with the other config files.
 
+Also the obstacles will be smaller, they're scaled up in the turtlebot window to compensate for the turtlebot's radius.
+
 ##How to set up the apriltag camera environment
 
 ####1. Apriltags

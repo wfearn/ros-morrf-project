@@ -15,8 +15,6 @@ THETA_THRESHOLD = .087
 
 class Follower():
     def __init__(self):
-        print "Follower started"
-
         rospy.init_node("follower", anonymous=False)
 
         self.robot_movement = rospy.Publisher("cmd_vel_mux/input/navi", Twist, queue_size=10)
@@ -36,7 +34,6 @@ class Follower():
         rospy.spin()
 
     def start_follow(self, path):
-        print "Received paths, setting initializer to true, path received was\n %s" % (str(path.waypoints))
 
         self.path = path.waypoints
         self.initialize = True
@@ -44,12 +41,11 @@ class Follower():
     def follow(self, robot_pos):
 
         if self.initialize == True:
+            print "Moving robot..."
 
             if self.index != (len(self.path) - 1):
 
                 if self.dist(robot_pos, self.path[self.index]) > DISTANCE_THRESHOLD:
-                    print "Moving robot from point %s to point %s" % (str(robot_pos), str(self.path[self.index]))
-
                     rx = robot_pos.x
                     ry = robot_pos.y
                     rtheta = robot_pos.theta
@@ -67,14 +63,12 @@ class Follower():
                     if is_negative(self.angle_to_waypoint):
                         self.angle_to_waypoint += 2 * math.pi
 
-                    print "Rtheta and new theta is %s, %s" % (str(rtheta), str(self.angle_to_waypoint))
                     rob_move = Twist()
                     rob_move.angular.z = 0
                     if abs(rtheta - self.angle_to_waypoint) > THETA_THRESHOLD:
                        rob_move.angular.z = self.update_orientation(robot_pos)
 
                     else:
-                       #rob_move.linear.x = self.update_position(rtheta, rob_move.angular.z)
                         rob_move.linear.x = self.lin_vel
 
                     self.robot_movement.publish(rob_move)
@@ -86,14 +80,12 @@ class Follower():
               self.initialize = False
 
     def update_position(self, rtheta, angular_vel):
-        print "Updating robot linear position"
         if abs(rtheta - self.angle_to_waypoint) > 0.174:
             return 0
         else:
             return -( ( self.lin_vel / ( math.pi / self.ang_scalar ) ) * abs( angular_vel ) ) + self.lin_vel
 
     def update_orientation(self, rob_pos):
-        print "Updating robot angular position"
         rob_theta = rob_pos.theta
         diff = rob_theta - self.angle_to_waypoint
 

@@ -9,12 +9,20 @@ from PyQt4.QtCore import *
 from tarrt_ros.msg import *
 from tarrt_ros.srv import *
 
+from harrt_ros.msg import *
+from harrt_ros.srv import *
+
+from commander.msg import *
+
 from sketch_window import Sketch
 
 from error_popup.not_initialized import NotInitialized
 
 from costmap_thread import CostmapThread
 from tarrt_thread import TarrtThread
+from harrt_thread import HarrtThread
+from continue_harrt_thread import ContinueHarrtThread
+from continue_tarrt_thread import ContinueTarrtThread
 
 from advanced_options.tarrt_adv_options import TarrtAdvancedOptions
 
@@ -57,11 +65,25 @@ class SketchConfig(QtGui.QMainWindow):
         load_menu.addAction(self.app_quit)
         load_menu.addAction(self.adv_options)
 
-        self.launch_button = QtGui.QPushButton("Launch MORRF", self)
-        self.launch_button.resize(250, 40)
-        self.launch_button.move(0, 160)
-        self.launch_button.setEnabled(False)
-        self.launch_button.clicked.connect(self.launchMORRF)
+        self.launch_tarrt = QtGui.QPushButton("Launch TARRT", self)
+        self.launch_tarrt.resize(250, 40)
+        self.launch_tarrt.setEnabled(False)
+        self.launch_tarrt.clicked.connect(self.launchTARRT)
+
+        self.continue_tarrt = QtGui.QPushButton("Continue TARRT", self)
+        self.continue_tarrt.resize(250, 40)
+        self.continue_tarrt.setEnabled(False)
+        self.continue_tarrt.clicked.connect(self.continueTARRT)
+
+        self.launch_harrt = QtGui.QPushButton("Launch HARRT", self)
+        self.launch_harrt.resize(250, 40)
+        self.launch_harrt.setEnabled(False)
+        self.launch_harrt.clicked.connect(self.launchHARRT)
+
+        self.continue_harrt = QtGui.QPushButton("Continue HARRT", self)
+        self.continue_harrt.resize(250, 40)
+        self.continue_harrt.setEnabled(False)
+        self.continue_harrt.clicked.connect(self.continueHARRT)
 
         layout = QtGui.QVBoxLayout()
         inner_layout = QtGui.QFormLayout()
@@ -71,7 +93,10 @@ class SketchConfig(QtGui.QMainWindow):
         inner_layout.addRow("Safely", self.safe)
 
         layout.addLayout(inner_layout)
-        layout.addWidget(self.launch_button)
+        layout.addWidget(self.launch_tarrt)
+        layout.addWidget(self.continue_tarrt)
+        layout.addWidget(self.launch_harrt)
+        layout.addWidget(self.continue_harrt)
 
         self.win = QtGui.QWidget(self)
         self.win.setLayout(layout)
@@ -135,27 +160,61 @@ class SketchConfig(QtGui.QMainWindow):
 
     def enableLaunch(self):
         if self.quick.checkState() or self.stealth.checkState() or self.safe.checkState():
-            self.launch_button.setEnabled(True)
+            self.launch_tarrt.setEnabled(True)
+            self.launch_harrt.setEnabled(True)
         else:
-            self.launch_button.setEnabled(False)
+            self.launch_tarrt.setEnabled(False)
+            self.launch_harrt.setEnabled(False)
 
     def isCompleted(self):
-        if not self.image_window.hasStart():
+        if not (self.quick.checkState() or self.stealth.checkState() or self.safe.checkState()):
             return False
 
-        elif not self.image_window.hasGoal():
-            return False
-
-        elif not (self.quick.checkState() or self.stealth.checkState() or self.safe.checkState()):
+        elif not self.image_window.isCompleted():
             return False
 
         else:
             return True
 
-    def launchMORRF(self):
+    def continueHARRT(self):
+        self.cont_harrt_thread = ContinueHarrtThread(self.options.getIterations())
+        self.cont_harrt_thread.start()
+
+        self.connect(self.cont_harrt_thread, QtCore.SIGNAL("CONTINUE_HARRT_RESPONSE"), self.continueCallback)
+
+    def continueTARRT(self):
+        self.cont_tarrt_thread = ContinueTarrtThread(self.options.getIterations())
+        self.cont_tarrt_thread.start()
+
+        self.connect(self.cont_tarrt_thread, QtCore.SIGNAL("CONTINUE_TARRT_RESPONSE"), self.continueCallback)
+
+    def continueCallback(self, continue_response):
+        self.image_window.startPathCycler(continue_response)
+
+    def launchHARRT(self):
+        self.harrt = True
+        self.tarrt = False
+
+        self.continue_tarrt.setEnabled(False)
+
+        self.launch()
+
+    def launchTARRT(self):
+        self.tarrt = True
+        self.harrt = False
+
+        self.continue_harrt.setEnabled(False)
+
+        self.launch()
+
+    def launch(self):
         if self.isCompleted():
 
-            self.initializer = tarrt_ros.msg.tarrt_init()
+            if self.tarrt:
+                self.initializer = tarrt_ros.msg.tarrt_init()
+
+            else:
+                self.initializer = harrt_ros.msg.harrt_init()
 
             map_img = self.getMap()
             self.initializer.map = map_img
@@ -165,10 +224,17 @@ class SketchConfig(QtGui.QMainWindow):
             stealth = self.stealth.isChecked()
             locs = self.image_window.getEnemyLocations()
 
-            self.costmap_thread = CostmapThread(map_img, stealth, safe, locs)
-            self.costmap_thread.start()
+            if not quick:
 
-            self.connect(self.costmap_thread, QtCore.SIGNAL("COSTMAP_RESPONSE"), self.costmapCallback)
+                self.costmap_thread = CostmapThread(map_img, stealth, safe, locs)
+                self.costmap_thread.start()
+
+                self.connect(self.costmap_thread, QtCore.SIGNAL("COSTMAP_RESPONSE"), self.costmapCallback)
+
+            else:
+
+                null_response = costmap_response()
+                self.costmapCallback(null_response)
 
             goal = self.image_window.getGoalPoint()
             start = self.image_window.getStartPoint()
@@ -184,25 +250,40 @@ class SketchConfig(QtGui.QMainWindow):
 
             self.initializer.number_of_iterations = self.options.getIterations()
             self.initializer.segment_length = self.options.getSegmentLength()
-            #self.initializer.number_of_trees = self.options.getTreeNumber()
+            self.initializer.number_of_trees = self.options.getNumberOfPaths()
 
-            print "quick " + str(quick)
             self.initializer.minimum_distance_enabled = quick
+
+            self.initializer.sketched_topology = self.image_window.getSketchedPath()
 
         else:
             self.error = NotInitialized()
 
     def costmapCallback(self, costmap_response):
-        if len(costmap_response.cost_maps)>0:
+        if len(costmap_response.cost_maps) > 0:
             self.initializer.cost_map = costmap_response.cost_maps[0]
 
-        self.tarrt_thread = TarrtThread(self.initializer)
-        self.tarrt_thread.start()
+        if self.tarrt:
 
-        self.connect(self.tarrt_thread, QtCore.SIGNAL("TARRT_RESPONSE"), self.tarrtCallback)
+            self.tarrt_thread = TarrtThread(self.initializer)
+            self.tarrt_thread.start()
 
-    def tarrtCallback(self, tarrt_response):
-        self.startPathCycler(tarrt_response)
+            self.connect(self.tarrt_thread, QtCore.SIGNAL("TARRT_RESPONSE"), self.callback)
+
+        else:
+            self.harrt_thread = HarrtThread(self.initializer)
+            self.harrt_thread.start()
+
+            self.connect(self.harrt_thread, QtCore.SIGNAL("HARRT_RESPONSE"), self.callback)
+
+    def callback(self, response):
+        self.startPathCycler(response)
+
+        if self.tarrt:
+            self.continue_tarrt.setEnabled(True)
+
+        else:
+            self.continue_harrt.setEnabled(True)
 
     def startPathCycler(self, paths):
         self.image_window.startPathCycler(paths)

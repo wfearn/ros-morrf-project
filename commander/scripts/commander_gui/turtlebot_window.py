@@ -47,6 +47,12 @@ class TurtlebotWindow(QtGui.QWidget):
 
         self.image_creation = False
 
+        self.start_number = 50
+        self.goal_number = 51
+        self.enemy_lower = 40
+        self.enemy_upper = 49
+        self.robot_number = 97
+
         self.windowInit()
 
     def windowInit(self):
@@ -59,6 +65,21 @@ class TurtlebotWindow(QtGui.QWidget):
 
     def getImage(self):
         pass
+
+    def setStartNumber(self, num):
+        self.start_number = num
+
+    def setGoalNumber(self, num):
+        self.goal_number = num
+
+    def setEnemyLowerBound(self, num):
+        self.enemy_lower = num
+
+    def setEnemyUpperBound(self, num):
+        self.enemy_upper = num
+
+    def setRobotNumber(self, num):
+        self.robot_number = num
 
     def updateObjectPositions(self, msg):
         for i in range(len(msg.id)):
@@ -81,16 +102,16 @@ class TurtlebotWindow(QtGui.QWidget):
                 painter.setBrush(Qt.black)
                 painter.drawRect(rect)
 
-            elif key < 50 and key > 39 and self.image_creation == False:
+            elif key <= self.enemy_upper and key >= self.enemy_lower and self.image_creation == False:
                 painter.drawImage( self.po.getEnemyDrawPoint(value.x, value.y), self.po.getEnemyImage() )
 
-            elif key == 50 and self.image_creation == False:
+            elif key == self.start_number and self.image_creation == False:
                 painter.drawImage( self.po.getStartDrawPoint(value.x, value.y), self.po.getStartImage() )
 
-            elif key == 51 and self.image_creation == False:
+            elif key == self.goal_number and self.image_creation == False:
                 painter.drawImage( self.po.getGoalDrawPoint(value.x, value.y), self.po.getGoalImage() )
 
-            elif key == 97 and self.image_creation == False:
+            elif key == self.robot_number and self.image_creation == False:
                 painter.drawImage( self.po.getRoboDrawPoint(value.x, value.y), self.po.getRoboImage() )
 
         if hasattr(self, "morrf_paths") and self.image_creation == False:
