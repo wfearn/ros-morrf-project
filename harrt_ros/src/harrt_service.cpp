@@ -82,6 +82,9 @@ static double calc_cost( POS2D pos_a, POS2D pos_b, double** pp_distribution, voi
 
 HARRTService::HARRTService() {
   mp_harrt = NULL;
+  mp_reference_frame_set = NULL;
+  fitness_distribution = NULL;
+  func = NULL;
   m_harrt_init_srv = m_nh.advertiseService( HARRT_INIT_SERVICE_NAME, &HARRTService::get_paths, this);
   m_harrt_cont_srv = m_cont.advertiseService( HARRT_CONT_SERVICE_NAME, &HARRTService::refine_paths, this);
 }
@@ -94,6 +97,7 @@ bool HARRTService::get_paths( harrt_ros::harrt_initialize::Request& req,
                               harrt_ros::harrt_initialize::Response& res) {
 
   std::cout << "Starting HARRT..." << std::endl;
+  std::cout << "W: " << req.init.map.width << " H: " << req.init.map.height << std::endl;
   delete_harrt();
 
   int** pp_obstacle = new int*[req.init.map.width];
@@ -123,11 +127,31 @@ bool HARRTService::get_paths( harrt_ros::harrt_initialize::Request& req,
     }
   }
 
+  std::cout << "min dist " << (int)req.init.minimum_distance_enabled << std::endl;
+  if(req.init.minimum_distance_enabled == true) {
+    std::cout << "calling calc_dist " << std::endl;
+    func = calc_dist;
+    fitness_distribution = NULL;
+  }
+  else {
+    std::cout << "calling calc_cost " << std::endl;
+    func = calc_cost;
+    harrt_ros::int16_image img = req.init.cost_map;
+    fitness_distribution = new double*[img.width];
+    for(unsigned int w=0; w < img.width; w++) {
+      fitness_distribution[w] = new double[img.height];
+
+      for(unsigned int h=0; h < img.height; h++) {
+        fitness_distribution[w][h] = img.int_array[w + img.width*h];
+      }
+    }
+  }
+
   mp_harrt = new BIRRTstar(req.init.width, req.init.height, req.init.segment_length);
   mp_harrt->set_reference_frames( mp_reference_frame_set );
   POS2D start(req.init.start.x, req.init.start.y);
   POS2D goal(req.init.goal.x, req.init.goal.y);
-  mp_harrt->init(start, goal, func, fitness_distribution, grammar_type );  
+  mp_harrt->init(start, goal, func, fitness_distribution, grammar_type );
 
   while(mp_harrt->get_current_iteration() <= req.init.number_of_iterations) {
     mp_harrt->extend();
@@ -144,7 +168,7 @@ bool HARRTService::get_paths( harrt_ros::harrt_initialize::Request& req,
         geometry_msgs::Pose2D point;
         point.x = p->m_way_points[j][0];
         point.y = p->m_way_points[j][1];
-        pp.waypoints.push_back(point); 
+        pp.waypoints.push_back(point);
       }
       res.paths.push_back(pp);
     }
@@ -163,9 +187,9 @@ bool HARRTService::get_paths( harrt_ros::harrt_initialize::Request& req,
 
 bool HARRTService::refine_paths( harrt_ros::harrt_continue::Request& req,
                                  harrt_ros::harrt_continue::Response& res) {
-  
+
   std::cout << "Refine paths of HARRT ... " << std::endl;
-  
+
   if( mp_harrt ) {
     unsigned int new_iterations = mp_harrt->get_current_iteration() + req.iterations;
     while(mp_harrt->get_current_iteration() <= new_iterations) {
@@ -183,15 +207,15 @@ bool HARRTService::refine_paths( harrt_ros::harrt_continue::Request& req,
           geometry_msgs::Pose2D point;
           point.x = p->m_way_points[j][0];
           point.y = p->m_way_points[j][1];
-          pp.waypoints.push_back(point); 
+          pp.waypoints.push_back(point);
         }
         res.paths.push_back(pp);
       }
     }
   }
- 
+
   std::cout << "Refine paths of HARRT finished " << std::endl;
- 
+
   return true;
 }
 
