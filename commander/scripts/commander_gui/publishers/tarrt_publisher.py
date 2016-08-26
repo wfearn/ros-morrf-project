@@ -6,7 +6,7 @@ from tarrt_ros.srv import *
 from tarrt_ros.msg import *
 
 def StartTarrtPublisher(tarrt_initiator):
-    print "Starting MORRF to generate paths..."
+    print "Starting TARRT to generate paths..."
 
     rospy.wait_for_service("/tarrt/get_paths")
 

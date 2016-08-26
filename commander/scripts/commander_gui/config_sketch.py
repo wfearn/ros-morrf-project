@@ -184,15 +184,17 @@ class SketchConfig(QtGui.QMainWindow):
 
             self.initializer.number_of_iterations = self.options.getIterations()
             self.initializer.segment_length = self.options.getSegmentLength()
-            self.initializer.number_of_trees = self.options.getTreeNumber()
+            #self.initializer.number_of_trees = self.options.getTreeNumber()
 
-            self.minimum_distance_enabled = quick
+            print "quick " + str(quick)
+            self.initializer.minimum_distance_enabled = quick
 
         else:
             self.error = NotInitialized()
 
     def costmapCallback(self, costmap_response):
-        self.initializer.cost_map = costmap_response.cost_maps[0]
+        if len(costmap_response.cost_maps)>0:
+            self.initializer.cost_map = costmap_response.cost_maps[0]
 
         self.tarrt_thread = TarrtThread(self.initializer)
         self.tarrt_thread.start()

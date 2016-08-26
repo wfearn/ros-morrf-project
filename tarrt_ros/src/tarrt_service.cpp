@@ -82,6 +82,9 @@ static double calc_cost( POS2D pos_a, POS2D pos_b, double** pp_distribution, voi
 
 TARRTService::TARRTService() {
   mp_tarrt = NULL;
+  mp_reference_frame_set = NULL;
+  fitness_distribution = NULL;
+  func = NULL;
   m_tarrt_init_srv = m_nh.advertiseService( TARRT_INIT_SERVICE_NAME, &TARRTService::get_paths, this);
   m_tarrt_cont_srv = m_cont.advertiseService( TARRT_CONT_SERVICE_NAME, &TARRTService::refine_paths, this);
 }
@@ -94,6 +97,8 @@ bool TARRTService::get_paths( tarrt_ros::tarrt_initialize::Request& req,
                               tarrt_ros::tarrt_initialize::Response& res) {
 
   std::cout << "Starting TARRT..." << std::endl;
+  std::cout << "W: " << req.init.map.width << " H: " << req.init.map.height << std::endl;
+
   delete_tarrt();
 
   int** pp_obstacle = new int*[req.init.map.width];
@@ -112,6 +117,8 @@ bool TARRTService::get_paths( tarrt_ros::tarrt_initialize::Request& req,
   grammar_type_t grammar_type = STRING_GRAMMAR_TYPE;
   mp_reference_frame_set = new ReferenceFrameSet();
   mp_reference_frame_set->init(req.init.width, req.init.height, obstacles);
+
+  std::cout << "SKETCHED SIZE " << req.init.sketched_topology.size() << std::endl;
   if(req.init.sketched_topology.size() > 0) {
     std::vector< Point2D > ref_points;
     for( unsigned int i = 0; i < req.init.sketched_topology.size(); i ++ ) {
@@ -123,11 +130,32 @@ bool TARRTService::get_paths( tarrt_ros::tarrt_initialize::Request& req,
     }
   }
 
+  std::cout << "min dist " << (int)req.init.minimum_distance_enabled << std::endl;
+  if(req.init.minimum_distance_enabled == true) {
+      std::cout << "calling calc_dist " << std::endl;
+      func = calc_dist;
+      fitness_distribution = NULL;
+  }
+  else {
+      std::cout << "calling calc_cost " << std::endl;
+      func = calc_cost;
+      tarrt_ros::int16_image img = req.init.cost_map;
+      fitness_distribution = new double*[img.width];
+
+      for(unsigned int w=0; w < img.width; w++) {
+          fitness_distribution[w] = new double[img.height];
+
+          for(unsigned int h=0; h < img.height; h++) {
+              fitness_distribution[w][h] = img.int_array[w + img.width*h];
+          }
+      }
+  }
+
   mp_tarrt = new MLRRTstar(req.init.width, req.init.height, req.init.segment_length);
   mp_tarrt->set_reference_frames( mp_reference_frame_set );
   POS2D start(req.init.start.x, req.init.start.y);
   POS2D goal(req.init.goal.x, req.init.goal.y);
-  mp_tarrt->init(start, goal, func, fitness_distribution, grammar_type );  
+  mp_tarrt->init(start, goal, func, fitness_distribution, grammar_type );
 
   while(mp_tarrt->get_current_iteration() <= req.init.number_of_iterations) {
     mp_tarrt->extend();
@@ -143,7 +171,7 @@ bool TARRTService::get_paths( tarrt_ros::tarrt_initialize::Request& req,
         geometry_msgs::Pose2D point;
         point.x = p->m_way_points[j][0];
         point.y = p->m_way_points[j][1];
-        pp.waypoints.push_back(point); 
+        pp.waypoints.push_back(point);
       }
       res.paths.push_back(pp);
     }
@@ -162,9 +190,9 @@ bool TARRTService::get_paths( tarrt_ros::tarrt_initialize::Request& req,
 
 bool TARRTService::refine_paths( tarrt_ros::tarrt_continue::Request& req,
                                  tarrt_ros::tarrt_continue::Response& res) {
-  
+
   std::cout << "Refine paths of TARRT ... " << std::endl;
-  
+
   if( mp_tarrt ) {
     unsigned int new_iterations = mp_tarrt->get_current_iteration() + req.iterations;
     while(mp_tarrt->get_current_iteration() <= new_iterations) {
@@ -181,15 +209,15 @@ bool TARRTService::refine_paths( tarrt_ros::tarrt_continue::Request& req,
           geometry_msgs::Pose2D point;
           point.x = p->m_way_points[j][0];
           point.y = p->m_way_points[j][1];
-          pp.waypoints.push_back(point); 
+          pp.waypoints.push_back(point);
         }
         res.paths.push_back(pp);
       }
     }
   }
- 
+
   std::cout << "Refine paths of TARRT finished " << std::endl;
- 
+
   return true;
 }
 
