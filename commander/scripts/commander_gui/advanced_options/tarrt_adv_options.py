@@ -115,12 +115,6 @@ class TarrtAdvancedOptions(QtGui.QWidget):
     def getRobotNumber(self):
         return int(self.robot.text())
 
-    def getIterations(self):
-        return 3000 #int(self.iterations.text())
-
-    def getSegmentLength(self):
-        return 4
-
     def getStartNumber(self):
         return int(self.start.text())
 
